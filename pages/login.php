@@ -11,7 +11,7 @@
 <body>
     <!-- Popup container (display: none by default) -->
     <div id="loginPopup" class="modal" tabindex="-1" style="display: none;">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Login or Sign up</h5>
@@ -36,14 +36,14 @@
           </div>
 
           <div class="p-3 position-relative">
-            <a href="#" class="pb-4 position-absolute top-50 end-0 translate-middle-y pe-4">Forgot password?</a>
+            <a href="#" class="pb-4 pe-4 position-absolute top-50 end-0 translate-middle-y" style="text-decoration: none; color: #64676a;">Forgot password?</a>
           </div>
           <div class="d-grid gap-2 col-6 mx-auto">
               <button type="submit" class="btn btn-primary">Login</button>
           </div>
           <div align="center" class="p-3">
             <h>Don't have an account? </h>
-            <a href="#">Sign up!</a>
+            <a href="#" style="text-decoration: none;">Sign up!</a>
           </div>
         </div>
       </div>
