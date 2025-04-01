@@ -9,49 +9,79 @@
     <title>Login</title>
 </head>
 <body>
-    <!-- Popup container (display: none by default) -->
+    <!-- Popup container -->
     <div id="loginPopup" class="modal" tabindex="-1" style="display: none;">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Login or Sign up</h5>
-            <button type="button" class="btn-close" onclick="togglePopup(false)"></button>
-          </div>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Login</h5>
+                    <button type="button" class="btn-close" onclick="togglePopup(false)"></button>
+                </div>
 
-          <div class="modal-body">
-            <!-- Email input -->
-            <div id="emailInput" class="mb-3" style="display: block;">
-              <input type="email" id="email" class="form-control" placeholder="Email">
+                <div class="modal-body">
+                    <!-- Login Form -->
+                    <div id="loginForm">
+                        <div class="mb-3">
+                            <input type="email" id="loginEmail" class="form-control" placeholder="Email">
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" id="loginPassword" class="form-control" placeholder="Password">
+                        </div>
+                        <div class="p-3 position-relative">
+                            <a href="#" class="pb-3 position-absolute top-50 end-0 translate-middle-y" style="text-decoration: none; color: #64676a;">Forgot password?</a>
+                        </div>
+                        <div class="d-grid gap-2 col-6 mx-auto">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                        <div align="center" class="p-3">
+                            Don't have an account? <a href="#" onclick="showRegisterForm()" style="text-decoration: none;">Sign up!</a>
+                        </div>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <div id="registerForm" style="display: none;">
+                        <div class="mb-3">
+                            <input type="text" id="registerName" class="form-control" placeholder="Full Name">
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" id="registerEmail" class="form-control" placeholder="Email">
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" id="registerPhone" class="form-control" placeholder="Phone">
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" id="registerPassword" class="form-control" placeholder="Password">
+                        </div>
+                        <div class="d-grid gap-2 col-6 mx-auto">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                        <div align="center" class="p-3">
+                            Already have an account? <a href="#" onclick="showLoginForm()" style="text-decoration: none;">Login</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <!-- Phone input -->
-            <div id="phoneInput" class="mb-3" style="display: none;">
-              <input type="text" id="phone" class="form-control" placeholder="Phone">
-            </div>
-
-            <!-- Password -->
-            <div>
-              <input type="password" id="password" class="form-control" placeholder="Password">
-            </div>
-          </div>
-
-          <div class="p-3 position-relative">
-            <a href="#" class="pb-4 pe-4 position-absolute top-50 end-0 translate-middle-y" style="text-decoration: none; color: #64676a;">Forgot password?</a>
-          </div>
-          <div class="d-grid gap-2 col-6 mx-auto">
-              <button type="submit" class="btn btn-primary">Login</button>
-          </div>
-          <div align="center" class="p-3">
-            <h>Don't have an account? </h>
-            <a href="#" style="text-decoration: none;">Sign up!</a>
-          </div>
         </div>
-      </div>
     </div>
 
     <script>
         function togglePopup(show) {
-        document.getElementById('loginPopup').style.display = show ? 'block' : 'none';
+            document.getElementById('loginPopup').style.display = show ? 'block' : 'none';
+			if (show) {
+				showLoginForm(); // Default to login form when popup is opened
+			}
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('modalTitle').innerText = 'Sign Up';
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('modalTitle').innerText = 'Login';
         }
     </script>
 </body>
