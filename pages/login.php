@@ -67,9 +67,9 @@
     <script>
         function togglePopup(show) {
             document.getElementById('loginPopup').style.display = show ? 'block' : 'none';
-			if (show) {
-				showLoginForm(); // Default to login form when popup is opened
-			}
+            if (show) {
+              showLoginForm(); // Default to login form when popup is opened
+            }
         }
 
         function showRegisterForm() {

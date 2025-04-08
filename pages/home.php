@@ -10,7 +10,6 @@
     <?php
     require ("login.php");
     ?>
-    
     <button onclick="togglePopup(true)">Login</button>
 </body>
 </html>
