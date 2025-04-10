@@ -14,19 +14,27 @@ $username = $_SESSION['username'] ?? null;
     rel="stylesheet"
   />
   <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"
   />
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&display=swap">
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    .navbar-nav .nav-link {
+      color: #fff !important;
+    }
+  </style>
 </head>
 <body>
   <?php
   require('../pages/login.php'); // Include the login popup
   ?>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black bg-gradient">
     <div class="container">
       <!-- Logo -->
       <a class="navbar-brand" href="#">
-        <img src="logo.png" alt="Site Logo" width="40" height="40" />
+        <img src="../assets/img/logo.png" alt="Site Logo" width="50px" height="50px" />
       </a>
 
       <!-- Toggler for mobile view -->
@@ -45,22 +53,26 @@ $username = $_SESSION['username'] ?? null;
       <!-- Navbar content -->
       <div class="collapse navbar-collapse" id="navbarContent">
         <!-- Centered search bar -->
-        <form class="d-flex mx-auto" action="search.php" method="get">
-          <input
-            class="form-control me-2"
-            type="search"
-            name="q"
-            placeholder="Search products..."
-            aria-label="Search"
-          />
-          <button class="btn btn-outline-success" type="submit">Search</button>
+        <form action="search.php" method="get" class="mx-auto" style="max-width: 500px;">
+          <div class="input-group" style="width: 500px;">
+            <input
+              class="form-control"
+              type="search"
+              name="q"
+              placeholder="Search Tech Zone!"
+              aria-label="Search"
+            />
+            <button class="btn btn-search" style="background-color: white;" type="submit">
+              <i class="bi bi-search text-black"></i>
+            </button>
+          </div>
         </form>
 
         <!-- Right side: Cart, Login/Register -->
-        <ul class="navbar-nav ms-auto">
+        <ul class="navbar-nav">
           <li class="nav-item me-3">
-            <a class="nav-link" href="cart.php">
-              <i class="bi bi-cart"></i> Cart
+            <a class="nav-link" href="cart.php" style="font-size: 14px;">
+              <i class="bi bi-cart" style="font-size: 19px;"></i> Cart
             </a>
           </li>
           <?php if ($username): ?>
@@ -68,11 +80,17 @@ $username = $_SESSION['username'] ?? null;
               <a class="nav-link" href="profile.php">Hello, <?php echo htmlspecialchars($username); ?></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="logout.php">Logout</a>
+              <a class="nav-link" href="logout.php">Sign Out</a>
             </li>
           <?php else: ?>
             <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="modal" data-bs-target="#loginPopup">Login</button>
+              <button 
+                  class="nav-link" 
+                  style="font-size: 14px;" 
+                  data-bs-toggle="modal"
+                  data-bs-target="#loginPopup">
+                <i class="bi bi bi-person me-1" style="font-size: 19px;"></i> Sign In
+              </button>
             </li>
           <?php endif; ?>
         </ul>
