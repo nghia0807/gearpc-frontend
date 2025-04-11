@@ -24,9 +24,6 @@ $username = $_SESSION['username'] ?? null;
   <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
 <body>
-  <?php
-  require('../pages/login.php'); // Include the login popup
-  ?>
   <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: black;">
     <div class="container">
       <!-- Logo -->
@@ -87,13 +84,14 @@ $username = $_SESSION['username'] ?? null;
             </li>
           <?php else: ?>
             <li class="nav-item">
-              <button 
-                  class="nav-link header-items" 
-                  style="font-size: 16px; font-weight: bold; border-radius: 22px;" 
-                  data-bs-toggle="modal"
-                  data-bs-target="#loginPopup">
-                <i class="bi bi-person " style="font-size: 16px; font-weight: bold"></i> Sign In
-              </button>
+              <a class="nav-link header-items" href="../pages/login.php" style="font-size: 16px; font-weight: bold; border-radius: 22px;">
+                <i class="bi bi-person" style="font-size: 16px; font-weight: bold"></i> Sign In
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link header-items" href="../pages/register.php" style="font-size: 16px; font-weight: bold; border-radius: 22px;">
+                Register
+              </a>
             </li>
           <?php endif; ?>
         </ul>
