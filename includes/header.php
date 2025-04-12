@@ -20,11 +20,51 @@ $username = $_SESSION['username'] ?? null;
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    input:-webkit-autofill {
+      background-color: #363636 !important;
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important;
+      -webkit-box-shadow: 0 0 0 1000px #363636 inset !important;
+      transition: background-color 9999s ease-out, color 9999s ease-out;
+    }
+    .navbar-nav .nav-link {
+      color: #fff !important;
+    }
+    .header-items:hover {
+      background-color: #1e1e1e;
+    }
+    .form-control:focus {
+      box-shadow: none !important;
+    }
+    .header-items {
+      font-size: 16px !important;
+      font-weight: bold !important;
+      border-radius: 22px !important;
+    } 
+    .form-control {
+      border-right: none !important;
+      background-color: #363636 !important; 
+      border-color: #363636 !important; 
+      color: #fff !important;
+    }
+    .form-control:focus {
+      border-color: #6694ea !important; 
+    }
+    .form-control:focus + .btn-search {
+      border-color: #6694ea !important; 
+      color: #fff !important;
+    }
+    .btn-search {
+      border-left: none !important;
+      background-color: #363636 !important; 
+      color: #fff !important;
+    }
+  </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: black;">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black">
     <div class="container">
       <!-- Logo -->
       <a class="navbar-brand" href="#">
@@ -47,50 +87,44 @@ $username = $_SESSION['username'] ?? null;
       <!-- Navbar content -->
       <div class="collapse navbar-collapse" id="navbarContent">
         <!-- Centered search bar -->
-        <form action="search.php" method="get" class="mx-auto" style="max-width: 500px;">
-          <div class="input-group" style="width: 500px;">
-            <input
-              class="form-control"
-              type="search"
-              name="q"
-              placeholder="Search Tech Zone!"
-              aria-label="Search"
-              style="background-color: #363636; border: none; color: #fff;"
-            />
-            <button class="btn btn-search" style="background-color: #363636;" type="submit">
-              <i class="bi bi-search text-white"></i>
-            </button>
-          </div>
-        </form>
+           <form action="search.php" method="get" class="mx-auto" style="max-width: 500px;">
+             <div class="input-group" style="width: 500px;">
+               <input
+               class="form-control"
+               type="search"
+               name="q"
+               placeholder="Search Tech Zone!"
+               aria-label="Search"
+               />
+               <button class="btn btn-search" type="submit">
+                 <i class="bi bi-search text-white"></i>
+                </button>
+              </div>
+            </form>
 
         <!-- Right side: Cart, Login/Register -->
         <ul class="navbar-nav">
           <li class="nav-item me-3">
-            <a class="nav-link header-items" href="order.php" style="font-size: 16px; font-weight: bold; border-radius: 22px;">
-              <i class="bi bi-truck me-1" style="font-size: 16px; font-weight: bold"></i> Orders
+            <a class="nav-link header-items" href="order.php">
+              <i class="bi bi-truck me-1"></i> Orders
             </a>
           </li>
           <li class="nav-item me-3">
-            <a class="nav-link header-items" href="cart.php" style="font-size: 16px; font-weight: bold; border-radius: 22px;">
-              <i class="bi bi-cart" style="font-size: 16px; font-weight: bold"></i> Cart
+            <a class="nav-link header-items" href="cart.php">
+              <i class="bi bi-cart"></i> Cart
             </a>
           </li>
           <?php if ($username): ?>
             <li class="nav-item">
-              <a class="nav-link header-items" href="profile.php" style="font-size: 16px; font-weight: bold; border-radius: 22px;">Hello, <?php echo htmlspecialchars($username); ?></a>
+              <a class="nav-link header-items" href="profile.php">Hello, <?php echo htmlspecialchars($username); ?></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link header-items" href="logout.php" style="font-size: 16px; font-weight: bold; border-radius: 22px;">Sign Out</a>
+              <a class="nav-link header-items" href="logout.php">Sign Out</a>
             </li>
           <?php else: ?>
             <li class="nav-item">
-              <a class="nav-link header-items" href="../pages/login.php" style="font-size: 16px; font-weight: bold; border-radius: 22px;">
-                <i class="bi bi-person" style="font-size: 16px; font-weight: bold"></i> Sign In
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link header-items" href="../pages/register.php" style="font-size: 16px; font-weight: bold; border-radius: 22px;">
-                Register
+              <a class="nav-link header-items" href="../pages/login.php">
+                <i class="bi bi-person"></i> Sign In
               </a>
             </li>
           <?php endif; ?>

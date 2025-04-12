@@ -15,7 +15,31 @@
   />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <style>
-    
+    .form-control::placeholder {
+      color:rgb(187, 187, 187) !important;
+    }
+    .navbar-items .nav-link {
+      color: #fff !important;
+      font-size: 14px !important;
+      font-weight: bold !important;
+    }
+    .navbar-items .nav-item.dropdown:hover .dropdown-menu {
+      display: block;
+    }
+    .navbar-items .nav-item:hover .nav-link {
+      text-decoration: underline;
+    }
+    .dropdown-item {
+      color: white !important;
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
+      padding-left: 15px !important;
+      padding-right: 15px !important;
+    }
+    .blue-text:hover {
+      background-color: #212121 !important;
+      text-decoration: underline !important;
+    }
   </style>
 </head>
 <body>
@@ -44,15 +68,14 @@
               role="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
-              style="font-size: 14px; font-weight: bold;"
             >
               Deals
             </a>
             <ul class="dropdown-menu p-2" aria-labelledby="navbarDropdownDeals" style="background-color: #212121;">
-              <li><a class="dropdown-item" href="#">Today's Best Deals</a></li>
-              <li><a class="dropdown-item" href="#">Laptop Deals</a></li>
-              <li><a class="dropdown-item" href="#">Headphone Deals</a></li>
-              <li><a class="dropdown-item" href="#">Keyboard Deals</a></li>
+              <li><a class="dropdown-item blue-text" href="#">Today's Best Deals</a></li>
+              <li><a class="dropdown-item blue-text" href="#">Laptop Deals</a></li>
+              <li><a class="dropdown-item blue-text" href="#">Headphone Deals</a></li>
+              <li><a class="dropdown-item blue-text" href="#">Keyboard Deals</a></li>
             </ul>
           </li>
           <li class="nav-item" style="display: flex; align-items: center;">
@@ -62,15 +85,15 @@
             <span class="fire-icon">🔥</span>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" style="font-size: 14px; font-weight: bold;">PC Builder</a>
+            <a class="nav-link" href="#" >PC Builder</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" style="font-size: 14px; font-weight: bold;">News</a>
+            <a class="nav-link" href="#" >News</a>
           </li>
         </ul>
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="#" style="font-size: 14px; font-weight: bold;">
+            <a class="nav-link" href="#" >
               <i class="bi bi-question-circle"></i> Help Center
             </a>
           </li>

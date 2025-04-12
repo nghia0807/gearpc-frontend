@@ -2,188 +2,54 @@ body {
  font-family: "OpenSans", sans-serif, Helvetica, Arial !important;
 }
 
-/* Popup background */
-#loginPopup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-  display: none; /* Controlled by togglePopup() JS function */
-}
-
-/* Popup content */
-#loginPopup .popup-content {
-  background: #fff;
-  margin: 100px auto;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 400px;
-  position: relative;
-}
-
-/* Close button */
-#loginPopup .close-btn {
-  float: right;
-  cursor: pointer;
-}
-
-/* Input fields */
-.popup-content label {
-  display: block;
-  margin-bottom: 5px;
-}
-.popup-content input[type="email"],
-.popup-content input[type="text"],
-.popup-content input[type="password"] {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-/* Toggle buttons */
-.popup-content button {
-  margin-right: 5px;
-}
-
-/* Font styles for Poppins font family */
-.poppins-thin {
-  font-family: "Poppins", sans-serif;
-  font-weight: 100;
-  font-style: normal;
-}
-
-.poppins-extralight {
-  font-family: "Poppins", sans-serif;
-  font-weight: 200;
-  font-style: normal;
-}
-
-.poppins-light {
-  font-family: "Poppins", sans-serif;
-  font-weight: 300;
-  font-style: normal;
-}
-
-.poppins-regular {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.poppins-medium {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-}
-
-.poppins-semibold {
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-style: normal;
-}
-
-.poppins-bold {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-style: normal;
-}
-
-.poppins-extrabold {
-  font-family: "Poppins", sans-serif;
-  font-weight: 800;
-  font-style: normal;
-}
-
-.poppins-black {
-  font-family: "Poppins", sans-serif;
-  font-weight: 900;
-  font-style: normal;
-}
-
-.poppins-thin-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 100;
-  font-style: italic;
-}
-
-.poppins-extralight-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 200;
-  font-style: italic;
-}
-
-.poppins-light-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 300;
-  font-style: italic;
-}
-
-.poppins-regular-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-style: italic;
-}
-
-.poppins-medium-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-style: italic;
-}
-
-.poppins-semibold-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-style: italic;
-}
-
-.poppins-bold-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-style: italic;
-}
-
-.poppins-extrabold-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 800;
-  font-style: italic;
-}
-
-.poppins-black-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 900;
-  font-style: italic;
-}
-
-/* Navbar styles */
-.navbar-nav .nav-link {
-  color: #fff !important;
-}
-.form-control::placeholder {
-  color:rgb(187, 187, 187) !important;
-}
-.navbar-items .nav-item.dropdown:hover .dropdown-menu {
-  display: block;
-}
-.navbar-items .nav-item:hover .nav-link {
-  text-decoration: underline;
-}
-.dropdown-item {
-  color: white !important;
-  padding-top: 10px !important;
-  padding-bottom: 10px !important;
-  padding-left: 15px !important;
-  padding-right: 15px !important;
-}
-.dropdown-item:hover {
-  background-color: #212121 !important;
+/* Blue text hover */
+.blue-text:hover {
   color: #8eaff0 !important;
-  text-decoration: underline !important;
 }
 
-/* Header styles */
-.header-items:hover {
-  background-color: #1e1e1e;
+/* Orange button */
+.btn-custom {
+  background-color: #ffa33a;
+  border-color: #ffa33a;
+  color: #121212;
+  width: 304px;
+  height: 44px;
+}
+.btn-custom:hover {
+  background-color: #ffa33a;
+  border-color: #d60;
+  color: #222;
+}
+
+
+/* Input field floating */
+.floating-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.floating-group .floating-input {
+  background-color: #121212;
+  border: 1px solid #555;
+  transition: border-color 0.2s;
+}
+.floating-group label {
+  position: absolute;
+  pointer-events: none;
+  left: 12px;
+  top: 12px;
+  color: #aaa;
+  transition: 0.2s ease all;
+  background-color: #121212;
+  padding: 0 4px;
+  z-index: 1;
+}
+.floating-group .floating-input:focus {
+  border-color: #6694ea;
+  outline: none;
+  box-shadow: none;
+}
+.floating-group .floating-input:focus + label,
+.floating-group .floating-input:not(:placeholder-shown) + label {
+  top: -10px;
+  font-size: 0.75rem;
 }
