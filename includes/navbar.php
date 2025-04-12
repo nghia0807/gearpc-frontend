@@ -72,10 +72,10 @@
               Deals
             </a>
             <ul class="dropdown-menu p-2" aria-labelledby="navbarDropdownDeals" style="background-color: #212121;">
-              <li><a class="dropdown-item blue-text" href="#">Today's Best Deals</a></li>
-              <li><a class="dropdown-item blue-text" href="#">Laptop Deals</a></li>
-              <li><a class="dropdown-item blue-text" href="#">Headphone Deals</a></li>
-              <li><a class="dropdown-item blue-text" href="#">Keyboard Deals</a></li>
+              <li><a class="dropdown-item blue-text" href="promo.php">Today's Best Deals</a></li>
+              <li><a class="dropdown-item blue-text" href="promo.php">Laptop Deals</a></li>
+              <li><a class="dropdown-item blue-text" href="promo.php">Headphone Deals</a></li>
+              <li><a class="dropdown-item blue-text" href="promo.php">Keyboard Deals</a></li>
             </ul>
           </li>
           <li class="nav-item" style="display: flex; align-items: center;">

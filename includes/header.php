@@ -61,6 +61,9 @@ $username = $_SESSION['username'] ?? null;
       background-color: #363636 !important; 
       color: #fff !important;
     }
+    .btn-search:focus {
+      border-color: #363636 !important;
+    }
   </style>
 </head>
 <body>
