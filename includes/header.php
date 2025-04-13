@@ -51,10 +51,12 @@ $username = $_SESSION['username'] ?? null;
     }
     .form-control:focus {
       border-color: #6694ea !important; 
+      border-width: 2px !important;
     }
     .form-control:focus + .btn-search {
       border-color: #6694ea !important; 
       color: #fff !important;
+      border-width: 2px !important;
     }
     .btn-search {
       border-left: none !important;
@@ -63,6 +65,9 @@ $username = $_SESSION['username'] ?? null;
     }
     .btn-search:focus {
       border-color: #363636 !important;
+    }
+    .bi-search:hover {
+      color: #6694ea !important; 
     }
   </style>
 </head>
@@ -101,7 +106,7 @@ $username = $_SESSION['username'] ?? null;
                />
                <button class="btn btn-search" type="submit">
                  <i class="bi bi-search text-white"></i>
-                </button>
+               </button>
               </div>
             </form>
 
