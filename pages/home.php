@@ -29,12 +29,14 @@ try {
 }
 
 $icons = [
-    'Laptop' => 'fas fa-laptop',
-    'PCs' => 'fas fa-desktop',
-    'Main, CPU, VGA' => 'fas fa-microchip',
-    'Mouse + Mouse Pad' => 'fas fa-mouse',
-    'Sounds' => 'fas fa-headphones',
-    'Monitor' => 'fas fa-tv'
+    'Laptops' => 'bi bi-laptop',
+    'PCs' => 'bi bi-pc-display',
+    'Main, CPU, VGA' => 'bi bi-cpu',
+    'Mouse + Mouse Pad' => 'bi bi-mouse',
+    'Sounds' => 'bi bi-speaker',
+    'Monitors' => 'bi bi-display',
+    'Earphones' => 'bi bi-headphones',
+    'Keyboards' => 'bi bi-keyboard',
 ];
 ?>
 <!DOCTYPE html>

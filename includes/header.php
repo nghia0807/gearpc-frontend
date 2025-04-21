@@ -142,4 +142,3 @@ $username = $_SESSION['username'] ?? null;
   </nav>
 </body>
 </html>
-<?php include 'navbar.php'; ?>

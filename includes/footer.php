@@ -26,7 +26,7 @@
 <body>
 
 <!-- Footer Component -->
-<footer class="tech-footer bg-dark text-light py-4 mt-5">
+<footer class="tech-footer bg-black text-light py-4 mt-5">
     <div class="container">
         <div class="row">
             <!-- About Us -->
