@@ -19,6 +19,24 @@ try {
         if (isset($jsonData['data']['data'])) {
             $categories = $jsonData['data']['data'];
             $totalCount = isset($jsonData['data']['totalCount']) ? $jsonData['data']['totalCount'] : 0;
+            // Custom order for categories
+            $customOrder = [
+                'Laptops',
+                'PCs',
+                'Main, CPU, VGA',
+                'Monitors',
+                'Keyboards',
+                'Mouse + Mouse Pad',
+                'Earphones',
+                'Sounds'
+            ];
+            usort($categories, function($a, $b) use ($customOrder) {
+                $posA = array_search($a['name'], $customOrder);
+                $posB = array_search($b['name'], $customOrder);
+                $posA = $posA === false ? PHP_INT_MAX : $posA;
+                $posB = $posB === false ? PHP_INT_MAX : $posB;
+                return $posA - $posB;
+            });
         } else {
             $errorMsg = 'Không có danh mục nào';
         }

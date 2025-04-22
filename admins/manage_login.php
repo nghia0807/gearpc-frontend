@@ -1,16 +1,19 @@
 <?php
 session_start();
 $error = '';
+
 if (isset($_GET['logout']) && $_GET['logout'] === '1') {
     session_unset();
     session_destroy();
     header('Location: manage_login.php');
     exit();
 }
+
 if (isset($_SESSION['token'])) {
     header('Location: admin_categories.php');
     exit();
 }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
@@ -33,9 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $res = json_decode($response, true);
             if (!empty($res['success']) && !empty($res['data']['token'])) {
-                $_SESSION['token'] = $res['data']['token'];
-                header('Location: admin_categories.php');
-                exit();
+                $role = $res['data']['user']['role'] ?? '';
+                if ($role === 'Manager' || $role === 'Admin') {
+                    $_SESSION['token'] = $res['data']['token'];
+                    $_SESSION['role'] = $role;
+                    header('Location: admin_categories.php');
+                    exit();
+                } else {
+                    $error = 'Bạn không có quyền truy cập. Vui lòng liên hệ quản trị viên.';
+                }
             } else {
                 $error = $res['message'] ?? 'Đăng nhập thất bại';
             }

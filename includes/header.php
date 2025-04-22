@@ -161,7 +161,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-black">
-    <div class="container">
+    <div class="container me-4">
       <!-- Logo -->
       <a class="navbar-brand" href="#">
         <img src="../assets/img/logo.png" alt="Site Logo" width="50px" height="50px" />

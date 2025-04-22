@@ -137,6 +137,9 @@ function brandImage($img) {
             <li class="nav-item">
                 <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_brands.php' ? ' active' : '' ?>" href="admin_brands.php">Brands</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_products.php' ? ' active' : '' ?>" href="admin_products.php">Products</a>
+            </li>
         </ul>
         <a href="manage_login.php?logout=1" class="btn btn-outline-light btn-sm ms-auto">Đăng xuất</a>
     </div>

@@ -65,13 +65,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $respData = json_decode($response, true);
             if ($httpCode === 200 && isset($respData['success']) && $respData['success'] === true) {
-                // Store token, user, expiration in session
-                $_SESSION['token'] = $respData['data']['token'];
-                $_SESSION['user'] = $respData['data']['user'];
-                $_SESSION['expiration'] = $respData['data']['expiration'];
-                $alert = 'Login successful! Redirecting...';
-                $alertType = 'success';
-                echo "<script>setTimeout(function(){ window.location.href = 'home.php'; }, 500);</script>";
+                // --- Role check logic ---
+                $role = $respData['data']['user']['role'] ?? null;
+                if ($role && $role === 'User') {
+                    $_SESSION['token'] = $respData['data']['token'];
+                    $_SESSION['user'] = $respData['data']['user'];
+                    $_SESSION['expiration'] = $respData['data']['expiration'];
+                    $_SESSION['role'] = $role;
+                    $alert = 'Login successful! Redirecting...';
+                    $alertType = 'success';
+                    echo "<script>setTimeout(function(){ window.location.href = 'home.php'; }, 500);</script>";
+                } else {
+                    $alert = 'Invalid or unauthorized role. Access denied.';
+                    $alertType = 'danger';
+                }
             } else {
                 $apiMsg = $respData['message'] ?? 'Username or password is incorrect.';
                 $alert = $apiMsg;
@@ -136,20 +143,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h5 class="mb-4" style="font-weight: 700;">Sign In</h5>
     <!-- Bootstrap alert for API or validation messages -->
     <?php if (!empty($alert)): ?>
-      <div class="alert alert-<?php echo $alertType; ?> w-100 mb-4" style="max-width: 340px; margin: 0 auto;">
-        <?php echo $alert; ?>
+      <div class="alert alert-<?php echo htmlspecialchars($alertType, ENT_QUOTES, 'UTF-8'); ?> w-100 mb-4" style="max-width: 340px; margin: 0 auto;">
+        <?php echo htmlspecialchars($alert, ENT_QUOTES, 'UTF-8'); ?>
       </div>
     <?php endif; ?>
     <form method="post" action="" id="loginForm" novalidate>
       <div class="floating-group">
-        <input type="text" class="form-control floating-input <?php echo !empty($errors['username']) ? 'is-invalid' : ''; ?>" id="username" name="username" placeholder=" " required minlength="8" value="<?php echo isset($username) ? $username : ''; ?>" />
+        <input type="text" class="form-control floating-input <?php echo !empty($errors['username']) ? 'is-invalid' : ''; ?>" id="username" name="username" placeholder=" " required minlength="8" value="<?php echo isset($username) ? htmlspecialchars($username, ENT_QUOTES, 'UTF-8') : ''; ?>" />
         <label for="username">Username</label>
-        <div class="invalid-feedback"><?php echo $errors['username']; ?></div>
+        <div class="invalid-feedback"><?php echo htmlspecialchars($errors['username'], ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
       <div class="floating-group">
         <input type="password" class="form-control floating-input <?php echo !empty($errors['password']) ? 'is-invalid' : ''; ?>" id="password" name="password" placeholder=" " required minlength="8" />
         <label for="password">Password</label>
-        <div class="invalid-feedback"><?php echo $errors['password']; ?></div>
+        <div class="invalid-feedback"><?php echo htmlspecialchars($errors['password'], ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
       <button type="submit" class="btn btn-custom" style="font-weight: bold;">Sign In</button>
     </form>
