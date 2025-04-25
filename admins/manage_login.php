@@ -3,8 +3,7 @@ session_start();
 $error = '';
 
 if (isset($_GET['logout']) && $_GET['logout'] === '1') {
-    session_unset();
-    session_destroy();
+    unset($_SESSION['admin_token'], $_SESSION['admin_user'], $_SESSION['admin_expiration'], $_SESSION['admin_role']);
     header('Location: manage_login.php');
     exit();
 }
@@ -30,23 +29,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]));
         $response = curl_exec($ch);
         $err = curl_error($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if ($err) {
             $error = 'Lỗi kết nối máy chủ.';
         } else {
-            $res = json_decode($response, true);
-            if (!empty($res['success']) && !empty($res['data']['token'])) {
-                $role = $res['data']['user']['role'] ?? '';
-                if ($role === 'Manager' || $role === 'Admin') {
-                    $_SESSION['token'] = $res['data']['token'];
-                    $_SESSION['role'] = $role;
-                    header('Location: admin_categories.php');
+            $respData = json_decode($response, true);
+            if ($httpCode === 200 && isset($respData['success']) && $respData['success'] === true) {
+                $role = $respData['data']['user']['role'] ?? null;
+                if ($role && in_array($role, ['Manager', 'Admin'])) {
+                    // Use admin-specific session keys
+                    $_SESSION['admin_token'] = $respData['data']['token'];
+                    $_SESSION['admin_user'] = $respData['data']['user'];
+                    $_SESSION['admin_expiration'] = $respData['data']['expiration'];
+                    $_SESSION['admin_role'] = $role;
+                    // Redirect to admin dashboard
+                    header('Location: admin_products.php');
                     exit();
                 } else {
-                    $error = 'Bạn không có quyền truy cập. Vui lòng liên hệ quản trị viên.';
+                    $error = 'Bạn không có quyền truy cập.';
                 }
             } else {
-                $error = $res['message'] ?? 'Đăng nhập thất bại';
+                $error = $respData['message'] ?? 'Đăng nhập thất bại';
             }
         }
     }

@@ -3,8 +3,7 @@ session_start();
 
 // --- Logout logic ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
-    session_unset();
-    session_destroy();
+    unset($_SESSION['user_token'], $_SESSION['user'], $_SESSION['user_expiration'], $_SESSION['user_role']);
     header('Location: ../pages/login.php');
     exit();
 }
@@ -13,9 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
 $isLoggedIn = false;
 $userFullName = '';
 $userRole = '';
-if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
+if (isset($_SESSION['user_token'], $_SESSION['user'], $_SESSION['user_expiration'])) {
     $now = strtotime('now');
-    $exp = strtotime($_SESSION['expiration']);
+    $exp = strtotime($_SESSION['user_expiration']);
     if ($exp > $now) {
         $isLoggedIn = true;
         $userFullName = htmlspecialchars($_SESSION['user']['fullName'] ?? $_SESSION['user']['username']);

@@ -1,10 +1,14 @@
 <?php
 session_start();
-if (!isset($_SESSION['token']) || !isset($_SESSION['role']) || !in_array($_SESSION['role'], ['Manager', 'Admin'])) {
-    header('Location: ../login.php');
+if (
+    !isset($_SESSION['admin_token']) ||
+    !isset($_SESSION['admin_role']) ||
+    !in_array($_SESSION['admin_role'], ['Manager', 'Admin'])
+) {
+    header('Location: ../manage_login.php');
     exit();
 }
-$token = $_SESSION['token'];
+$token = $_SESSION['admin_token'];
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];
@@ -313,7 +317,7 @@ function productImage($img) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-const token = '<?= htmlspecialchars($_SESSION['token']) ?>';
+const token = '<?= htmlspecialchars($_SESSION['admin_token']) ?>';
 
 // Show modal
 $('#addProductBtn').on('click', function() {
@@ -494,7 +498,7 @@ $(function() {
             url: 'http://localhost:5000/api/products/' + encodeURIComponent(productId),
             method: 'GET',
             headers: {
-                'Authorization': 'Bearer <?= htmlspecialchars($_SESSION['token']) ?>',
+                'Authorization': 'Bearer <?= htmlspecialchars($_SESSION['admin_token']) ?>',
                 'Accept': 'application/json'
             },
             dataType: 'json',

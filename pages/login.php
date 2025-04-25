@@ -68,10 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // --- Role check logic ---
                 $role = $respData['data']['user']['role'] ?? null;
                 if ($role && $role === 'User') {
-                    $_SESSION['token'] = $respData['data']['token'];
+                    // Use user-specific session keys
+                    $_SESSION['user_token'] = $respData['data']['token'];
                     $_SESSION['user'] = $respData['data']['user'];
-                    $_SESSION['expiration'] = $respData['data']['expiration'];
-                    $_SESSION['role'] = $role;
+                    $_SESSION['user_expiration'] = $respData['data']['expiration'];
+                    $_SESSION['user_role'] = $role;
                     $alert = 'Login successful! Redirecting...';
                     $alertType = 'success';
                     echo "<script>setTimeout(function(){ window.location.href = 'home.php'; }, 500);</script>";
@@ -139,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
   <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
-    <img src="logo.png" alt="Logo" class="mb-4" />
+    <img src="../assets/img/logo.png" alt="Logo" class="mb-4" />
     <h5 class="mb-4" style="font-weight: 700;">Sign In</h5>
     <!-- Bootstrap alert for API or validation messages -->
     <?php if (!empty($alert)): ?>

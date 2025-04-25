@@ -1,10 +1,14 @@
 <?php
 session_start();
-if (!isset($_SESSION['token'])) {
-    header('Location: manage_login.php');
+if (
+    !isset($_SESSION['admin_token']) ||
+    !isset($_SESSION['admin_role']) ||
+    !in_array($_SESSION['admin_role'], ['Manager', 'Admin'])
+) {
+    header('Location: ../manage_login.php');
     exit();
 }
-$token = $_SESSION['token'];
+$token = $_SESSION['admin_token'];
 $apiBase = 'http://localhost:5000/api/brands';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
