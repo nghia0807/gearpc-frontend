@@ -1,15 +1,36 @@
 <?php
+// --- Use admin_session with cookie path /admin ---
+session_name('admin_session');
+session_set_cookie_params(['path' => '/admin']);
 session_start();
 $error = '';
 
+// --- Clear user_session if exists ---
+if (session_name() !== 'user_session') {
+    if (isset($_COOKIE['user_session'])) {
+        session_write_close();
+        session_name('user_session');
+        session_start();
+        session_unset();
+        session_destroy();
+        setcookie('user_session', '', time() - 3600, '/user');
+        session_name('admin_session');
+        session_start();
+    }
+}
+
+// --- Logout logic ---
 if (isset($_GET['logout']) && $_GET['logout'] === '1') {
-    unset($_SESSION['admin_token'], $_SESSION['admin_user'], $_SESSION['admin_expiration'], $_SESSION['admin_role']);
+    session_unset();
+    session_destroy();
+    setcookie('admin_session', '', time() - 3600, '/admin');
     header('Location: manage_login.php');
     exit();
 }
 
-if (isset($_SESSION['token'])) {
-    header('Location: admin_categories.php');
+// --- Redirect if already logged in as admin ---
+if (isset($_SESSION['admin_user']) && in_array($_SESSION['admin_user']['role'], ['Manager', 'Admin'])) {
+    header('Location: admin_products.php');
     exit();
 }
 
@@ -38,15 +59,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($httpCode === 200 && isset($respData['success']) && $respData['success'] === true) {
                 $role = $respData['data']['user']['role'] ?? null;
                 if ($role && in_array($role, ['Manager', 'Admin'])) {
-                    // Use admin-specific session keys
                     $_SESSION['admin_token'] = $respData['data']['token'];
                     $_SESSION['admin_user'] = $respData['data']['user'];
                     $_SESSION['admin_expiration'] = $respData['data']['expiration'];
-                    $_SESSION['admin_role'] = $role;
-                    // Redirect to admin dashboard
                     header('Location: admin_products.php');
                     exit();
                 } else {
+                    session_unset();
+                    session_destroy();
+                    setcookie('admin_session', '', time() - 3600, '/admin');
                     $error = 'Bạn không có quyền truy cập.';
                 }
             } else {
@@ -62,6 +83,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Đăng nhập Quản trị</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .logout-link {
+            color: #fff;
+            background: #dc3545;
+            padding: 4px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 12px;
+            display: inline-block;
+        }
+        .logout-link:hover {
+            background: #b52a2a;
+            color: #fff;
+        }
+    </style>
 </head>
 <body class="bg-light">
 <div class="container d-flex justify-content-center align-items-center" style="min-height:100vh;">

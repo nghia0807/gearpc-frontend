@@ -1,4 +1,6 @@
 <?php
+session_name('user_session');
+session_set_cookie_params(['path' => '/']);
 session_start();
 
 // --- Logout logic ---
