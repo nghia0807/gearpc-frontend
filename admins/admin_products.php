@@ -109,6 +109,35 @@ function productImage($img) {
             border: 1px solid #ddd;
             margin-bottom: 8px;
         }
+        .variant-group {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background: #f8f9fa;
+            position: relative;
+        }
+        .variant-group .remove-variant-group-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+        .variant-option {
+            border: 1px dashed #ced4da;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #fff;
+            position: relative;
+        }
+        .variant-option .remove-variant-option-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+        .add-variant-group-btn, .add-variant-option-btn {
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -225,54 +254,13 @@ function productImage($img) {
           </div>
         </div>
         <hr>
-        <h6>Biến thể sản phẩm</h6>
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label required">Tên tuỳ chọn (optionTitle)</label>
-            <input type="text" class="form-control" name="optionTitle" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label required">Nhãn tuỳ chọn (optionLabel)</label>
-            <input type="text" class="form-control" name="optionLabel" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label required">Số lượng</label>
-            <input type="number" class="form-control" name="quantity" min="1" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label required">Giá gốc</label>
-            <input type="number" class="form-control" name="originalPrice" min="0" step="0.01" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label required">Giá hiện tại</label>
-            <input type="number" class="form-control" name="currentPrice" min="0" step="0.01" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Barcode</label>
-            <input type="text" class="form-control" name="barcode">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Mô tả ngắn</label>
-            <input type="text" class="form-control" name="shortDescription">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label required">Tên mô tả</label>
-            <input type="text" class="form-control" name="descName" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label required">Nội dung mô tả</label>
-            <input type="text" class="form-control" name="descText" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label required">Ảnh chi tiết (imagesBase64)</label>
-            <input type="file" class="form-control" name="detailImageBase64" id="detailImageInput" accept="image/*" required>
-            <img id="detailImgPreview" class="img-preview mt-2 d-block" src="https://via.placeholder.com/80x80?text=No+Img" alt="Preview">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Piority (ảnh/mô tả)</label>
-            <input type="number" class="form-control" name="piority" value="1" min="1">
-          </div>
-        </div>
+        <h6>
+            Biến thể sản phẩm
+            <button type="button" class="btn btn-success btn-sm add-variant-group-btn ms-2">
+                <i class="fa fa-plus"></i> Thêm nhóm biến thể
+            </button>
+        </h6>
+        <div id="variantGroupsContainer"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -317,8 +305,9 @@ const token = '<?= htmlspecialchars($_SESSION['admin_token']) ?>';
 $('#addProductBtn').on('click', function() {
     $('#addProductForm')[0].reset();
     $('#mainImgPreview').attr('src', 'https://via.placeholder.com/80x80?text=No+Img');
-    $('#detailImgPreview').attr('src', 'https://via.placeholder.com/80x80?text=No+Img');
     $('#addProductFormAlert').html('');
+    resetVariantGroups();
+    mainImageBase64 = '';
     $('#addProductModal').modal('show');
 });
 
@@ -372,20 +361,148 @@ $('#mainImageInput').on('change', function(e) {
     }
 });
 
-// Detail image preview & base64
-let detailImageBase64 = '';
-$('#detailImageInput').on('change', function(e) {
-    const file = e.target.files[0];
+// --- Variant Groups/Options Dynamic Form ---
+let variantGroupIdx = 0;
+
+// Template for a variant group
+function getVariantGroupHtml(idx) {
+    return `
+    <div class="variant-group" data-group-idx="${idx}">
+        <button type="button" class="btn btn-danger btn-sm remove-variant-group-btn" title="Xoá nhóm">
+            <i class="fa fa-trash"></i>
+        </button>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label required">Tên tuỳ chọn (optionTitle)</label>
+                <input type="text" class="form-control option-title-input" name="optionTitle_${idx}" required>
+            </div>
+            <div class="col-md-6 text-end">
+                <button type="button" class="btn btn-primary btn-sm add-variant-option-btn" data-group-idx="${idx}">
+                    <i class="fa fa-plus"></i> Thêm tuỳ chọn
+                </button>
+            </div>
+        </div>
+        <div class="variant-options-container mt-3"></div>
+    </div>
+    `;
+}
+
+// Template for a variant option
+function getVariantOptionHtml(groupIdx, optionIdx) {
+    return `
+    <div class="variant-option" data-option-idx="${optionIdx}">
+        <button type="button" class="btn btn-outline-danger btn-sm remove-variant-option-btn" title="Xoá tuỳ chọn">
+            <i class="fa fa-trash"></i>
+        </button>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label required">Nhãn tuỳ chọn (optionLabel)</label>
+                <input type="text" class="form-control option-label-input" name="optionLabel_${groupIdx}_${optionIdx}" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label required">Giá gốc</label>
+                <input type="number" class="form-control original-price-input" name="originalPrice_${groupIdx}_${optionIdx}" min="0" step="0.01" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label required">Giá hiện tại</label>
+                <input type="number" class="form-control current-price-input" name="currentPrice_${groupIdx}_${optionIdx}" min="0" step="0.01" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Barcode</label>
+                <input type="text" class="form-control barcode-input" name="barcode_${groupIdx}_${optionIdx}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Mô tả ngắn</label>
+                <input type="text" class="form-control short-description-input" name="shortDescription_${groupIdx}_${optionIdx}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label required">Tên mô tả</label>
+                <input type="text" class="form-control desc-name-input" name="descName_${groupIdx}_${optionIdx}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label required">Nội dung mô tả</label>
+                <input type="text" class="form-control desc-text-input" name="descText_${groupIdx}_${optionIdx}" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label required">Ảnh chi tiết (imagesBase64)</label>
+                <input type="file" class="form-control variant-image-input" name="variantImage_${groupIdx}_${optionIdx}" accept="image/*" required>
+                <img class="img-preview mt-2 d-block variant-img-preview" src="https://via.placeholder.com/80x80?text=No+Img" alt="Preview">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Piority (ảnh/mô tả)</label>
+                <input type="number" class="form-control piority-input" name="piority_${groupIdx}_${optionIdx}" value="1" min="1">
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+// Add initial variant group on modal open
+function resetVariantGroups() {
+    $('#variantGroupsContainer').empty();
+    variantGroupIdx = 0;
+    addVariantGroup();
+}
+
+// Add a new variant group
+function addVariantGroup() {
+    const idx = variantGroupIdx++;
+    $('#variantGroupsContainer').append(getVariantGroupHtml(idx));
+    // Add one option by default
+    addVariantOption(idx);
+}
+
+// Add a new option to a group
+function addVariantOption(groupIdx) {
+    const $group = $(`.variant-group[data-group-idx="${groupIdx}"]`);
+    if ($group.length === 0) return;
+    const $optionsContainer = $group.find('.variant-options-container');
+    const optionIdx = $optionsContainer.children('.variant-option').length;
+    $optionsContainer.append(getVariantOptionHtml(groupIdx, optionIdx));
+}
+
+// Remove variant group
+$('#variantGroupsContainer').on('click', '.remove-variant-group-btn', function() {
+    $(this).closest('.variant-group').remove();
+});
+
+// Remove variant option
+$('#variantGroupsContainer').on('click', '.remove-variant-option-btn', function() {
+    $(this).closest('.variant-option').remove();
+});
+
+// Add variant group
+$('.add-variant-group-btn').on('click', function() {
+    addVariantGroup();
+});
+
+// Add variant option
+$('#variantGroupsContainer').on('click', '.add-variant-option-btn', function() {
+    const groupIdx = $(this).data('group-idx');
+    addVariantOption(groupIdx);
+});
+
+// Variant image preview & base64 for each option
+const variantImageBase64Map = {}; // { groupIdx_optionIdx: base64 }
+
+$('#variantGroupsContainer').on('change', '.variant-image-input', function(e) {
+    const $option = $(this).closest('.variant-option');
+    const $group = $(this).closest('.variant-group');
+    const groupIdx = $group.data('group-idx');
+    const optionIdx = $option.data('option-idx');
+    const key = `${groupIdx}_${optionIdx}`;
+    const file = this.files[0];
+    const $preview = $option.find('.variant-img-preview');
     if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-            detailImageBase64 = evt.target.result.split(',')[1];
-            $('#detailImgPreview').attr('src', evt.target.result);
+            variantImageBase64Map[key] = evt.target.result.split(',')[1];
+            $preview.attr('src', evt.target.result);
         };
         reader.readAsDataURL(file);
     } else {
-        detailImageBase64 = '';
-        $('#detailImgPreview').attr('src', 'https://via.placeholder.com/80x80?text=No+Img');
+        variantImageBase64Map[key] = '';
+        $preview.attr('src', 'https://via.placeholder.com/80x80?text=No+Img');
     }
 });
 
@@ -393,26 +510,65 @@ $('#detailImageInput').on('change', function(e) {
 $('#addProductForm').on('submit', function(e) {
     e.preventDefault();
     $('#addProductFormAlert').html('');
-    // Validate required fields
     const form = this;
+    // --- Collect main product fields ---
     const name = form.name.value.trim();
     const code = form.code.value.trim();
     const brandCode = form.brandCode.value.trim();
     const categoriesCode = Array.from(form['categoriesCode[]'].selectedOptions).map(opt => opt.value);
     const status = form.status.value;
     const giftCodes = form.giftCodes.value.trim();
-    const optionTitle = form.optionTitle.value.trim();
-    const optionLabel = form.optionLabel.value.trim();
-    const quantity = parseInt(form.quantity.value, 10);
-    const originalPrice = parseFloat(form.originalPrice.value);
-    const currentPrice = parseFloat(form.currentPrice.value);
-    const barcode = form.barcode.value.trim();
-    const shortDescription = form.shortDescription.value.trim();
-    const descName = form.descName.value.trim();
-    const descText = form.descText.value.trim();
-    const piority = parseInt(form.piority.value, 10) || 1;
 
-    if (!name || !code || !mainImageBase64 || !brandCode || !categoriesCode.length || !optionTitle || !optionLabel || !quantity || !currentPrice || !descName || !descText || !detailImageBase64) {
+    // --- Collect variants ---
+    let variants = [];
+    let valid = true;
+    $('#variantGroupsContainer .variant-group').each(function() {
+        const $group = $(this);
+        const groupIdx = $group.data('group-idx');
+        const optionTitle = $group.find('.option-title-input').val().trim();
+        if (!optionTitle) valid = false;
+        let options = [];
+        $group.find('.variant-option').each(function() {
+            const $opt = $(this);
+            const optionIdx = $opt.data('option-idx');
+            const optionLabel = $opt.find('.option-label-input').val().trim();
+            const quantity = parseInt($opt.find('.quantity-input').val(), 10);
+            const originalPrice = parseFloat($opt.find('.original-price-input').val());
+            const currentPrice = parseFloat($opt.find('.current-price-input').val());
+            const barcode = $opt.find('.barcode-input').val().trim();
+            const shortDescription = $opt.find('.short-description-input').val().trim();
+            const descName = $opt.find('.desc-name-input').val().trim();
+            const descText = $opt.find('.desc-text-input').val().trim();
+            const piority = parseInt($opt.find('.piority-input').val(), 10) || 1;
+            const key = `${groupIdx}_${optionIdx}`;
+            const imageBase64 = variantImageBase64Map[key] || '';
+            if (!optionLabel || !quantity || !currentPrice || !descName || !descText || !imageBase64) valid = false;
+            options.push({
+                optionLabel,
+                quantity,
+                originalPrice,
+                currentPrice,
+                barcode,
+                descriptions: [{
+                    name: descName,
+                    descriptionText: descText,
+                    piority
+                }],
+                imagesBase64: [{
+                    base64Content: imageBase64,
+                    piority
+                }],
+                shortDescription
+            });
+        });
+        if (options.length === 0) valid = false;
+        variants.push({
+            optionTitle,
+            options
+        });
+    });
+
+    if (!name || !code || !mainImageBase64 || !brandCode || !categoriesCode.length || !variants.length || !valid) {
         $('#addProductFormAlert').html('<div class="alert alert-danger">Vui lòng nhập đầy đủ các trường bắt buộc.</div>');
         return;
     }
@@ -426,26 +582,7 @@ $('#addProductForm').on('submit', function(e) {
         status,
         brandCode,
         giftCodes: giftCodes ? giftCodes.split(',').map(s => s.trim()).filter(Boolean) : [],
-        variants: [{
-            optionTitle,
-            options: [{
-                optionLabel,
-                quantity,
-                originalPrice,
-                currentPrice,
-                barcode,
-                descriptions: [{
-                    name: descName,
-                    descriptionText: descText,
-                    piority
-                }],
-                imagesBase64: [{
-                    base64Content: detailImageBase64,
-                    piority
-                }],
-                shortDescription
-            }]
-        }]
+        variants
     };
 
     // Send API request
@@ -550,6 +687,20 @@ $(function() {
             }).join('');
         }
 
+        // Calculate total quantity from options
+        var totalQuantity = 0;
+        if (options.length) {
+            options.forEach(function(opt) {
+                if (Array.isArray(opt.options)) {
+                    opt.options.forEach(function(o) {
+                        if (typeof o.quantity === 'number') {
+                            totalQuantity += o.quantity;
+                        }
+                    });
+                }
+            });
+        }
+
         // Gifts
         var giftsHtml = '';
         if (gifts.length) {
@@ -574,7 +725,8 @@ $(function() {
                 optionsHtml += '<li><b>' + esc(opt.title) + ':</b> ';
                 if (Array.isArray(opt.options)) {
                     optionsHtml += opt.options.map(function(o) {
-                        return esc(o.label) + ' (SL: ' + esc(o.quantity) + (o.selected ? ', Được chọn' : '') + ')';
+                        // Remove quantity from here
+                        return esc(o.label) + (o.selected ? ' (Được chọn)' : '');
                     }).join(', ');
                 }
                 optionsHtml += '</li>';
@@ -604,6 +756,7 @@ $(function() {
                 <h6>Chi tiết sản phẩm</h6>
                 <div>Mã vạch: <span class="text-muted">${esc(detail.barcode)}</span></div>
                 <div>Mô tả ngắn: <span class="text-muted">${esc(detail.shortDescription)}</span></div>
+                <div>Số lượng: <span class="text-muted">${totalQuantity}</span></div>
                 <div>Mô tả: ${descList}</div>
                 <div>Hình ảnh: ${detailImgs}</div>
                 <hr>

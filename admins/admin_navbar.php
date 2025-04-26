@@ -12,6 +12,11 @@
                 <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_products.php' ? ' active' : '' ?>" href="admin_products.php">Products</a>
             </li>
         </ul>
-        <a href="manage_login.php?logout=1" class="btn btn-outline-light btn-sm ms-auto">Đăng xuất</a>
+        <?php if (isset($_SESSION['admin_user']['fullName'])): ?>
+            <span class="navbar-text text-light me-3">
+                <?= htmlspecialchars($_SESSION['admin_user']['fullName']) ?>
+            </span>
+        <?php endif; ?>
+        <a href="manage_login.php?logout=1" class="btn btn-outline-light btn-sm">Đăng xuất</a>
     </div>
 </nav>
