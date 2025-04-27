@@ -1,7 +1,7 @@
 <?php
 // --- Use admin_session with cookie path /admin ---
 session_name('admin_session');
-session_set_cookie_params(['path' => '/admin']);
+session_set_cookie_params(['path' => '/']);
 session_start();
 
 if (

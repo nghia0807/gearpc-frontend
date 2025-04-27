@@ -1,36 +1,22 @@
 <?php
 // --- Use admin_session with cookie path /admin ---
 session_name('admin_session');
-session_set_cookie_params(['path' => '/admin']);
+session_set_cookie_params(['path' => '/']); // Only valid for /admins
 session_start();
 $error = '';
-
-// --- Clear user_session if exists ---
-if (session_name() !== 'user_session') {
-    if (isset($_COOKIE['user_session'])) {
-        session_write_close();
-        session_name('user_session');
-        session_start();
-        session_unset();
-        session_destroy();
-        setcookie('user_session', '', time() - 3600, '/user');
-        session_name('admin_session');
-        session_start();
-    }
-}
 
 // --- Logout logic ---
 if (isset($_GET['logout']) && $_GET['logout'] === '1') {
     session_unset();
     session_destroy();
-    setcookie('admin_session', '', time() - 3600, '/admin');
+    setcookie('admin_session', '', time() - 3600, '/admins'); // Use the same path as session_set_cookie_params
     header('Location: manage_login.php');
     exit();
 }
 
 // --- Redirect if already logged in as admin ---
 if (isset($_SESSION['admin_user']) && in_array($_SESSION['admin_user']['role'], ['Manager', 'Admin'])) {
-    header('Location: admin_products.php');
+    header('Location: admin_categories.php');
     exit();
 }
 
@@ -62,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['admin_token'] = $respData['data']['token'];
                     $_SESSION['admin_user'] = $respData['data']['user'];
                     $_SESSION['admin_expiration'] = $respData['data']['expiration'];
-                    header('Location: admin_products.php');
+                    header('Location: admin_categories.php');
                     exit();
                 } else {
                     session_unset();

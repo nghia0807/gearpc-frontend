@@ -1,7 +1,7 @@
 <?php
 // --- Use admin_session with cookie path /admin ---
 session_name('admin_session');
-session_set_cookie_params(['path' => '/admin']);
+session_set_cookie_params(['path' => '/']);
 session_start();
 
 // --- Check admin session and expiration ---
@@ -84,68 +84,13 @@ function productImage($img) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <style>
-        .modal-thumb {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            display: inline-block;
-        }
-        .admin-products .action-btn {
-            margin-right: 4px;
-        }
-        .product-table th, .product-table td {
-            vertical-align: middle !important;
-        }
-        .form-label.required:after {
-            content: "*";
-            color: red;
-            margin-left: 2px;
-        }
-        .img-preview {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border: 1px solid #ddd;
-            margin-bottom: 8px;
-        }
-        .variant-group {
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 16px;
-            margin-bottom: 16px;
-            background: #f8f9fa;
-            position: relative;
-        }
-        .variant-group .remove-variant-group-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-        }
-        .variant-option {
-            border: 1px dashed #ced4da;
-            border-radius: 4px;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: #fff;
-            position: relative;
-        }
-        .variant-option .remove-variant-option-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-        }
-        .add-variant-group-btn, .add-variant-option-btn {
-            margin-top: 8px;
-        }
-    </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
 <div class="container admin-products">
-    <?php foreach ($alerts as $alert): ?>
+    <!-- <?php foreach ($alerts as $alert): ?>
         <div class="alert alert-<?= htmlspecialchars($alert['type']) ?>"><?= htmlspecialchars($alert['msg']) ?></div>
-    <?php endforeach; ?>
+    <?php endforeach; ?> -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Danh sách sản phẩm</h4>
         <button class="btn btn-success" id="addProductBtn">

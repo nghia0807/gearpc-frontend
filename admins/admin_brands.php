@@ -1,7 +1,7 @@
 <?php
 // --- Use admin_session with cookie path /admin ---
 session_name('admin_session');
-session_set_cookie_params(['path' => '/admin']);
+session_set_cookie_params(['path' => '/']);
 session_start();
 
 if (
@@ -143,7 +143,7 @@ function brandImage($img) {
 <?php include 'admin_navbar.php'; ?>
 <div class="container">
     <?php foreach ($alerts as $alert): ?>
-        <div class="alert alert-<?= $alert['type'] ?>"><?= htmlspecialchars($alert['msg']) ?></div>
+        <!-- <div class="alert alert-<?= $alert['type'] ?>"><?= htmlspecialchars($alert['msg']) ?></div> -->
     <?php endforeach; ?>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Danh sách thương hiệu</h4>
