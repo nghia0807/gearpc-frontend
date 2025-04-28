@@ -316,6 +316,63 @@ function getProductImages($product) {
             margin-right: 0.5rem;
         }
         
+        /* Gift section */
+        .gift-section {
+            background-color: rgba(255, 163, 58, 0.1);
+            border: 1px dashed #ffa33a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .gift-section-title {
+            display: flex;
+            align-items: center;
+            color: #ffa33a;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .gift-section-title i {
+            margin-right: 0.5rem;
+            font-size: 1.25rem;
+        }
+        .gift-item {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .gift-item:last-child {
+            margin-bottom: 0;
+        }
+        .gift-item-image {
+            width: 48px;
+            height: 48px;
+            background-color: #fff;
+            border-radius: 6px;
+            padding: 0.25rem;
+            margin-right: 0.75rem;
+            overflow: hidden;
+        }
+        .gift-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .gift-item-info {
+            flex: 1;
+        }
+        .gift-item-name {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+        .gift-item-code {
+            font-size: 0.8rem;
+            color: #999;
+        }
+        
         /* Product Tabs */
         .nav-tabs {
             border-bottom: 1px solid #333;
@@ -499,6 +556,31 @@ function getProductImages($product) {
                             </div>
                         </div>
                         
+                        <!-- Gift Section - ADDED THIS SECTION -->
+                        <?php if (!empty($product['gifts']) && is_array($product['gifts'])): ?>
+                            <div class="gift-section">
+                                <div class="gift-section-title">
+                                    <i class="bi bi-gift"></i>
+                                    <span>Quà tặng kèm</span>
+                                </div>
+                                
+                                <?php foreach ($product['gifts'] as $gift): ?>
+                                    <div class="gift-item">
+                                        <div class="gift-item-image">
+                                            <img src="<?= htmlspecialchars($gift['image']) ?>" 
+                                                 alt="<?= htmlspecialchars($gift['name']) ?>"
+                                                 onerror="this.src='https://via.placeholder.com/48x48?text=Gift'">
+                                        </div>
+                                        <div class="gift-item-info">
+                                            <div class="gift-item-name"><?= htmlspecialchars($gift['name']) ?></div>
+                                            <div class="gift-item-code">Mã: <?= htmlspecialchars($gift['code']) ?></div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                        <!-- End Gift Section -->
+                        
                         <!-- Short Description -->
                         <?php if (!empty($product['productDetail']['shortDescription'])): ?>
                             <div class="short-desc">
@@ -540,10 +622,10 @@ function getProductImages($product) {
                         
                         <!-- Action Buttons -->
                         <div class="product-actions">
-                            <button class="btn btn-add-cart" id="addToCartBtn">
+                            <button class="btn btn-add-cart" id="addToCartBtn" style="color: #ff9620;background-color: #ffffff0d;">
                                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
                             </button>
-                            <button class="btn btn-wishlist">
+                            <button class="btn btn-wishlist" style="color: #ff9620;background-color: #ffffff0d;">
                                 <i class="bi bi-heart"></i> Thêm vào yêu thích
                             </button>
                         </div>
@@ -677,6 +759,11 @@ function getProductImages($product) {
             const optionValues = document.querySelectorAll('.option-value');
             optionValues.forEach(option => {
                 option.addEventListener('click', function() {
+                    // Kiểm tra xem option đã được chọn hay chưa, nếu đã chọn thì không làm gì
+                    if (this.classList.contains('selected')) {
+                        return;
+                    }
+                    
                     // Get all options in the same group
                     const optionsGroup = this.closest('.option-values');
                     const options = optionsGroup.querySelectorAll('.option-value');
@@ -690,12 +777,53 @@ function getProductImages($product) {
                     
                     // If option has ID, load the product with that ID
                     if (optionId) {
+                        // Hiển thị một thông báo hoặc trạng thái đang tải (tùy chọn)
+                        const loadingOverlay = document.createElement('div');
+                        loadingOverlay.style.position = 'fixed';
+                        loadingOverlay.style.top = '0';
+                        loadingOverlay.style.left = '0';
+                        loadingOverlay.style.width = '100%';
+                        loadingOverlay.style.height = '100%';
+                        loadingOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                        loadingOverlay.style.display = 'flex';
+                        loadingOverlay.style.justifyContent = 'center';
+                        loadingOverlay.style.alignItems = 'center';
+                        loadingOverlay.style.zIndex = '9999';
+                        
+                        const spinner = document.createElement('div');
+                        spinner.className = 'spinner-border text-light';
+                        spinner.setAttribute('role', 'status');
+                        
+                        const srOnly = document.createElement('span');
+                        srOnly.className = 'visually-hidden';
+                        srOnly.textContent = 'Đang tải...';
+                        
+                        spinner.appendChild(srOnly);
+                        loadingOverlay.appendChild(spinner);
+                        document.body.appendChild(loadingOverlay);
+                        
                         // Update URL with the new product/option ID
                         const currentUrl = new URL(window.location.href);
                         currentUrl.searchParams.set('id', optionId);
                         
-                        // Navigate to the new URL - this will reload the page with the new product ID
-                        window.location.href = currentUrl.toString();
+                        // Gọi API để lấy thông tin sản phẩm mới
+                        fetch(`http://localhost:5000/api/products/${optionId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success && data.data) {
+                                    // Chuyển trang đến URL mới với ID sản phẩm đã chọn
+                                    window.location.href = currentUrl.toString();
+                                } else {
+                                    // Xử lý trường hợp lỗi khi gọi API
+                                    alert('Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.');
+                                    document.body.removeChild(loadingOverlay);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching product data:', error);
+                                alert('Đã xảy ra lỗi khi tải thông tin sản phẩm. Vui lòng thử lại sau.');
+                                document.body.removeChild(loadingOverlay);
+                            });
                     }
                 });
             });
@@ -727,7 +855,7 @@ function getProductImages($product) {
                 console.log('Added to cart:', {
                     productId: '<?= htmlspecialchars($product['productInfo']['id'] ?? '') ?>',
                     productName: '<?= htmlspecialchars($product['productInfo']['name'] ?? '') ?>',
-                    quantity: quantity,
+                    quantity: 1,
                     selectedOptions: selectedOptions,
                     price: <?= isset($product['price']['currentPrice']) ? $product['price']['currentPrice'] : 0 ?>
                 });
