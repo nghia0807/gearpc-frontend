@@ -152,6 +152,57 @@ if (!empty($categoryCode)) {
         .filter-section {
             margin-bottom: 1.5rem;
         }
+        .brand-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+        .brand-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #ffffff;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .brand-item:hover {
+            background-color: #2d2d2d;
+            transform: translateY(-3px);
+        }
+        .brand-item.active {
+            background-color: #6694ea;
+        }
+        .brand-img-container {
+            width: 60px;
+            height: 60px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .brand-img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+        .brand-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            height: 2.5rem;
+        }
         .filter-item {
             display: block;
             padding: 0.75rem 1rem;
@@ -361,6 +412,14 @@ if (!empty($categoryCode)) {
             color: #ffffff;
             border-color: #5273c0;
         }
+        .all-brands {
+            background-color: #2d2d2d;
+            border: 2px solid #444;
+        }
+        .all-brands.active {
+            background-color: #6694ea;
+            border-color: #6694ea;
+        }
         @media (max-width: 768px) {
             .filters-container {
                 margin-bottom: 1rem;
@@ -368,6 +427,9 @@ if (!empty($categoryCode)) {
             .page-title {
                 font-size: 1.5rem;
                 margin-bottom: 1rem;
+            }
+            .brand-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             }
         }
     </style>
@@ -389,58 +451,69 @@ if (!empty($categoryCode)) {
         </h1>
         
         <div class="row">
-            <!-- Sidebar Filters -->
             <!-- Small filters column -->
-    <div class="col-12 mb-4">
-        <div class="filters-container">
-            <div class="row">
-                <!-- Search Box -->
-                <div class="col-md-7">
-                    <div class="filter-section">
-                        <h5 class="filter-heading">Search Products</h5>
-                        <form action="" method="get" class="search-form">
-                            <?php if (!empty($categoryCode)): ?>
-                                <input type="hidden" name="category" value="<?= htmlspecialchars($categoryCode) ?>">
-                            <?php endif; ?>
-                            <?php if (!empty($brandCode)): ?>
-                                <input type="hidden" name="brand" value="<?= htmlspecialchars($brandCode) ?>">
-                            <?php endif; ?>
-                            <div class="input-group">
-                                <input type="text" name="q" class="form-control search-input" placeholder="Search..." value="<?= htmlspecialchars($searchQuery) ?>">
-                                <button type="submit" class="btn search-btn">
-                                    <i class="bi bi-search"></i>
-                                </button>
+            <div class="col-12 mb-4">
+                <div class="filters-container">
+                    <div class="row">
+                        <!-- Search Box -->
+                        <div class="col-md-12 mb-4">
+                            <div class="filter-section">
+                                <h5 class="filter-heading">Search Products</h5>
+                                <form action="" method="get" class="search-form">
+                                    <?php if (!empty($categoryCode)): ?>
+                                        <input type="hidden" name="category" value="<?= htmlspecialchars($categoryCode) ?>">
+                                    <?php endif; ?>
+                                    <?php if (!empty($brandCode)): ?>
+                                        <input type="hidden" name="brand" value="<?= htmlspecialchars($brandCode) ?>">
+                                    <?php endif; ?>
+                                    <div class="input-group">
+                                        <input type="text" name="q" class="form-control search-input" placeholder="Search..." value="<?= htmlspecialchars($searchQuery) ?>">
+                                        <button type="submit" class="btn search-btn">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
-                    </div>
-                </div>
-                
-                <!-- Brands Filter -->
-                <div class="col-md-5">
-                    <div class="filter-section">
-                        <h5 class="filter-heading">Brands</h5>
-                        <form action="" method="get" id="brandFilterForm">
-                            <?php if (!empty($categoryCode)): ?>
-                                <input type="hidden" name="category" value="<?= htmlspecialchars($categoryCode) ?>">
-                            <?php endif; ?>
-                            <?php if (!empty($searchQuery)): ?>
-                                <input type="hidden" name="q" value="<?= htmlspecialchars($searchQuery) ?>">
-                            <?php endif; ?>
-                            <select class="form-select filter-select" name="brand" id="brandSelect">
-                                <option value="">All Brands</option>
-                                <?php foreach ($brands as $brand): ?>
-                                    <?php if (!isset($brand['code']) || !isset($brand['name'])) continue; ?>
-                                    <option value="<?= htmlspecialchars($brand['code']) ?>" <?= $brandCode === $brand['code'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($brand['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </form>
+                        </div>
+                        
+                        <!-- Brands Filter with Images -->
+                        <div class="col-md-12">
+                            <div class="filter-section">
+                                <h5 class="filter-heading">Brands</h5>
+                                <div class="brand-grid">
+                                    <!-- All Brands option -->
+                                    <a href="<?= 'products.php' . ($categoryCode ? '?category=' . urlencode($categoryCode) : '') . 
+                                             ($searchQuery ? ($categoryCode ? '&q=' : '?q=') . urlencode($searchQuery) : '') ?>" 
+                                       class="brand-item all-brands <?= empty($brandCode) ? 'active' : '' ?>">
+                                        <div class="brand-img-container">
+                                            <i class="bi bi-grid-3x3-gap" style="font-size: 24px; color: #666;"></i>
+                                        </div>
+                                        <div class="brand-name">All Brands</div>
+                                    </a>
+                                    
+                                    <!-- Brand items -->
+                                    <?php foreach ($brands as $brand): ?>
+                                        <?php if (!isset($brand['code']) || !isset($brand['name'])) continue; ?>
+                                        <a href="<?= 'products.php?brand=' . urlencode($brand['code']) . 
+                                                ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . 
+                                                ($searchQuery ? '&q=' . urlencode($searchQuery) : '') ?>" 
+                                           class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
+                                            <div class="brand-img-container">
+                                                <?php if (isset($brand['imageUrl']) && !empty($brand['imageUrl'])): ?>
+                                                    <img src="<?= htmlspecialchars($brand['imageUrl']) ?>" alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
+                                                <?php else: ?>
+                                                    <i class="bi bi-building" style="font-size: 24px; color: #666;"></i>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="brand-name"><?= htmlspecialchars($brand['name']) ?></div>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
             
             <!-- Product Grid -->
             <div class="col-12">
@@ -557,11 +630,6 @@ if (!empty($categoryCode)) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Auto-submit brand filter when selection changes
-            document.getElementById('brandSelect').addEventListener('change', function() {
-                document.getElementById('brandFilterForm').submit();
-            });
-            
             // Add to cart functionality
             const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
             addToCartButtons.forEach(button => {
