@@ -1,12 +1,17 @@
 <?php
-require_once 'includes/database.php';
-require_once 'components/header.php';
-?>
+/**
+ * GearPC Website - Main Entry Point
+ * 
+ * This file serves as the main entry point for the GearPC website.
+ * It redirects users to the home page in the pages directory.
+ */
 
-<main>
-    <!-- Add your homepage content here -->
-</main>
+// Start session if needed
+session_name('user_session');
+session_set_cookie_params(['path' => '/']);
+session_start();
 
-<?php
-require_once 'components/footer.php';
+// Redirect to the home page
+header('Location: pages/home.php');
+exit();
 ?>

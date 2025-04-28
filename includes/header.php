@@ -1,7 +1,10 @@
 <?php
-session_name('user_session');
-session_set_cookie_params(['path' => '/']);
-session_start();
+// Kiểm tra xem phiên đã bắt đầu chưa trước khi gọi các hàm session
+if (session_status() == PHP_SESSION_NONE) {
+  session_name('user_session');
+  session_set_cookie_params(['path' => '/']);
+  session_start();
+}
 
 // --- Logout logic ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
