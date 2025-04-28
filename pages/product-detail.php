@@ -39,6 +39,29 @@ try {
     $errorMsg = 'Đã xảy ra lỗi: ' . $e->getMessage();
 }
 
+// Get related products
+$relatedProducts = [];
+if ($product && isset($product['productInfo']['code'])) {
+    $productCode = $product['productInfo']['code'];
+    $relatedApiUrl = "http://localhost:5000/api/products/related?productCode={$productCode}&count=5";
+    
+    try {
+        $ch = curl_init($relatedApiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $relatedResponse = curl_exec($ch);
+        
+        if (!curl_errno($ch)) {
+            $relatedJsonData = json_decode($relatedResponse, true);
+            if ($relatedJsonData['success'] && isset($relatedJsonData['data'])) {
+                $relatedProducts = $relatedJsonData['data'];
+            }
+        }
+        curl_close($ch);
+    } catch (Exception $e) {
+        // Silently handle errors for related products
+    }
+}
+
 // Helper function to format currency
 function formatCurrency($amount) {
     return number_format($amount, 0, ',', '.') . ' ₫';
@@ -432,6 +455,71 @@ function getProductImages($product) {
             margin-bottom: 1rem;
         }
         
+        /* Related Products */
+        .related-products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .related-product-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .related-product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .related-product-image {
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .related-product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .related-product-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            line-height: 1.4;
+            color: #ffffff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .related-product-brand {
+            font-size: 0.8rem;
+            color: #6694ea;
+            margin-bottom: 0.75rem;
+        }
+        .related-product-price {
+            margin-top: auto;
+        }
+        .related-product-current-price {
+            font-weight: 600;
+            color: #ffa33a;
+            font-size: 1.1rem;
+        }
+        .related-product-original-price {
+            font-size: 0.85rem;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 0.5rem;
+        }
+        
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .product-container {
@@ -455,6 +543,9 @@ function getProductImages($product) {
             }
             .specs-table td:first-child {
                 width: 40%;
+            }
+            .related-products {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
         }
         
@@ -556,7 +647,7 @@ function getProductImages($product) {
                             </div>
                         </div>
                         
-                        <!-- Gift Section - ADDED THIS SECTION -->
+                        <!-- Gift Section -->
                         <?php if (!empty($product['gifts']) && is_array($product['gifts'])): ?>
                             <div class="gift-section">
                                 <div class="gift-section-title">
@@ -579,7 +670,6 @@ function getProductImages($product) {
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
-                        <!-- End Gift Section -->
                         
                         <!-- Short Description -->
                         <?php if (!empty($product['productDetail']['shortDescription'])): ?>
@@ -698,10 +788,50 @@ function getProductImages($product) {
             <!-- Product Recommendations -->
             <div class="product-container">
                 <h3 class="mb-4">Sản phẩm tương tự</h3>
-                <div class="text-center py-4">
-                    <i class="bi bi-box2 fs-1 mb-3"></i>
-                    <p>Hiện chưa có sản phẩm tương tự để hiển thị</p>
-                </div>
+                
+                <?php if (!empty($relatedProducts)): ?>
+                    <div class="related-products">
+                        <?php foreach ($relatedProducts as $relatedProduct): ?>
+                            <div class="related-product-card">
+                                <a href="product-detail.php?id=<?= htmlspecialchars($relatedProduct['id']) ?>" class="text-decoration-none">
+                                    <div class="related-product-image">
+                                        <img src="<?= htmlspecialchars($relatedProduct['imageUrl']) ?>" 
+                                             alt="<?= htmlspecialchars($relatedProduct['name']) ?>"
+                                             onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
+                                    </div>
+                                    <h5 class="related-product-title"><?= htmlspecialchars($relatedProduct['name']) ?></h5>
+                                    
+                                    <?php if (!empty($relatedProduct['brandName'])): ?>
+                                        <div class="related-product-brand">
+                                            <i class="bi bi-tag-fill me-1"></i> <?= htmlspecialchars($relatedProduct['brandName']) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($relatedProduct['shortDescription'])): ?>
+                                        <p class="mb-2 small text-truncate"><?= htmlspecialchars($relatedProduct['shortDescription']) ?></p>
+                                    <?php endif; ?>
+                                    
+                                    <div class="related-product-price">
+                                        <span class="related-product-current-price">
+                                            <?= formatCurrency($relatedProduct['currentPrice']) ?>
+                                        </span>
+                                        
+                                        <?php if (isset($relatedProduct['originalPrice']) && $relatedProduct['originalPrice'] > $relatedProduct['currentPrice']): ?>
+                                            <span class="related-product-original-price">
+                                                <?= formatCurrency($relatedProduct['originalPrice']) ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="bi bi-box2 fs-1 mb-3"></i>
+                        <p>Hiện chưa có sản phẩm tương tự để hiển thị</p>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>
@@ -855,7 +985,7 @@ function getProductImages($product) {
                 console.log('Added to cart:', {
                     productId: '<?= htmlspecialchars($product['productInfo']['id'] ?? '') ?>',
                     productName: '<?= htmlspecialchars($product['productInfo']['name'] ?? '') ?>',
-                    quantity: 1,
+                    quantity: quantity,
                     selectedOptions: selectedOptions,
                     price: <?= isset($product['price']['currentPrice']) ? $product['price']['currentPrice'] : 0 ?>
                 });
