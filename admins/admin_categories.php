@@ -1,23 +1,22 @@
 <?php
-// --- Use admin_session with cookie path /admin ---
-session_name('admin_session');
-session_set_cookie_params(['path' => '/']);
-session_start();
+// Start default session (no custom session_name or path)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (
-    !isset($_SESSION['admin_token']) ||
-    !isset($_SESSION['admin_user']) ||
-    !in_array($_SESSION['admin_user']['role'], ['Manager', 'Admin']) ||
-    !isset($_SESSION['admin_expiration']) ||
-    strtotime($_SESSION['admin_expiration']) < time()
+    !isset($_SESSION['token']) ||
+    !isset($_SESSION['user']) ||
+    !in_array($_SESSION['user']['role'], ['Manager', 'Admin']) ||
+    !isset($_SESSION['expiration']) ||
+    strtotime($_SESSION['expiration']) < time()
 ) {
     session_unset();
     session_destroy();
-    setcookie('admin_session', '', time() - 3600, '/admin');
     header('Location: manage_login.php');
     exit();
 }
-$token = $_SESSION['admin_token'];
+$token = $_SESSION['token'];
 $apiBase = 'http://localhost:5000/api/categories';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;

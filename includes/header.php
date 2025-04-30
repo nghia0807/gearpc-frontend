@@ -1,14 +1,13 @@
 <?php
-// Kiểm tra xem phiên đã bắt đầu chưa trước khi gọi các hàm session
-if (session_status() == PHP_SESSION_NONE) {
-  session_name('user_session');
-  session_set_cookie_params(['path' => '/']);
-  session_start();
+// Start default session (no custom session_name or path)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
 // --- Logout logic ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
-    unset($_SESSION['user_token'], $_SESSION['user'], $_SESSION['user_expiration'], $_SESSION['user_role']);
+    session_unset();
+    session_destroy();
     header('Location: ../pages/login.php');
     exit();
 }
@@ -17,9 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
 $isLoggedIn = false;
 $userFullName = '';
 $userRole = '';
-if (isset($_SESSION['user_token'], $_SESSION['user'], $_SESSION['user_expiration'])) {
+if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
     $now = strtotime('now');
-    $exp = strtotime($_SESSION['user_expiration']);
+    $exp = strtotime($_SESSION['expiration']);
     if ($exp > $now) {
         $isLoggedIn = true;
         $userFullName = htmlspecialchars($_SESSION['user']['fullName'] ?? $_SESSION['user']['username']);

@@ -1,7 +1,7 @@
 <?php
-if (!isset($_SESSION['admin_expiration']) || !is_numeric($_SESSION['admin_expiration']) || $_SESSION['admin_expiration'] < time()) {
+if (!isset($_SESSION['expiration']) || !is_numeric($_SESSION['expiration']) || $_SESSION['expiration'] < time()) {
     // For development/testing: set session expiration to 1 hour from now if not set or expired
-    $_SESSION['admin_expiration'] = time() + 3600;
+    $_SESSION['expiration'] = time() + 3600;
 }
 ?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
@@ -18,12 +18,12 @@ if (!isset($_SESSION['admin_expiration']) || !is_numeric($_SESSION['admin_expira
                 <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_products.php' ? ' active' : '' ?>" href="admin_products.php">Products</a>
             </li>
         </ul>
-        <?php if (isset($_SESSION['admin_user']['fullName'])): ?>
+        <?php if (isset($_SESSION['user']['fullName'])): ?>
             <span class="navbar-text text-light me-3">
-                <?= htmlspecialchars($_SESSION['admin_user']['fullName']) ?>
+                <?= htmlspecialchars($_SESSION['user']['fullName']) ?>
             </span>
         <?php endif; ?>
-        <?php if (isset($_SESSION['admin_user']['role']) && $_SESSION['admin_user']['role'] === 'Admin'): ?>
+        <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Admin'): ?>
             <button type="button" class="btn btn-outline-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#createManagerModal">
                 Create Manager Account
             </button>
@@ -32,7 +32,7 @@ if (!isset($_SESSION['admin_expiration']) || !is_numeric($_SESSION['admin_expira
     </div>
 </nav>
 
-<?php if (isset($_SESSION['admin_user']['role']) && $_SESSION['admin_user']['role'] === 'Admin'): ?>
+<?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Admin'): ?>
 <!-- Create Manager Modal -->
 <div class="modal fade" id="createManagerModal" tabindex="-1" aria-labelledby="createManagerModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -73,7 +73,7 @@ if (!isset($_SESSION['admin_expiration']) || !is_numeric($_SESSION['admin_expira
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-<?php if (isset($_SESSION['admin_user']['role']) && $_SESSION['admin_user']['role'] === 'Admin'): ?>
+<?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Admin'): ?>
 $(function() {
     $('#createManagerForm').on('submit', function(e) {
         e.preventDefault();
@@ -89,7 +89,7 @@ $(function() {
         }
         // Check session expiration (PHP value injected)
         <?php
-        $expiration = isset($_SESSION['admin_expiration']) ? (int)$_SESSION['admin_expiration'] : 0;
+        $expiration = isset($_SESSION['expiration']) ? (int)$_SESSION['expiration'] : 0;
         ?>
         var expiration = <?= $expiration ?> * 1000;
         if (Date.now() > expiration) {
@@ -110,7 +110,7 @@ $(function() {
             contentType: 'application/json',
             data: JSON.stringify(data),
             headers: {
-                'Authorization': 'Bearer <?= htmlspecialchars($_SESSION['admin_token']) ?>'
+                'Authorization': 'Bearer <?= htmlspecialchars($_SESSION['token']) ?>'
             },
             success: function(response) {
                 $('#managerAlert').html('<div class="alert alert-success">Manager account created successfully.</div>');

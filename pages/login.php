@@ -1,8 +1,12 @@
 <?php
-// --- Session and API Login Logic ---
-session_name('user_session');
-session_set_cookie_params(['path' => '/']);
-session_start();
+// --- Start default session (no custom session_name or path) ---
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+} else {
+    session_unset();
+    session_destroy();
+    session_start();
+}
 
 $alert = '';
 $alertType = '';
@@ -69,15 +73,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($httpCode === 200 && isset($respData['success']) && $respData['success'] === true) {
                 // --- Role check logic ---
                 $role = $respData['data']['user']['role'] ?? null;
-                if ($role && $role === 'User') {
-                    // Use user-specific session keys
-                    $_SESSION['user_token'] = $respData['data']['token'];
+                if ($role) {
+                    // Store required session data
+                    $_SESSION['token'] = $respData['data']['token'];
                     $_SESSION['user'] = $respData['data']['user'];
-                    $_SESSION['user_expiration'] = $respData['data']['expiration'];
-                    $_SESSION['user_role'] = $role;
+                    $_SESSION['expiration'] = $respData['data']['expiration'];
                     $alert = 'Login successful! Redirecting...';
                     $alertType = 'success';
-                    echo "<script>setTimeout(function(){ window.location.href = 'home.php'; }, 500);</script>";
+                    if ($role === 'Admin' || $role === 'Manager') {
+                        echo "<script>setTimeout(function(){ window.location.href = 'admin_products.php'; }, 500);</script>";
+                    } else {
+                        echo "<script>setTimeout(function(){ window.location.href = 'home.php'; }, 500);</script>";
+                    }
                 } else {
                     $alert = 'Invalid or unauthorized role. Access denied.';
                     $alertType = 'danger';
@@ -100,7 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../assets/css/style.css">
   <style>
     body {
@@ -144,19 +152,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
     <img src="../assets/img/logo.png" alt="Logo" class="mb-4" />
     <h5 class="mb-4" style="font-weight: 700;">Sign In</h5>
-    <!-- Bootstrap alert for API or validation messages -->
+    <!-- Bootstrap 5 alert for API or validation messages -->
     <?php if (!empty($alert)): ?>
       <div class="alert alert-<?php echo htmlspecialchars($alertType, ENT_QUOTES, 'UTF-8'); ?> w-100 mb-4" style="max-width: 340px; margin: 0 auto;">
         <?php echo htmlspecialchars($alert, ENT_QUOTES, 'UTF-8'); ?>
       </div>
     <?php endif; ?>
     <form method="post" action="" id="loginForm" novalidate>
-      <div class="floating-group">
+      <div class="mb-3 floating-group">
         <input type="text" class="form-control floating-input <?php echo !empty($errors['username']) ? 'is-invalid' : ''; ?>" id="username" name="username" placeholder=" " required minlength="8" value="<?php echo isset($username) ? htmlspecialchars($username, ENT_QUOTES, 'UTF-8') : ''; ?>" />
         <label for="username">Username</label>
         <div class="invalid-feedback"><?php echo htmlspecialchars($errors['username'], ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
-      <div class="floating-group">
+      <div class="mb-3 floating-group">
         <input type="password" class="form-control floating-input <?php echo !empty($errors['password']) ? 'is-invalid' : ''; ?>" id="password" name="password" placeholder=" " required minlength="8" />
         <label for="password">Password</label>
         <div class="invalid-feedback"><?php echo htmlspecialchars($errors['password'], ENT_QUOTES, 'UTF-8'); ?></div>
@@ -168,8 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="register.php" class="blue-text" style="color: #e3e3e3; font-weight: bold;">Sign Up</a>
     </p>
   </div>
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Client-side validation -->
   <script>
     // --- Client-side validation ---

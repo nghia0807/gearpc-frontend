@@ -1,8 +1,6 @@
 <?php
-// Kiểm tra xem phiên đã bắt đầu chưa trước khi gọi các hàm session
-if (session_status() == PHP_SESSION_NONE) {
-    session_name('user_session');
-    session_set_cookie_params(['path' => '/']);
+// Start default session (no custom session_name or path)
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
@@ -759,10 +757,12 @@ function getProductImages($product) {
                                 <?php endif; ?>
                             </div>
                             
+
                             <!-- Description Tab -->
                             <div class="tab-pane fade" id="description-tab-pane" role="tabpanel" 
                                  aria-labelledby="description-tab" tabindex="0">
                                 
+
                                 <?php if (!empty($product['productDetail']['description'])): ?>
                                     <div class="mt-3">
                                         <h4><?= htmlspecialchars($product['productInfo']['name']) ?></h4>

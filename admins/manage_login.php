@@ -1,21 +1,20 @@
 <?php
-// --- Use admin_session with cookie path /admin ---
-session_name('admin_session');
-session_set_cookie_params(['path' => '/']); // Only valid for /admins
-session_start();
+// Chỉ khởi tạo session nếu chưa có
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $error = '';
 
 // --- Logout logic ---
 if (isset($_GET['logout']) && $_GET['logout'] === '1') {
     session_unset();
     session_destroy();
-    setcookie('admin_session', '', time() - 3600, '/admins'); // Use the same path as session_set_cookie_params
     header('Location: manage_login.php');
     exit();
 }
 
 // --- Redirect if already logged in as admin ---
-if (isset($_SESSION['admin_user']) && in_array($_SESSION['admin_user']['role'], ['Manager', 'Admin'])) {
+if (isset($_SESSION['user']) && in_array($_SESSION['user']['role'] ?? '', ['Manager', 'Admin'])) {
     header('Location: admin_categories.php');
     exit();
 }
@@ -45,15 +44,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($httpCode === 200 && isset($respData['success']) && $respData['success'] === true) {
                 $role = $respData['data']['user']['role'] ?? null;
                 if ($role && in_array($role, ['Manager', 'Admin'])) {
-                    $_SESSION['admin_token'] = $respData['data']['token'];
-                    $_SESSION['admin_user'] = $respData['data']['user'];
-                    $_SESSION['admin_expiration'] = $respData['data']['expiration'];
+                    $_SESSION['token'] = $respData['data']['token'];
+                    $_SESSION['user'] = $respData['data']['user'];
+                    // Xử lý expiration: nếu là số thì giữ nguyên, nếu là string thì chuyển sang timestamp
+                    $expiration = $respData['data']['expiration'] ?? null;
+                    if ($expiration) {
+                        if (is_numeric($expiration)) {
+                            $_SESSION['expiration'] = $expiration;
+                        } else {
+                            // Nếu là string ISO hoặc định dạng khác, chuyển sang timestamp
+                            $_SESSION['expiration'] = strtotime($expiration);
+                        }
+                    } else {
+                        // Nếu không có expiration, đặt mặc định 1 giờ
+                        $_SESSION['expiration'] = time() + 3600;
+                    }
                     header('Location: admin_categories.php');
                     exit();
                 } else {
                     session_unset();
                     session_destroy();
-                    setcookie('admin_session', '', time() - 3600, '/admin');
                     $error = 'Bạn không có quyền truy cập.';
                 }
             } else {

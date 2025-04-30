@@ -1,24 +1,22 @@
 <?php
-// --- Use admin_session with cookie path /admin ---
-session_name('admin_session');
-session_set_cookie_params(['path' => '/']);
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // --- Check admin session and expiration ---
 if (
-    !isset($_SESSION['admin_token']) ||
-    !isset($_SESSION['admin_user']) ||
-    !in_array($_SESSION['admin_user']['role'], ['Manager', 'Admin']) ||
-    !isset($_SESSION['admin_expiration']) ||
-    strtotime($_SESSION['admin_expiration']) < time()
+    !isset($_SESSION['token']) ||
+    !isset($_SESSION['user']) ||
+    !in_array($_SESSION['user']['role'], ['Manager', 'Admin']) ||
+    !isset($_SESSION['expiration']) ||
+    strtotime($_SESSION['expiration']) < time()
 ) {
     session_unset();
     session_destroy();
-    setcookie('admin_session', '', time() - 3600, '/admin');
     header('Location: manage_login.php');
     exit();
 }
-$token = $_SESSION['admin_token'];
+$token = $_SESSION['token'];
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];
@@ -244,7 +242,7 @@ function productImage($img) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-const token = '<?= htmlspecialchars($_SESSION['admin_token']) ?>';
+const token = '<?= htmlspecialchars($_SESSION['token']) ?>';
 
 // Show modal
 $('#addProductBtn').on('click', function() {
@@ -574,7 +572,7 @@ $(function() {
             url: 'http://localhost:5000/api/products/' + encodeURIComponent(productId),
             method: 'GET',
             headers: {
-                'Authorization': 'Bearer <?= htmlspecialchars($_SESSION['admin_token']) ?>',
+                'Authorization': 'Bearer <?= htmlspecialchars($_SESSION['token']) ?>',
                 'Accept': 'application/json'
             },
             dataType: 'json',

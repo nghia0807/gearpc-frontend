@@ -1,8 +1,6 @@
 <?php
-// Start session if needed
-if (session_status() == PHP_SESSION_NONE) {
-    session_name('user_session');
-    session_set_cookie_params(['path' => '/']);
+// Start default session (no custom session_name or path)
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
