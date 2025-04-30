@@ -180,8 +180,7 @@ function productImage($img) {
           </div>
           <div class="col-md-12">
             <label class="form-label required">Danh mục</label>
-            <select class="form-select" name="categoriesCode[]" id="categoriesSelect" multiple required>
-            </select>
+            <div id="categoriesCheckboxes" class="row"></div>
           </div>
           <div class="col-md-6">
             <label class="form-label required">Trạng thái</label>
@@ -270,19 +269,23 @@ function fetchBrandsAndCategories() {
         }
         $('#brandSelect').html(html);
     });
-    // Categories
+    // Categories as checkboxes
     fetch('http://localhost:5000/api/categories/get?pageIndex=0&pageSize=100', {
         headers: { 'Authorization': 'Bearer ' + token }
     })
     .then(r => r.json())
     .then(data => {
-        let html = '<option value="">-- Chọn danh mục --</option>';
+        let html = '';
         if (data.success && data.data && data.data.data) {
             data.data.data.forEach(c => {
-                html += `<option value="${c.code}">${c.name}</option>`;
+                html += `
+                <div class="form-check col-md-4 mb-1">
+                    <input class="form-check-input category-checkbox" type="checkbox" value="${c.code}" id="cat_${c.code}">
+                    <label class="form-check-label" for="cat_${c.code}">${c.name}</label>
+                </div>`;
             });
         }
-        $('#categoriesSelect').html(html);
+        $('#categoriesCheckboxes').html(html);
     });
 }
 fetchBrandsAndCategories();
@@ -351,6 +354,10 @@ function getVariantOptionHtml(groupIdx, optionIdx) {
                 <input type="number" class="form-control current-price-input" name="currentPrice_${groupIdx}_${optionIdx}" min="0" step="0.01" required>
             </div>
             <div class="col-md-3">
+                <label class="form-label required">Số lượng</label>
+                <input type="number" class="form-control quantity-input" name="quantity_${groupIdx}_${optionIdx}" min="0" step="1" value="0" required>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">Barcode</label>
                 <input type="text" class="form-control barcode-input" name="barcode_${groupIdx}_${optionIdx}">
             </div>
@@ -358,36 +365,107 @@ function getVariantOptionHtml(groupIdx, optionIdx) {
                 <label class="form-label">Mô tả ngắn</label>
                 <input type="text" class="form-control short-description-input" name="shortDescription_${groupIdx}_${optionIdx}">
             </div>
-            <div class="col-md-6">
-                <label class="form-label required">Tên mô tả</label>
-                <input type="text" class="form-control desc-name-input" name="descName_${groupIdx}_${optionIdx}" required>
+            <div class="col-md-12">
+                <label class="form-label required">Mô tả chi tiết</label>
+                <div class="descriptions-container" data-group-idx="${groupIdx}" data-option-idx="${optionIdx}">
+                    <!-- Description items will be appended here -->
+                </div>
+                <button type="button" class="btn btn-outline-success btn-sm mt-2 add-description-btn" data-group-idx="${groupIdx}" data-option-idx="${optionIdx}">
+                    <i class="fa fa-plus"></i> Thêm mô tả
+                </button>
             </div>
-            <div class="col-md-6">
-                <label class="form-label required">Nội dung mô tả</label>
-                <input type="text" class="form-control desc-text-input" name="descText_${groupIdx}_${optionIdx}" required>
-            </div>
-            <div class="col-md-3">
+            <div class="col-md-12">
                 <label class="form-label required">Ảnh chi tiết (imagesBase64)</label>
-                <input type="file" class="form-control variant-image-input" name="variantImage_${groupIdx}_${optionIdx}" accept="image/*" required>
-                <img class="img-preview mt-2 d-block variant-img-preview" src="https://via.placeholder.com/80x80?text=No+Img" alt="Preview">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Piority (ảnh/mô tả)</label>
-                <input type="number" class="form-control piority-input" name="piority_${groupIdx}_${optionIdx}" value="1" min="1">
+                <div class="images-container" data-group-idx="${groupIdx}" data-option-idx="${optionIdx}">
+                    <!-- Image items will be appended here -->
+                </div>
+                <button type="button" class="btn btn-outline-success btn-sm mt-2 add-image-btn" data-group-idx="${groupIdx}" data-option-idx="${optionIdx}">
+                    <i class="fa fa-plus"></i> Thêm ảnh
+                </button>
             </div>
         </div>
     </div>
     `;
 }
 
-// Add initial variant group on modal open
+// Template for a single description item
+function getDescriptionHtml(groupIdx, optionIdx, descIdx) {
+    return `
+    <div class="row g-2 align-items-end description-item mb-2" data-desc-idx="${descIdx}">
+        <div class="col-md-3">
+            <input type="text" class="form-control desc-name-input" name="descName_${groupIdx}_${optionIdx}_${descIdx}" placeholder="Tên mô tả" required>
+        </div>
+        <div class="col-md-5">
+            <input type="text" class="form-control desc-text-input" name="descText_${groupIdx}_${optionIdx}_${descIdx}" placeholder="Nội dung mô tả" required>
+        </div>
+        <div class="col-md-2">
+            <input type="number" class="form-control desc-priority-input" name="descPriority_${groupIdx}_${optionIdx}_${descIdx}" value="${descIdx+1}" min="1" required>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-outline-danger btn-sm remove-description-btn" title="Xoá mô tả">
+                <i class="fa fa-trash"></i>
+            </button>
+        </div>
+    </div>
+    `;
+}
+
+// Template for a single image item
+function getImageHtml(groupIdx, optionIdx, imgIdx) {
+    return `
+    <div class="row g-2 align-items-end image-item mb-2" data-img-idx="${imgIdx}">
+        <div class="col-md-5">
+            <input type="file" class="form-control image-input" name="image_${groupIdx}_${optionIdx}_${imgIdx}" accept="image/*" required>
+        </div>
+        <div class="col-md-3">
+            <input type="number" class="form-control image-priority-input" name="imagePriority_${groupIdx}_${optionIdx}_${imgIdx}" value="${imgIdx+1}" min="1" required>
+        </div>
+        <div class="col-md-2">
+            <img class="img-preview d-block image-preview" src="https://via.placeholder.com/80x80?text=No+Img" style="width:40px;height:40px;object-fit:contain;background:#f8f9fa;" alt="Preview">
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-outline-danger btn-sm remove-image-btn" title="Xoá ảnh">
+                <i class="fa fa-trash"></i>
+            </button>
+        </div>
+    </div>
+    `;
+}
+
+// Add initial description when adding a variant option
+function addInitialDescription($option, groupIdx, optionIdx) {
+    const $descContainer = $option.find('.descriptions-container');
+    $descContainer.empty();
+    $descContainer.append(getDescriptionHtml(groupIdx, optionIdx, 0));
+}
+
+// Add initial image when adding a variant option
+function addInitialImage($option, groupIdx, optionIdx) {
+    const $imgContainer = $option.find('.images-container');
+    $imgContainer.empty();
+    $imgContainer.append(getImageHtml(groupIdx, optionIdx, 0));
+}
+
+// When adding a variant option, add one description and one image by default
+function addVariantOption(groupIdx) {
+    const $group = $(`.variant-group[data-group-idx="${groupIdx}"]`);
+    if ($group.length === 0) return;
+    const $optionsContainer = $group.find('.variant-options-container');
+    const optionIdx = $optionsContainer.children('.variant-option').length;
+    $optionsContainer.append(getVariantOptionHtml(groupIdx, optionIdx));
+    // Add one description by default
+    const $option = $optionsContainer.children('.variant-option').last();
+    addInitialDescription($option, groupIdx, optionIdx);
+    // Add one image by default
+    addInitialImage($option, groupIdx, optionIdx);
+}
+
 function resetVariantGroups() {
     $('#variantGroupsContainer').empty();
     variantGroupIdx = 0;
     addVariantGroup();
 }
 
-// Add a new variant group
 function addVariantGroup() {
     const idx = variantGroupIdx++;
     $('#variantGroupsContainer').append(getVariantGroupHtml(idx));
@@ -395,56 +473,94 @@ function addVariantGroup() {
     addVariantOption(idx);
 }
 
-// Add a new option to a group
-function addVariantOption(groupIdx) {
-    const $group = $(`.variant-group[data-group-idx="${groupIdx}"]`);
-    if ($group.length === 0) return;
-    const $optionsContainer = $group.find('.variant-options-container');
-    const optionIdx = $optionsContainer.children('.variant-option').length;
-    $optionsContainer.append(getVariantOptionHtml(groupIdx, optionIdx));
-}
-
-// Remove variant group
-$('#variantGroupsContainer').on('click', '.remove-variant-group-btn', function() {
-    $(this).closest('.variant-group').remove();
-});
-
-// Remove variant option
-$('#variantGroupsContainer').on('click', '.remove-variant-option-btn', function() {
-    $(this).closest('.variant-option').remove();
-});
-
-// Add variant group
+// Handle "Thêm nhóm biến thể" button
 $('.add-variant-group-btn').on('click', function() {
     addVariantGroup();
 });
 
-// Add variant option
+// Handle "Thêm tuỳ chọn" button inside each group (event delegation)
 $('#variantGroupsContainer').on('click', '.add-variant-option-btn', function() {
     const groupIdx = $(this).data('group-idx');
     addVariantOption(groupIdx);
 });
 
-// Variant image preview & base64 for each option
-const variantImageBase64Map = {}; // { groupIdx_optionIdx: base64 }
+// Remove variant group
+$('#variantGroupsContainer').on('click', '.remove-variant-group-btn', function() {
+    if (confirm('Xóa nhóm biến thể này?')) {
+        $(this).closest('.variant-group').remove();
+    }
+});
 
-$('#variantGroupsContainer').on('change', '.variant-image-input', function(e) {
+// Remove variant option
+$('#variantGroupsContainer').on('click', '.remove-variant-option-btn', function() {
+    if (confirm('Xóa tùy chọn này?')) {
+        $(this).closest('.variant-option').remove();
+    }
+});
+
+// --- Description & Image logic ---
+// Add description logic
+$('#variantGroupsContainer').on('click', '.add-description-btn', function() {
+    const groupIdx = $(this).data('group-idx');
+    const optionIdx = $(this).data('option-idx');
+    const $descContainer = $(`.variant-group[data-group-idx="${groupIdx}"] .variant-option[data-option-idx="${optionIdx}"] .descriptions-container`);
+    const descIdx = $descContainer.children('.description-item').length;
+    $descContainer.append(getDescriptionHtml(groupIdx, optionIdx, descIdx));
+});
+
+// Remove description logic
+$('#variantGroupsContainer').on('click', '.remove-description-btn', function() {
+    const $descItem = $(this).closest('.description-item');
+    const $descContainer = $descItem.parent();
+    $descItem.remove();
+    // Re-number priorities after removal
+    $descContainer.children('.description-item').each(function(i) {
+        $(this).find('.desc-priority-input').val(i+1);
+    });
+});
+
+// Add image logic
+$('#variantGroupsContainer').on('click', '.add-image-btn', function() {
+    const groupIdx = $(this).data('group-idx');
+    const optionIdx = $(this).data('option-idx');
+    const $imgContainer = $(`.variant-group[data-group-idx="${groupIdx}"] .variant-option[data-option-idx="${optionIdx}"] .images-container`);
+    const imgIdx = $imgContainer.children('.image-item').length;
+    $imgContainer.append(getImageHtml(groupIdx, optionIdx, imgIdx));
+});
+
+// Remove image logic
+$('#variantGroupsContainer').on('click', '.remove-image-btn', function() {
+    const $imgItem = $(this).closest('.image-item');
+    const $imgContainer = $imgItem.parent();
+    $imgItem.remove();
+    // Re-number priorities after removal
+    $imgContainer.children('.image-item').each(function(i) {
+        $(this).find('.image-priority-input').val(i+1);
+    });
+});
+
+// Image preview & base64 for each image item
+const variantImagesBase64Map = {}; // { groupIdx_optionIdx_imgIdx: base64 }
+
+$('#variantGroupsContainer').on('change', '.image-input', function(e) {
+    const $imgItem = $(this).closest('.image-item');
     const $option = $(this).closest('.variant-option');
     const $group = $(this).closest('.variant-group');
     const groupIdx = $group.data('group-idx');
     const optionIdx = $option.data('option-idx');
-    const key = `${groupIdx}_${optionIdx}`;
+    const imgIdx = $imgItem.data('img-idx');
+    const key = `${groupIdx}_${optionIdx}_${imgIdx}`;
     const file = this.files[0];
-    const $preview = $option.find('.variant-img-preview');
+    const $preview = $imgItem.find('.image-preview');
     if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-            variantImageBase64Map[key] = evt.target.result.split(',')[1];
+            variantImagesBase64Map[key] = evt.target.result.split(',')[1];
             $preview.attr('src', evt.target.result);
         };
         reader.readAsDataURL(file);
     } else {
-        variantImageBase64Map[key] = '';
+        variantImagesBase64Map[key] = '';
         $preview.attr('src', 'https://via.placeholder.com/80x80?text=No+Img');
     }
 });
@@ -458,7 +574,10 @@ $('#addProductForm').on('submit', function(e) {
     const name = form.name.value.trim();
     const code = form.code.value.trim();
     const brandCode = form.brandCode.value.trim();
-    const categoriesCode = Array.from(form['categoriesCode[]'].selectedOptions).map(opt => opt.value);
+    // Collect checked categories
+    const categoriesCode = $('#categoriesCheckboxes .category-checkbox:checked').map(function() {
+        return this.value;
+    }).get();
     const status = form.status.value;
     const giftCodes = form.giftCodes.value.trim();
 
@@ -475,32 +594,51 @@ $('#addProductForm').on('submit', function(e) {
             const $opt = $(this);
             const optionIdx = $opt.data('option-idx');
             const optionLabel = $opt.find('.option-label-input').val().trim();
+            // Sửa: quantity là số nguyên, mặc định 0 nếu không có
             const quantity = parseInt($opt.find('.quantity-input').val(), 10);
+            // Sửa: barcode là string, không ép kiểu số
+            const barcode = $opt.find('.barcode-input').val() ? $opt.find('.barcode-input').val().trim() : "";
             const originalPrice = parseFloat($opt.find('.original-price-input').val());
             const currentPrice = parseFloat($opt.find('.current-price-input').val());
-            const barcode = $opt.find('.barcode-input').val().trim();
             const shortDescription = $opt.find('.short-description-input').val().trim();
-            const descName = $opt.find('.desc-name-input').val().trim();
-            const descText = $opt.find('.desc-text-input').val().trim();
             const piority = parseInt($opt.find('.piority-input').val(), 10) || 1;
-            const key = `${groupIdx}_${optionIdx}`;
-            const imageBase64 = variantImageBase64Map[key] || '';
-            if (!optionLabel || !quantity || !currentPrice || !descName || !descText || !imageBase64) valid = false;
+
+            // --- Collect descriptions ---
+            let descriptions = [];
+            let descValid = true;
+            $opt.find('.descriptions-container .description-item').each(function() {
+                const $desc = $(this);
+                const name = $desc.find('.desc-name-input').val().trim();
+                const descriptionText = $desc.find('.desc-text-input').val().trim();
+                const priority = parseInt($desc.find('.desc-priority-input').val(), 10) || 1;
+                if (!name || !descriptionText) descValid = false;
+                descriptions.push({ name, descriptionText, priority });
+            });
+            descriptions.sort((a, b) => a.priority - b.priority);
+
+            // --- Collect images ---
+            let imagesBase64 = [];
+            let imgValid = true;
+            $opt.find('.images-container .image-item').each(function() {
+                const $img = $(this);
+                const imgIdx = $img.data('img-idx');
+                const priority = parseInt($img.find('.image-priority-input').val(), 10) || 1;
+                const key = `${groupIdx}_${optionIdx}_${imgIdx}`;
+                const base64Content = variantImagesBase64Map[key] || '';
+                if (!base64Content) imgValid = false;
+                imagesBase64.push({ base64Content, priority });
+            });
+            imagesBase64.sort((a, b) => a.priority - b.priority);
+
+            if (!optionLabel || isNaN(quantity) || !Number.isFinite(originalPrice) || !Number.isFinite(currentPrice) || imagesBase64.length === 0 || descriptions.length === 0 || !descValid || !imgValid) valid = false;
             options.push({
                 optionLabel,
-                quantity,
+                quantity: isNaN(quantity) ? 0 : quantity,
                 originalPrice,
                 currentPrice,
                 barcode,
-                descriptions: [{
-                    name: descName,
-                    descriptionText: descText,
-                    piority
-                }],
-                imagesBase64: [{
-                    base64Content: imageBase64,
-                    piority
-                }],
+                descriptions,
+                imagesBase64,
                 shortDescription
             });
         });
@@ -597,8 +735,8 @@ $(function() {
         }
         var info = data.productInfo || {};
         var img = info.imageUrl
-            ? '<img src="' + esc(info.imageUrl) + '" class="modal-thumb mb-2" alt="Product Image" onerror="this.src=\'https://via.placeholder.com/100x100?text=No+Img\';">'
-            : '<img src="https://via.placeholder.com/100x100?text=No+Img" class="modal-thumb mb-2" alt="No Image">';
+            ? '<img src="' + esc(info.imageUrl) + '" class="modal-thumb mb-2" style="max-width:100px;max-height:100px;object-fit:contain;display:block;margin:auto;background:#f8f9fa;" alt="Product Image" onerror="this.src=\'https://via.placeholder.com/100x100?text=No+Img\';">'
+            : '<img src="https://via.placeholder.com/100x100?text=No+Img" class="modal-thumb mb-2" style="max-width:100px;max-height:100px;object-fit:contain;display:block;margin:auto;background:#f8f9fa;" alt="No Image">';
         var brand = info.brand ? esc(info.brand) : 'N/A';
         var category = Array.isArray(info.category) ? esc(info.category.join(', ')) : (info.category ? esc(info.category) : 'N/A');
         var status = info.status ? esc(info.status) : 'N/A';
