@@ -1,12 +1,21 @@
 <?php
-// Start default session (no custom session_name or path)
+// --- Use user_session for user pages ---
 if (session_status() === PHP_SESSION_NONE) {
+    session_name('user_session');
     session_start();
 }
 
-// --- Logout logic ---
+// --- Logout logic for header logout button ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
-    session_unset();
+    // Clear session and cookie for user_session
+    $_SESSION = [];
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
     session_destroy();
     header('Location: ../pages/login.php');
     exit();
@@ -17,15 +26,16 @@ $isLoggedIn = false;
 $userFullName = '';
 $userRole = '';
 if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
-    $now = strtotime('now');
-    $exp = strtotime($_SESSION['expiration']);
+    $now = time();
+    // Support both timestamp and string expiration
+    $exp = is_numeric($_SESSION['expiration']) ? (int)$_SESSION['expiration'] : strtotime($_SESSION['expiration']);
     if ($exp > $now) {
         $isLoggedIn = true;
         $userFullName = htmlspecialchars($_SESSION['user']['fullName'] ?? $_SESSION['user']['username']);
         $userRole = $_SESSION['user']['role'] ?? '';
     } else {
         // Session expired
-        session_unset();
+        $_SESSION = [];
         session_destroy();
     }
 }

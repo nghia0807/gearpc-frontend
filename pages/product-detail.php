@@ -1,9 +1,4 @@
 <?php
-// Start default session (no custom session_name or path)
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Check if product ID is provided
 $productId = isset($_GET['id']) ? $_GET['id'] : null;
 

@@ -1,21 +1,8 @@
 <?php
-// Start default session (no custom session_name or path)
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// --- Use admin_session for admin pages and enforce role check ---
+session_name('admin_session');
+session_start();
 
-if (
-    !isset($_SESSION['token']) ||
-    !isset($_SESSION['user']) ||
-    !in_array($_SESSION['user']['role'], ['Manager', 'Admin']) ||
-    !isset($_SESSION['expiration']) ||
-    strtotime($_SESSION['expiration']) < time()
-) {
-    session_unset();
-    session_destroy();
-    header('Location: manage_login.php');
-    exit();
-}
 $token = $_SESSION['token'];
 $apiBase = 'http://localhost:5000/api/categories';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;

@@ -1,9 +1,3 @@
-<?php
-if (!isset($_SESSION['expiration']) || !is_numeric($_SESSION['expiration']) || $_SESSION['expiration'] < time()) {
-    // For development/testing: set session expiration to 1 hour from now if not set or expired
-    $_SESSION['expiration'] = time() + 3600;
-}
-?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container">
         <a class="navbar-brand" href="#">GearPC Admin</a>

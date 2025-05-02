@@ -1,21 +1,27 @@
 <?php
-// Chỉ khởi tạo session nếu chưa có
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// --- Use a separate session for admins ---
+session_name('admin_session');
+session_set_cookie_params([
+    'path' => '/admin', // Admin session cookie path
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+session_start();
+
 $error = '';
 
-// --- Logout logic ---
-if (isset($_GET['logout']) && $_GET['logout'] === '1') {
-    session_unset();
+// --- Logout logic for admin session ---
+if (isset($_GET['logout'])) {
+    $_SESSION = [];
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
     session_destroy();
-    header('Location: manage_login.php');
-    exit();
-}
-
-// --- Redirect if already logged in as admin ---
-if (isset($_SESSION['user']) && in_array($_SESSION['user']['role'] ?? '', ['Manager', 'Admin'])) {
-    header('Location: admin_categories.php');
+    header("Location: manage_login.php");
     exit();
 }
 
@@ -46,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($role && in_array($role, ['Manager', 'Admin'])) {
                     $_SESSION['token'] = $respData['data']['token'];
                     $_SESSION['user'] = $respData['data']['user'];
+                    $_SESSION['role'] = $role;
                     // Xử lý expiration: nếu là số thì giữ nguyên, nếu là string thì chuyển sang timestamp
                     $expiration = $respData['data']['expiration'] ?? null;
                     if ($expiration) {
@@ -62,7 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header('Location: admin_categories.php');
                     exit();
                 } else {
-                    session_unset();
+                    // Clear session for security
+                    $_SESSION = [];
                     session_destroy();
                     $error = 'Bạn không có quyền truy cập.';
                 }
@@ -79,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Đăng nhập Quản trị</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         .logout-link {
             color: #fff;
@@ -117,5 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </body>
 </html>

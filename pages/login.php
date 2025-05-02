@@ -1,12 +1,12 @@
 <?php
-// --- Start default session (no custom session_name or path) ---
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-} else {
-    session_unset();
-    session_destroy();
-    session_start();
-}
+// --- Use a separate session for users ---
+session_name('user_session');
+session_set_cookie_params([
+    'path' => '/user', // User session cookie path
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+session_start();
 
 $alert = '';
 $alertType = '';
@@ -77,11 +77,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Store required session data
                     $_SESSION['token'] = $respData['data']['token'];
                     $_SESSION['user'] = $respData['data']['user'];
+                    $_SESSION['role'] = $role;
                     $_SESSION['expiration'] = $respData['data']['expiration'];
                     $alert = 'Login successful! Redirecting...';
                     $alertType = 'success';
                     if ($role === 'Admin' || $role === 'Manager') {
-                        echo "<script>setTimeout(function(){ window.location.href = 'admin_products.php'; }, 500);</script>";
+                        $alert = 'Admin and Manager accounts are not allowed to log in from this page.';
+                        $alertType = 'danger';
+                        // Clear session for security
+                        $_SESSION = [];
+                        session_destroy();
                     } else {
                         echo "<script>setTimeout(function(){ window.location.href = 'home.php'; }, 500);</script>";
                     }
@@ -146,6 +151,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       color: #e3e3e3 !important; 
       font-weight: bold !important;
     }
+    .logout-link {
+      color: #fff;
+      background: #dc3545;
+      padding: 4px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      margin-top: 12px;
+      display: inline-block;
+    }
+    .logout-link:hover {
+      background: #b52a2a;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -177,6 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </p>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <!-- Client-side validation -->
   <script>
     // --- Client-side validation ---
