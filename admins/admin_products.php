@@ -41,6 +41,23 @@ function fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, &$alerts, &$t
     return $data['data']['data'];
 }
 
+// --- Fetch brands and categories for selection ---
+function fetchAll($url, $token) {
+    $ch = curl_init($url . '?pageIndex=0&pageSize=1000');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer $token",
+        "Accept: application/json"
+    ]);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    $data = json_decode($response, true);
+    if (!$data || !$data['success']) return [];
+    return $data['data']['data'] ?? [];
+}
+$brandsList = fetchAll('http://localhost:5000/api/brands/get', $token);
+$categoriesList = fetchAll('http://localhost:5000/api/categories/get', $token);
+
 // --- Fetch products for current page ---
 $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $totalCount);
 
@@ -96,6 +113,38 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
         .modal-product-desc-list {
             margin-bottom: 0;
         }
+        /* Thêm style cho card trong modal */
+        #addProductModal .card {
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        #addProductModal .card-header {
+            border-bottom: 1px solid #e3e3e3;
+            font-size: 1.05em;
+        }
+        #addProductModal .card-body {
+            padding-bottom: 0.5rem;
+        }
+        #addProductModal label.form-label {
+            font-weight: 500;
+        }
+        #addProductModal .variant-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            padding: 12px;
+        }
+        #addProductModal .option-block {
+            background: #fff;
+            border: 1px solid #e3e3e3;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        #addProductModal .input-group .form-control {
+            min-width: 0;
+        }
     </style>
 </head>
 <body>
@@ -110,7 +159,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
             <button id="btnDeleteSelected" class="btn btn-danger" disabled>
                 <i class="fa fa-trash"></i> Xóa đã chọn
             </button>
-            <button class="btn btn-success" disabled>
+            <button id="btnAddProduct" class="btn btn-success">
                 <i class="fa fa-plus"></i> Thêm sản phẩm
             </button>
         </div>
@@ -187,6 +236,116 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
     <!-- Alert for JS actions -->
     <div id="jsAlertContainer" style="margin-top:16px;"></div>
 </div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <form id="addProductForm" autocomplete="off">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addProductModalLabel">Thêm sản phẩm mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body" style="overflow-y:auto; max-height:70vh;">
+          <div id="addProductAlert"></div>
+          <!-- Thông tin chính -->
+          <div class="card mb-3 border-primary">
+            <div class="card-header bg-primary text-white py-2">
+              <strong>Thông tin sản phẩm</strong>
+            </div>
+            <div class="card-body pb-2">
+              <div class="row mb-2">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Tên sản phẩm</label>
+                  <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Mã sản phẩm</label>
+                  <input type="text" class="form-control" name="code" required>
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Ảnh đại diện</label>
+                <input type="file" class="form-control" name="image" accept="image/*" required>
+              </div>
+            </div>
+          </div>
+          <!-- Danh mục, Thương hiệu, Trạng thái -->
+          <div class="card mb-3 border-success">
+            <div class="card-header bg-success text-white py-2">
+              <strong>Phân loại & Trạng thái</strong>
+            </div>
+            <div class="card-body pb-2">
+              <div class="mb-2">
+                <label class="form-label">Danh mục</label>
+                <div class="row">
+                  <?php foreach ($categoriesList as $cat): ?>
+                    <div class="col-md-4">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="categoriesCode[]" value="<?= htmlspecialchars($cat['code']) ?>" id="cat_<?= htmlspecialchars($cat['code']) ?>">
+                        <label class="form-check-label" for="cat_<?= htmlspecialchars($cat['code']) ?>">
+                          <?= htmlspecialchars($cat['name']) ?>
+                        </label>
+                      </div>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Thương hiệu</label>
+                  <select class="form-select" name="brandCode" required>
+                    <option value="">-- Chọn thương hiệu --</option>
+                    <?php foreach ($brandsList as $brand): ?>
+                      <option value="<?= htmlspecialchars($brand['code']) ?>">
+                        <?= htmlspecialchars($brand['name']) ?>
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Trạng thái</label>
+                  <select class="form-select" name="status" required>
+                    <option value="New">New</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Gift code -->
+          <div class="card mb-3 border-warning">
+            <div class="card-header bg-warning text-dark py-2">
+              <strong>Gift Codes</strong>
+            </div>
+            <div class="card-body pb-2">
+              <label class="form-label">Gift Codes (mã, cách nhau bởi dấu phẩy, có thể bỏ trống)</label>
+              <input type="text" class="form-control" name="giftCodes" placeholder="VD: gift1,gift2">
+            </div>
+          </div>
+          <!-- VARIANTS SECTION -->
+          <div class="card mb-3 border-info">
+            <div class="card-header bg-info text-white py-2">
+              <strong>Biến thể sản phẩm</strong>
+            </div>
+            <div class="card-body pb-2">
+              <div id="variantsSection">
+                <!-- Variant blocks will be inserted here by JS -->
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btnAddVariant">+ Thêm biến thể</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Thêm sản phẩm</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- End Add Product Modal -->
 
 <div class="modal fade" id="viewProductModal" tabindex="-1" aria-labelledby="viewProductModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -290,152 +449,463 @@ document.addEventListener('DOMContentLoaded', function () {
             btnDeleteSelected.disabled = false;
         });
     }
-});
 
-function showProductDetail(productId) {
-    const modal = new bootstrap.Modal(document.getElementById('viewProductModal'));
-    const contentDiv = document.getElementById('viewProductModalContent');
-    contentDiv.innerHTML = '<div class="text-muted">Đang tải thông tin sản phẩm...</div>';
-    modal.show();
+    // --- Add Product Modal logic ---
+    const btnAddProduct = document.getElementById('btnAddProduct');
+    const addProductModal = new bootstrap.Modal(document.getElementById('addProductModal'));
+    const addProductForm = document.getElementById('addProductForm');
+    const addProductAlert = document.getElementById('addProductAlert');
 
-    fetch('get_product_detail.php?id=' + encodeURIComponent(productId), {
-        method: 'GET',
-        credentials: 'same-origin'
-    })
-    .then(async response => {
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        return await response.json();
-    })
-    .then(data => {
-        if (!data.success || !data.data) {
-            contentDiv.innerHTML = '<div class="alert alert-danger">Không thể tải thông tin sản phẩm.</div>';
-            return;
-        }
-        contentDiv.innerHTML = renderProductDetail(data.data);
-    })
-    .catch(err => {
-        contentDiv.innerHTML = '<div class="alert alert-danger">Lỗi kết nối server, vui lòng thử lại.</div>';
+    // --- VARIANTS DYNAMIC ---
+    const variantsSection = document.getElementById('variantsSection');
+    const btnAddVariant = document.getElementById('btnAddVariant');
+    let variantCount = 0;
+    const MAX_VARIANTS = 2;
+
+    function createVariantBlock(idx) {
+        return `
+        <div class="variant-block border rounded p-2 mb-3" data-variant-idx="${idx}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-bold">Biến thể #${idx + 1}</span>
+            <button type="button" class="btn btn-sm btn-outline-danger btnRemoveVariant" ${idx === 0 ? 'style="display:none;"' : ''}>&times;</button>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Tiêu đề biến thể</label>
+            <input type="text" class="form-control" name="variant_optionTitle_${idx}" placeholder="VD: Màu sắc" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Options cho biến thể này</label>
+            <div class="variant-options-list" data-variant-idx="${idx}"></div>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddOption" data-variant-idx="${idx}">+ Thêm option</button>
+          </div>
+        </div>
+        `;
+    }
+
+    function createOptionBlock(variantIdx, optionIdx) {
+        return `
+        <div class="option-block border p-2 mb-2" data-option-idx="${optionIdx}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-semibold">Option #${optionIdx + 1}</span>
+            <button type="button" class="btn btn-sm btn-outline-danger btnRemoveOption" ${optionIdx === 0 ? 'style="display:none;"' : ''}>&times;</button>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Nhãn option</label>
+            <input type="text" class="form-control" name="variant_${variantIdx}_optionLabel_${optionIdx}" placeholder="VD: Đỏ" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Giá gốc</label>
+            <input type="number" class="form-control" name="variant_${variantIdx}_originalPrice_${optionIdx}" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Giá hiện tại</label>
+            <input type="number" class="form-control" name="variant_${variantIdx}_currentPrice_${optionIdx}" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Mô tả ngắn</label>
+            <input type="text" class="form-control" name="variant_${variantIdx}_shortDescription_${optionIdx}">
+          </div>
+          <!-- Multiple Descriptions -->
+          <div class="mb-2">
+            <label class="form-label">Mô tả chi tiết (có thể thêm nhiều)</label>
+            <div class="variantDescriptionsList" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}"></div>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddDescription" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}">+ Thêm mô tả</button>
+          </div>
+          <!-- Multiple Images -->
+          <div class="mb-2">
+            <label class="form-label">Ảnh option (có thể thêm nhiều)</label>
+            <div class="variantImagesList" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}"></div>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddImage" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}">+ Thêm ảnh</button>
+          </div>
+        </div>
+        `;
+    }
+
+    function createDescriptionRow(variantIdx, optionIdx, descIdx = 0, name = '', text = '', priority = 0) {
+        return `
+        <div class="input-group mb-1 variant-desc-row" data-desc-idx="${descIdx}">
+            <input type="text" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_name[]" placeholder="Tên mô tả" value="${name}">
+            <input type="text" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_text[]" placeholder="Nội dung mô tả" value="${text}">
+            <input type="number" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_priority[]" placeholder="Priority" value="${priority}">
+            <button type="button" class="btn btn-outline-danger btn-remove-desc" tabindex="-1">&times;</button>
+        </div>`;
+    }
+    function createImageRow(variantIdx, optionIdx, imgIdx = 0, priority = 0) {
+        return `
+        <div class="input-group mb-1 variant-img-row" data-img-idx="${imgIdx}">
+            <input type="file" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_image[]" accept="image/*">
+            <input type="number" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_image_priority[]" placeholder="Priority" value="${priority}">
+            <button type="button" class="btn btn-outline-danger btn-remove-img" tabindex="-1">&times;</button>
+        </div>`;
+    }
+
+    function refreshVariantRemoveBtns() {
+        variantsSection.querySelectorAll('.btnRemoveVariant').forEach(btn => {
+            btn.onclick = function() {
+                btn.closest('.variant-block').remove();
+                variantCount--;
+                updateAddVariantBtn();
+            };
+        });
+    }
+    function refreshOptionRemoveBtns() {
+        variantsSection.querySelectorAll('.btnRemoveOption').forEach(btn => {
+            btn.onclick = function() {
+                btn.closest('.option-block').remove();
+            };
+        });
+    }
+    function refreshDescriptionRemoveBtns() {
+        variantsSection.querySelectorAll('.btn-remove-desc').forEach(btn => {
+            btn.onclick = function() {
+                btn.closest('.variant-desc-row').remove();
+            };
+        });
+    }
+    function refreshImageRemoveBtns() {
+        variantsSection.querySelectorAll('.btn-remove-img').forEach(btn => {
+            btn.onclick = function() {
+                btn.closest('.variant-img-row').remove();
+            };
+        });
+    }
+    function updateAddVariantBtn() {
+        btnAddVariant.disabled = variantCount >= MAX_VARIANTS;
+    }
+
+    function addOptionToVariant(variantIdx) {
+        const variantBlock = variantsSection.querySelector(`.variant-block[data-variant-idx="${variantIdx}"]`);
+        const optionsList = variantBlock.querySelector('.variant-options-list');
+        const optionIdx = optionsList.children.length;
+        optionsList.insertAdjacentHTML('beforeend', createOptionBlock(variantIdx, optionIdx));
+        refreshOptionRemoveBtns();
+
+        // Add one description and one image row by default
+        const descList = optionsList.lastElementChild.querySelector('.variantDescriptionsList');
+        const imgList = optionsList.lastElementChild.querySelector('.variantImagesList');
+        descList.insertAdjacentHTML('beforeend', createDescriptionRow(variantIdx, optionIdx, 0, '', '', 0));
+        imgList.insertAdjacentHTML('beforeend', createImageRow(variantIdx, optionIdx, 0, 0));
+        refreshDescriptionRemoveBtns();
+        refreshImageRemoveBtns();
+
+        // Add handler for add description/image buttons
+        optionsList.lastElementChild.querySelector('.btnAddDescription').onclick = function() {
+            const descList = this.parentElement.querySelector('.variantDescriptionsList');
+            const descIdx = descList.children.length;
+            descList.insertAdjacentHTML('beforeend', createDescriptionRow(variantIdx, optionIdx, descIdx, '', '', descIdx));
+            refreshDescriptionRemoveBtns();
+        };
+        optionsList.lastElementChild.querySelector('.btnAddImage').onclick = function() {
+            const imgList = this.parentElement.querySelector('.variantImagesList');
+            const imgIdx = imgList.children.length;
+            imgList.insertAdjacentHTML('beforeend', createImageRow(variantIdx, optionIdx, imgIdx, imgIdx));
+            refreshImageRemoveBtns();
+        };
+    }
+
+    btnAddVariant.onclick = function() {
+        if (variantCount >= MAX_VARIANTS) return;
+        const idx = variantCount;
+        variantsSection.insertAdjacentHTML('beforeend', createVariantBlock(idx));
+        variantCount++;
+        updateAddVariantBtn();
+        refreshVariantRemoveBtns();
+
+        // Add one option by default
+        addOptionToVariant(idx);
+
+        // Add handler for add option button
+        const variantBlock = variantsSection.querySelector(`.variant-block[data-variant-idx="${idx}"]`);
+        variantBlock.querySelector('.btnAddOption').onclick = function() {
+            addOptionToVariant(idx);
+        };
+    };
+
+    // On modal show, reset variants
+    btnAddProduct.addEventListener('click', function() {
+        addProductForm.reset();
+        addProductAlert.innerHTML = '';
+        variantsSection.innerHTML = '';
+        variantCount = 0;
+        btnAddVariant.disabled = false;
+        // Thêm biến thể đầu tiên (không dùng await)
+        btnAddVariant.click();
+        addProductModal.show();
     });
-}
 
-function renderProductDetail(data) {
-    function esc(str) {
-        return typeof str === 'string' ? str.replace(/[&<>"']/g, function(m) {
-            return ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-            })[m];
-        }) : '';
-    }
-    const info = data.productInfo || {};
-    const price = data.price || {};
-    const detail = data.productDetail || {};
-    const options = Array.isArray(data.productOptions) ? data.productOptions : [];
-    const gifts = Array.isArray(data.gifts) ? data.gifts : [];
-    const createdDate = data.createdDate ? formatDateTime(data.createdDate) : '';
-    const createdBy = esc(data.createdBy || '');
+    // --- Gather form data for variants/options ---
+    addProductForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        addProductAlert.innerHTML = '';
+        // ...existing code for main fields...
+        const form = e.target;
+        const name = form.name.value.trim();
+        const code = form.code.value.trim();
+        const status = form.status.value;
+        const brandCode = form.brandCode.value;
+        const categoriesCode = Array.from(form.querySelectorAll('input[name="categoriesCode[]"]:checked')).map(cb => cb.value);
+        const giftCodes = form.giftCodes.value.split(',').map(s => s.trim()).filter(Boolean);
 
-    let imgThumb = info.imageUrl ? `<img src="${esc(info.imageUrl)}" class="modal-product-thumb me-2 mb-2" alt="Ảnh sản phẩm">` :
-        `<img src="https://via.placeholder.com/96x96?text=No+Image" class="modal-product-thumb me-2 mb-2" alt="No Image">`;
+        // Main image
+        const imageFile = form.image.files[0];
+        let imageBase64 = '';
+        if (imageFile) {
+            imageBase64 = await fileToBase64(imageFile);
+        }
 
-    let imgList = '';
-    if (detail.image && detail.image.length > 0) {
-        imgList = detail.image.map(img =>
-            `<img src="${esc(img.url)}" alt="Ảnh phụ" title="priority: ${img.priority}" />`
-        ).join('');
-        imgList = `<div class="modal-product-img-list mb-2">${imgList}</div>`;
-    }
+        // --- Gather variants ---
+        const variants = [];
+        const variantBlocks = Array.from(variantsSection.querySelectorAll('.variant-block'));
+        for (let vIdx = 0; vIdx < variantBlocks.length; ++vIdx) {
+            const variantBlock = variantBlocks[vIdx];
+            const optionTitle = variantBlock.querySelector(`input[name="variant_optionTitle_${vIdx}"]`).value.trim();
+            const options = [];
+            const optionBlocks = Array.from(variantBlock.querySelectorAll('.option-block'));
+            for (let oIdx = 0; oIdx < optionBlocks.length; ++oIdx) {
+                const optionBlock = optionBlocks[oIdx];
+                const optionLabel = optionBlock.querySelector(`input[name="variant_${vIdx}_optionLabel_${oIdx}"]`).value.trim();
+                const originalPrice = parseInt(optionBlock.querySelector(`input[name="variant_${vIdx}_originalPrice_${oIdx}"]`).value, 10) || 0;
+                const currentPrice = parseInt(optionBlock.querySelector(`input[name="variant_${vIdx}_currentPrice_${oIdx}"]`).value, 10) || 0;
+                const shortDescription = optionBlock.querySelector(`input[name="variant_${vIdx}_shortDescription_${oIdx}"]`).value.trim();
 
-    let categories = Array.isArray(info.category) ? info.category.map(esc).join(', ') : '';
+                // Descriptions
+                const descNames = Array.from(optionBlock.querySelectorAll(`input[name="variant_${vIdx}_option_${oIdx}_desc_name[]"]`)).map(i => i.value.trim());
+                const descTexts = Array.from(optionBlock.querySelectorAll(`input[name="variant_${vIdx}_option_${oIdx}_desc_text[]"]`)).map(i => i.value.trim());
+                const descPriorities = Array.from(optionBlock.querySelectorAll(`input[name="variant_${vIdx}_option_${oIdx}_desc_priority[]"]`)).map(i => parseInt(i.value, 10) || 0);
+                const descriptions = [];
+                for (let i = 0; i < descNames.length; ++i) {
+                    if (descNames[i] && descTexts[i]) {
+                        descriptions.push({
+                            name: descNames[i],
+                            descriptionText: descTexts[i],
+                            priority: descPriorities[i]
+                        });
+                    }
+                }
 
-    let descList = '';
-    if (detail.description && detail.description.length > 0) {
-        descList = '<div class="mb-2"><span class="modal-product-label">Mô tả:</span><ul class="ps-4" style="list-style-type: disc; margin-bottom: 0;">';
-        detail.description.forEach(d => {
-            descList += `<li>
-                <span class="modal-product-label">${esc(d.name)}:</span> ${esc(d.descriptionText)}
-            </li>`;
-        });
-        descList += '</ul></div>';
-    }
+                // Images
+                const imageInputs = Array.from(optionBlock.querySelectorAll(`input[name="variant_${vIdx}_option_${oIdx}_image[]"]`));
+                const imagePriorities = Array.from(optionBlock.querySelectorAll(`input[name="variant_${vIdx}_option_${oIdx}_image_priority[]"]`)).map(i => parseInt(i.value, 10) || 0);
+                const imagesBase64 = [];
+                for (let i = 0; i < imageInputs.length; ++i) {
+                    const file = imageInputs[i].files[0];
+                    if (file) {
+                        const base64Content = await fileToBase64(file);
+                        imagesBase64.push({
+                            base64Content,
+                            priority: imagePriorities[i]
+                        });
+                    }
+                }
 
-    let optionList = '';
-    if (options.length > 0) {
-        optionList = '<div class="mb-2">';
-        options.forEach(opt => {
-            optionList += `<div class="modal-product-option mb-1"><span class="modal-product-label">${esc(opt.title)}:</span> `;
-            if (Array.isArray(opt.options)) {
-                optionList += opt.options.map(o =>
-                    `<span class="${o.selected ? 'selected' : ''}">${esc(o.label)}</span>`
-                ).join(', ');
+                options.push({
+                    optionLabel,
+                    originalPrice,
+                    currentPrice,
+                    descriptions,
+                    imagesBase64,
+                    shortDescription
+                });
             }
+            variants.push({
+                optionTitle,
+                options
+            });
+        }
+
+        // Build request body
+        const body = {
+            name,
+            code,
+            imageBase64,
+            categoriesCode,
+            status,
+            brandCode,
+            variants,
+            giftCodes
+        };
+
+        // POST to API
+        try {
+            const resp = await fetch('http://localhost:5000/api/products/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer <?= htmlspecialchars($token) ?>'
+                },
+                body: JSON.stringify(body)
+            });
+            const text = await resp.text();
+            let data = {};
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch (err) {
+                console.error('Failed to parse JSON:', err, text);
+            }
+            if (!resp.ok || !data.success) {
+                throw new Error(data.message || 'Thêm sản phẩm thất bại');
+            }
+            addProductAlert.innerHTML = '<div class="alert alert-success">Thêm sản phẩm thành công!</div>';
+            setTimeout(() => { addProductModal.hide(); window.location.reload(); }, 1200);
+        } catch (err) {
+            addProductAlert.innerHTML = `<div class="alert alert-danger">${err.message || 'Lỗi thêm sản phẩm'}</div>`;
+        }
+    });
+
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(',')[1] || '');
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function showProductDetail(productId) {
+        const modal = new bootstrap.Modal(document.getElementById('viewProductModal'));
+        const contentDiv = document.getElementById('viewProductModalContent');
+        contentDiv.innerHTML = '<div class="text-muted">Đang tải thông tin sản phẩm...</div>';
+        modal.show();
+
+        fetch('get_product_detail.php?id=' + encodeURIComponent(productId), {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+        .then(async response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return await response.json();
+        })
+        .then(data => {
+            if (!data.success || !data.data) {
+                contentDiv.innerHTML = '<div class="alert alert-danger">Không thể tải thông tin sản phẩm.</div>';
+                return;
+            }
+            contentDiv.innerHTML = renderProductDetail(data.data);
+        })
+        .catch(err => {
+            contentDiv.innerHTML = '<div class="alert alert-danger">Lỗi kết nối server, vui lòng thử lại.</div>';
+        });
+    }
+
+    function renderProductDetail(data) {
+        function esc(str) {
+            return typeof str === 'string' ? str.replace(/[&<>"']/g, function(m) {
+                return ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                })[m];
+            }) : '';
+        }
+        const info = data.productInfo || {};
+        const price = data.price || {};
+        const detail = data.productDetail || {};
+        const options = Array.isArray(data.productOptions) ? data.productOptions : [];
+        const gifts = Array.isArray(data.gifts) ? data.gifts : [];
+        const createdDate = data.createdDate ? formatDateTime(data.createdDate) : '';
+        const createdBy = esc(data.createdBy || '');
+
+        let imgThumb = info.imageUrl ? `<img src="${esc(info.imageUrl)}" class="modal-product-thumb me-2 mb-2" alt="Ảnh sản phẩm">` :
+            `<img src="https://via.placeholder.com/96x96?text=No+Image" class="modal-product-thumb me-2 mb-2" alt="No Image">`;
+
+        let imgList = '';
+        if (detail.image && detail.image.length > 0) {
+            imgList = detail.image.map(img =>
+                `<img src="${esc(img.url)}" alt="Ảnh phụ" title="priority: ${img.priority}" />`
+            ).join('');
+            imgList = `<div class="modal-product-img-list mb-2">${imgList}</div>`;
+        }
+
+        let categories = Array.isArray(info.category) ? info.category.map(esc).join(', ') : '';
+
+        let descList = '';
+        if (detail.description && detail.description.length > 0) {
+            descList = '<div class="mb-2"><span class="modal-product-label">Mô tả:</span><ul class="ps-4" style="list-style-type: disc; margin-bottom: 0;">';
+            detail.description.forEach(d => {
+                descList += `<li>
+                    <span class="modal-product-label">${esc(d.name)}:</span> ${esc(d.descriptionText)}
+                </li>`;
+            });
+            descList += '</ul></div>';
+        }
+
+        let optionList = '';
+        if (options.length > 0) {
+            optionList = '<div class="mb-2">';
+            options.forEach(opt => {
+                optionList += `<div class="modal-product-option mb-1"><span class="modal-product-label">${esc(opt.title)}:</span> `;
+                if (Array.isArray(opt.options)) {
+                    optionList += opt.options.map(o =>
+                        `<span class="${o.selected ? 'selected' : ''}">${esc(o.label)}</span>`
+                    ).join(', ');
+                }
+                optionList += '</div>';
+            });
             optionList += '</div>';
-        });
-        optionList += '</div>';
+        }
+
+        let giftList = '';
+        if (!gifts || gifts.length === 0) {
+            giftList = '<div class="text-muted">Không có quà tặng</div>';
+        } else {
+            giftList = '<ul class="list-group mb-2">';
+            gifts.forEach((g, idx) => {
+                giftList += `<li class="list-group-item">${esc(JSON.stringify(g))}</li>`;
+            });
+            giftList += '</ul>';
+        }
+
+        let priceHtml = `<div>
+            <span class="modal-product-label">Giá gốc:</span> ${formatPrice(price.originalPrice)}₫<br>
+            <span class="modal-product-label">Giá hiện tại:</span> ${formatPrice(price.currentPrice)}₫<br>
+            <span class="modal-product-label">Giá khuyến mãi:</span> ${formatPrice(price.discountPrice)}₫<br>
+            <span class="modal-product-label">Giảm giá:</span> ${price.discountPercentage ? esc(price.discountPercentage + '%') : '0%'}
+        </div>`;
+
+        return `
+        <div class="row">
+            <div class="col-md-4 text-center">
+                ${imgThumb}
+                ${imgList}
+            </div>
+            <div class="col-md-8">
+                <div class="mb-2">
+                    <span class="modal-product-label">ID:</span> ${esc(info.id)}<br>
+                    <span class="modal-product-label">Mã SP:</span> ${esc(info.code)}<br>
+                    <span class="modal-product-label">Tên:</span> ${esc(info.name)}<br>
+                    <span class="modal-product-label">Trạng thái:</span> ${esc(info.status)}<br>
+                    <span class="modal-product-label">Danh mục:</span> ${categories}<br>
+                    <span class="modal-product-label">Thương hiệu:</span> ${esc(info.brand)}
+                </div>
+                <div class="mb-2">${priceHtml}</div>
+                <div class="mb-2">
+                    <span class="modal-product-label">Mô tả ngắn:</span> ${esc(detail.shortDescription)}
+                </div>
+                ${descList}
+                ${optionList}
+                <div class="mb-2">
+                    <span class="modal-product-label">Quà tặng:</span><br>
+                    ${giftList}
+                </div>
+                <div class="modal-product-meta">
+                    <span class="modal-product-label">Ngày tạo:</span> ${createdDate}<br>
+                    <span class="modal-product-label">Người tạo:</span> ${createdBy}
+                </div>
+            </div>
+        </div>
+        `;
     }
 
-    let giftList = '';
-    if (!gifts || gifts.length === 0) {
-        giftList = '<div class="text-muted">Không có quà tặng</div>';
-    } else {
-        giftList = '<ul class="list-group mb-2">';
-        gifts.forEach((g, idx) => {
-            giftList += `<li class="list-group-item">${esc(JSON.stringify(g))}</li>`;
-        });
-        giftList += '</ul>';
+    function formatPrice(val) {
+        if (typeof val !== 'number') return '0';
+        return val.toLocaleString('vi-VN', {maximumFractionDigits: 0});
     }
 
-    let priceHtml = `<div>
-        <span class="modal-product-label">Giá gốc:</span> ${formatPrice(price.originalPrice)}₫<br>
-        <span class="modal-product-label">Giá hiện tại:</span> ${formatPrice(price.currentPrice)}₫<br>
-        <span class="modal-product-label">Giá khuyến mãi:</span> ${formatPrice(price.discountPrice)}₫<br>
-        <span class="modal-product-label">Giảm giá:</span> ${price.discountPercentage ? esc(price.discountPercentage + '%') : '0%'}
-    </div>`;
-
-    return `
-    <div class="row">
-        <div class="col-md-4 text-center">
-            ${imgThumb}
-            ${imgList}
-        </div>
-        <div class="col-md-8">
-            <div class="mb-2">
-                <span class="modal-product-label">ID:</span> ${esc(info.id)}<br>
-                <span class="modal-product-label">Mã SP:</span> ${esc(info.code)}<br>
-                <span class="modal-product-label">Tên:</span> ${esc(info.name)}<br>
-                <span class="modal-product-label">Trạng thái:</span> ${esc(info.status)}<br>
-                <span class="modal-product-label">Danh mục:</span> ${categories}<br>
-                <span class="modal-product-label">Thương hiệu:</span> ${esc(info.brand)}
-            </div>
-            <div class="mb-2">${priceHtml}</div>
-            <div class="mb-2">
-                <span class="modal-product-label">Mô tả ngắn:</span> ${esc(detail.shortDescription)}
-            </div>
-            ${descList}
-            ${optionList}
-            <div class="mb-2">
-                <span class="modal-product-label">Quà tặng:</span><br>
-                ${giftList}
-            </div>
-            <div class="modal-product-meta">
-                <span class="modal-product-label">Ngày tạo:</span> ${createdDate}<br>
-                <span class="modal-product-label">Người tạo:</span> ${createdBy}
-            </div>
-        </div>
-    </div>
-    `;
-}
-
-function formatPrice(val) {
-    if (typeof val !== 'number') return '0';
-    return val.toLocaleString('vi-VN', {maximumFractionDigits: 0});
-}
-
-function formatDateTime(dt) {
-    const d = new Date(dt);
-    if (isNaN(d.getTime())) return '';
-    const pad = n => n < 10 ? '0' + n : n;
-    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
+    function formatDateTime(dt) {
+        const d = new Date(dt);
+        if (isNaN(d.getTime())) return '';
+        const pad = n => n < 10 ? '0' + n : n;
+        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+});
 </script>
 </body>
 </html>
