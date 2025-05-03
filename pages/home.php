@@ -18,17 +18,11 @@ try {
         $jsonData = json_decode($response, true);
         if (isset($jsonData['data']['data'])) {
             $categories = $jsonData['data']['data'];
-            $totalCount = isset($jsonData['data']['totalCount']) ? $jsonData['data']['totalCount'] : 0;
+            $totalCount = $jsonData['data']['totalCount'] ?? 0;
             // Custom order for categories
             $customOrder = [
-                'Laptops',
-                'PCs',
-                'Main, CPU, VGA',
-                'Monitors',
-                'Keyboards',
-                'Mouse + Mouse Pad',
-                'Earphones',
-                'Sounds'
+                'Laptops', 'PCs', 'Main, CPU, VGA', 'Monitors', 'Keyboards',
+                'Mouse + Mouse Pad', 'Earphones', 'Sounds'
             ];
             usort($categories, function($a, $b) use ($customOrder) {
                 $posA = array_search($a['name'], $customOrder);
@@ -68,69 +62,50 @@ $icons = [
     <title>Home</title>
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #121212 !important;
-            color: #ffffff !important;
+            display: flex; flex-direction: column; min-height: 100vh; margin: 0;
+            background-color: #121212 !important; color: #fff !important;
         }
-        .content {
-            flex: 1;
-        }
+        .content { flex: 1; }
         .sidebar-menu {
-            background-color: #414141;
-            min-height: auto; 
-            box-shadow: none; 
-            border-radius: 10px;
+            background-color: #414141; min-height: auto;
+            box-shadow: none; border-radius: 10px;
         }
-        .sidebar-menu a {
-            color: white;
-            transition: background-color 0.2s;
-        }
-        .sidebar-menu a:hover {
-            background-color: #303030 !important;
-            color: white;
-        }
+        .sidebar-menu a { color: white; transition: background-color 0.2s; }
+        .sidebar-menu a:hover { background-color: #303030 !important; color: white; }
         .list-group-item {
-            border: none !important;
-            border-radius: 10px !important;
+            border: none !important; border-radius: 10px !important;
             background-color: #414141 !important;
         }
     </style>
 </head>
 <body>
-    <?php 
-    include '../includes/header.php'; 
-    include '../includes/navbar.php';
-    ?>
+    <?php include '../includes/header.php'; include '../includes/navbar.php'; ?>
     <div class="content">
         <div class="container-fluid">
             <div class="row">
                 <nav class="sidebar-menu col-md-3 col-12 p-3 mt-3">
-                    <?php if (!empty($errorMsg)): ?>
-                        <div class="alert alert-danger"><?php echo $errorMsg; ?></div>
-                    <?php elseif (!empty($categories)): ?>
+                    <?php if ($errorMsg): ?>
+                        <div class="alert alert-danger"><?= htmlspecialchars($errorMsg) ?></div>
+                    <?php elseif ($categories): ?>
                         <div class="list-group">
                             <?php foreach ($categories as $cat): ?>
                                 <?php
                                 if (!is_array($cat) || !isset($cat['id']) || !isset($cat['name'])) continue;
-                                $iconClass = isset($icons[$cat['name']]) ? $icons[$cat['name']] : 'fas fa-folder';
+                                $iconClass = $icons[$cat['name']] ?? 'fas fa-folder';
                                 ?>
-                                <a href="/category/<?php echo $cat['name']; ?>" class="list-group-item list-group-item-action">
-                                    <i class="<?php echo $iconClass; ?>"></i> <?php echo $cat['name']; ?>
+                                <a href="/category/<?= urlencode($cat['name']) ?>" class="list-group-item list-group-item-action">
+                                    <i class="<?= $iconClass ?>"></i> <?= htmlspecialchars($cat['name']) ?>
                                 </a>
                             <?php endforeach; ?>
                         </div>
                         <?php if ($totalCount > count($categories)): ?>
-                            <a href="?pageIndex=<?php echo $pageIndex + 1; ?>" class="btn btn-primary mt-3">Load More</a>
+                            <a href="?pageIndex=<?= $pageIndex + 1 ?>" class="btn btn-primary mt-3">Load More</a>
                         <?php endif; ?>
                     <?php else: ?>
                         <p>Không có danh mục nào</p>
                     <?php endif; ?>
                 </nav>
                 <main class="col-md-9 col-12">
-                    <!-- Placeholder main content area -->
                     <div class="p-3">
                         <h2>Sản phẩm nổi bật</h2>
                         <!-- ...existing or sample content... -->

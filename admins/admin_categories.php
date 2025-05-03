@@ -1,5 +1,4 @@
 <?php
-// --- Use admin_session for admin pages and enforce role check ---
 session_name('admin_session');
 session_start();
 

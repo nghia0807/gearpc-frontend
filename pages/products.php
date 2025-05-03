@@ -4,7 +4,7 @@ $categoryCode = isset($_GET['category']) ? trim($_GET['category']) : '';
 $brandCode = isset($_GET['brand']) ? trim($_GET['brand']) : '';
 $searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
 $pageIndex = isset($_GET['page']) ? max(0, intval($_GET['page'])) : 0;
-$pageSize = 12; // Number of products per page
+$pageSize = 12;
 
 // API Endpoints
 $productsApiUrl = "http://localhost:5000/api/products?pageIndex={$pageIndex}&pageSize={$pageSize}";
@@ -12,17 +12,11 @@ $brandsApiUrl = "http://localhost:5000/api/brands/get_select";
 $categoriesApiUrl = "http://localhost:5000/api/categories/get?pageIndex=0&pageSize=100";
 
 // Add filters to API URL if provided
-if (!empty($categoryCode)) {
-    $productsApiUrl .= "&categoryCode=" . urlencode($categoryCode);
-}
-if (!empty($brandCode)) {
-    $productsApiUrl .= "&brandCode=" . urlencode($brandCode);
-}
-if (!empty($searchQuery)) {
-    $productsApiUrl .= "&productName=" . urlencode($searchQuery);
-}
+if ($categoryCode) $productsApiUrl .= "&categoryCode=" . urlencode($categoryCode);
+if ($brandCode) $productsApiUrl .= "&brandCode=" . urlencode($brandCode);
+if ($searchQuery) $productsApiUrl .= "&productName=" . urlencode($searchQuery);
 
-// Function to make API requests
+// Helper: Make API requests
 function makeApiRequest($url) {
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -30,11 +24,7 @@ function makeApiRequest($url) {
     $response = curl_exec($ch);
     $error = curl_error($ch);
     curl_close($ch);
-    
-    if ($error) {
-        return ['success' => false, 'message' => $error];
-    }
-    
+    if ($error) return ['success' => false, 'message' => $error];
     return json_decode($response, true);
 }
 
@@ -49,24 +39,20 @@ $totalProducts = 0;
 $brands = [];
 $categories = [];
 
-if (isset($productsResponse['success']) && $productsResponse['success'] && isset($productsResponse['data']['data'])) {
+if (!empty($productsResponse['success']) && isset($productsResponse['data']['data'])) {
     $products = $productsResponse['data']['data'];
     $totalProducts = $productsResponse['data']['totalCount'] ?? 0;
 }
-
-if (isset($brandsResponse['success']) && $brandsResponse['success'] && isset($brandsResponse['data'])) {
+if (!empty($brandsResponse['success']) && isset($brandsResponse['data'])) {
     $brands = $brandsResponse['data'];
 }
-
-if (isset($categoriesResponse['success']) && $categoriesResponse['success'] && isset($categoriesResponse['data']['data'])) {
+if (!empty($categoriesResponse['success']) && isset($categoriesResponse['data']['data'])) {
     $categories = $categoriesResponse['data']['data'];
-    
-    // Sort categories for better display
+    // Sort categories for display
     $customOrder = [
-        'Laptops', 'PCs', 'Main, CPU, VGA', 'Monitors', 'Keyboards', 
+        'Laptops', 'PCs', 'Main, CPU, VGA', 'Monitors', 'Keyboards',
         'Mouse + Mouse Pad', 'Earphones', 'Sounds'
     ];
-    
     usort($categories, function($a, $b) use ($customOrder) {
         $posA = array_search($a['name'], $customOrder);
         $posB = array_search($b['name'], $customOrder);
@@ -76,16 +62,14 @@ if (isset($categoriesResponse['success']) && $categoriesResponse['success'] && i
     });
 }
 
-// Helper function to format currency
+// Helper: Format currency
 function formatCurrency($amount) {
     return number_format($amount, 0, ',', '.') . ' ₫';
 }
 
-// Helper function to calculate discount percentage
+// Helper: Calculate discount percentage
 function calculateDiscount($original, $current) {
-    if ($original <= 0 || $current <= 0 || $original <= $current) {
-        return 0;
-    }
+    if ($original <= 0 || $current <= 0 || $original <= $current) return 0;
     return round((($original - $current) / $original) * 100);
 }
 
@@ -103,9 +87,9 @@ $categoryIcons = [
 
 // Get active category name for display
 $activeCategoryName = "";
-if (!empty($categoryCode)) {
+if ($categoryCode) {
     foreach ($categories as $cat) {
-        if (isset($cat['code']) && $cat['code'] === $categoryCode) {
+        if (!empty($cat['code']) && $cat['code'] === $categoryCode) {
             $activeCategoryName = $cat['name'];
             break;
         }
@@ -117,7 +101,7 @@ if (!empty($categoryCode)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= !empty($activeCategoryName) ? htmlspecialchars($activeCategoryName) : 'All Products' ?> - GearPC</title>
+    <title><?= $activeCategoryName ? htmlspecialchars($activeCategoryName) : 'All Products' ?> - GearPC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -430,21 +414,17 @@ if (!empty($categoryCode)) {
 <body>
     <?php include '../includes/header.php'; ?>
     <?php include '../includes/navbar.php'; ?>
-    
     <div class="container py-4">
-        <!-- Page Title -->
         <h1 class="page-title">
-            <?php if (!empty($activeCategoryName)): ?>
+            <?php if ($activeCategoryName): ?>
                 <span><?= htmlspecialchars($activeCategoryName) ?></span>
-            <?php elseif (!empty($searchQuery)): ?>
+            <?php elseif ($searchQuery): ?>
                 <span>Search Results for: "<?= htmlspecialchars($searchQuery) ?>"</span>
             <?php else: ?>
                 <span>All Products</span>
             <?php endif; ?>
         </h1>
-        
         <div class="row">
-            <!-- Small filters column -->
             <div class="col-12 mb-4">
                 <div class="filters-container">
                     <div class="row">
@@ -453,10 +433,10 @@ if (!empty($categoryCode)) {
                             <div class="filter-section">
                                 <h5 class="filter-heading">Search Products</h5>
                                 <form action="" method="get" class="search-form">
-                                    <?php if (!empty($categoryCode)): ?>
+                                    <?php if ($categoryCode): ?>
                                         <input type="hidden" name="category" value="<?= htmlspecialchars($categoryCode) ?>">
                                     <?php endif; ?>
-                                    <?php if (!empty($brandCode)): ?>
+                                    <?php if ($brandCode): ?>
                                         <input type="hidden" name="brand" value="<?= htmlspecialchars($brandCode) ?>">
                                     <?php endif; ?>
                                     <div class="input-group">
@@ -468,34 +448,27 @@ if (!empty($categoryCode)) {
                                 </form>
                             </div>
                         </div>
-                        
-                        <!-- Brands Filter with Images -->
+                        <!-- Brands Filter -->
                         <div class="col-md-12">
                             <div class="filter-section">
                                 <h5 class="filter-heading">Brands</h5>
                                 <div class="brand-grid">
-                                    <!-- All Brands option -->
-                                    <a href="<?= 'products.php' . ($categoryCode ? '?category=' . urlencode($categoryCode) : '') . 
-                                             ($searchQuery ? ($categoryCode ? '&q=' : '?q=') . urlencode($searchQuery) : '') ?>" 
-                                       class="brand-item all-brands <?= empty($brandCode) ? 'active' : '' ?>">
+                                    <a href="<?= 'products.php' . ($categoryCode ? '?category=' . urlencode($categoryCode) : '') . ($searchQuery ? ($categoryCode ? '&q=' : '?q=') . urlencode($searchQuery) : '') ?>"
+                                       class="brand-item all-brands <?= !$brandCode ? 'active' : '' ?>">
                                         <div class="brand-img-container">
-                                            <i class="bi bi-grid-3x3-gap" style="font-size: 24px; color: #666;"></i>
+                                            <i class="bi bi-grid-3x3-gap" style="font-size:24px;color:#666;"></i>
                                         </div>
                                         <div class="brand-name">All Brands</div>
                                     </a>
-                                    
-                                    <!-- Brand items -->
                                     <?php foreach ($brands as $brand): ?>
-                                        <?php if (!isset($brand['code']) || !isset($brand['name'])) continue; ?>
-                                        <a href="<?= 'products.php?brand=' . urlencode($brand['code']) . 
-                                                ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . 
-                                                ($searchQuery ? '&q=' . urlencode($searchQuery) : '') ?>" 
+                                        <?php if (empty($brand['code']) || empty($brand['name'])) continue; ?>
+                                        <a href="<?= 'products.php?brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') ?>"
                                            class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
                                             <div class="brand-img-container">
-                                                <?php if (isset($brand['imageUrl']) && !empty($brand['imageUrl'])): ?>
+                                                <?php if (!empty($brand['imageUrl'])): ?>
                                                     <img src="<?= htmlspecialchars($brand['imageUrl']) ?>" alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
                                                 <?php else: ?>
-                                                    <i class="bi bi-building" style="font-size: 24px; color: #666;"></i>
+                                                    <i class="bi bi-building" style="font-size:24px;color:#666;"></i>
                                                 <?php endif; ?>
                                             </div>
                                             <div class="brand-name"><?= htmlspecialchars($brand['name']) ?></div>
@@ -507,11 +480,9 @@ if (!empty($categoryCode)) {
                     </div>
                 </div>
             </div>
-            
             <!-- Product Grid -->
             <div class="col-12">
-                <!-- Display Products -->
-                <?php if (empty($products)): ?>
+                <?php if (!$products): ?>
                     <div class="no-products">
                         <div class="no-products-icon">
                             <i class="bi bi-search"></i>
@@ -526,8 +497,8 @@ if (!empty($categoryCode)) {
                             <div class="col">
                                 <div class="product-card">
                                     <div class="product-img-container">
-                                        <img src="<?= htmlspecialchars($product['imageUrl'] ?? '') ?>" 
-                                             alt="<?= htmlspecialchars($product['name']) ?>" 
+                                        <img src="<?= htmlspecialchars($product['imageUrl'] ?? '') ?>"
+                                             alt="<?= htmlspecialchars($product['name']) ?>"
                                              class="product-img"
                                              onerror="this.src='https://via.placeholder.com/300x180?text=No+Image'">
                                     </div>
@@ -540,7 +511,7 @@ if (!empty($categoryCode)) {
                                         </h5>
                                         <div class="d-flex align-items-center">
                                             <span class="product-price-current"><?= formatCurrency($product['currentPrice']) ?></span>
-                                            <?php if (isset($product['originalPrice']) && $product['originalPrice'] > $product['currentPrice']): ?>
+                                            <?php if (!empty($product['originalPrice']) && $product['originalPrice'] > $product['currentPrice']): ?>
                                                 <span class="product-price-original"><?= formatCurrency($product['originalPrice']) ?></span>
                                                 <?php $discount = calculateDiscount($product['originalPrice'], $product['currentPrice']); ?>
                                                 <?php if ($discount > 0): ?>
@@ -562,39 +533,26 @@ if (!empty($categoryCode)) {
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    
                     <!-- Pagination -->
                     <?php if ($totalProducts > $pageSize): ?>
                         <div class="pagination-container">
                             <nav aria-label="Product pagination">
                                 <ul class="pagination justify-content-center">
-                                    <?php 
+                                    <?php
                                     $totalPages = ceil($totalProducts / $pageSize);
                                     $maxPagesToShow = 5;
                                     $startPage = max(0, min($pageIndex - floor($maxPagesToShow / 2), $totalPages - $maxPagesToShow));
                                     $endPage = min($startPage + $maxPagesToShow, $totalPages);
-                                    
-                                    // Build pagination URL base
                                     $paginationUrl = 'products.php?page=';
-                                    if (!empty($categoryCode)) {
-                                        $paginationUrl .= '&category=' . urlencode($categoryCode);
-                                    }
-                                    if (!empty($brandCode)) {
-                                        $paginationUrl .= '&brand=' . urlencode($brandCode);
-                                    }
-                                    if (!empty($searchQuery)) {
-                                        $paginationUrl .= '&q=' . urlencode($searchQuery);
-                                    }
+                                    if ($categoryCode) $paginationUrl .= '&category=' . urlencode($categoryCode);
+                                    if ($brandCode) $paginationUrl .= '&brand=' . urlencode($brandCode);
+                                    if ($searchQuery) $paginationUrl .= '&q=' . urlencode($searchQuery);
                                     ?>
-                                    
-                                    <!-- Previous Page -->
                                     <li class="page-item <?= $pageIndex <= 0 ? 'disabled' : '' ?>">
                                         <a class="page-link" href="<?= $paginationUrl . ($pageIndex - 1) ?>" aria-label="Previous">
                                             <span aria-hidden="true">&laquo;</span>
                                         </a>
                                     </li>
-                                    
-                                    <!-- Page Numbers -->
                                     <?php for ($i = $startPage; $i < $endPage; $i++): ?>
                                         <li class="page-item <?= $i === $pageIndex ? 'active' : '' ?>">
                                             <a class="page-link" href="<?= $paginationUrl . $i ?>">
@@ -602,8 +560,6 @@ if (!empty($categoryCode)) {
                                             </a>
                                         </li>
                                     <?php endfor; ?>
-                                    
-                                    <!-- Next Page -->
                                     <li class="page-item <?= $pageIndex >= $totalPages - 1 ? 'disabled' : '' ?>">
                                         <a class="page-link" href="<?= $paginationUrl . ($pageIndex + 1) ?>" aria-label="Next">
                                             <span aria-hidden="true">&raquo;</span>
@@ -617,22 +573,15 @@ if (!empty($categoryCode)) {
             </div>
         </div>
     </div>
-    
     <?php include '../includes/footer.php'; ?>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add to cart functionality
-            const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
-            addToCartButtons.forEach(button => {
+            // Add to cart functionality (demo)
+            document.querySelectorAll('.add-to-cart-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    const productId = this.getAttribute('data-product-id');
-                    // For now, just show an alert
                     alert('Added to cart!');
-                    
-                    // Here you would typically send an AJAX request to add the product to the cart
-                    console.log('Adding product to cart:', productId);
+                    // Implement AJAX add-to-cart here if needed
                 });
             });
         });

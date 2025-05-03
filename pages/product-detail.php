@@ -1,7 +1,6 @@
 <?php
 // Check if product ID is provided
-$productId = isset($_GET['id']) ? $_GET['id'] : null;
-
+$productId = $_GET['id'] ?? null;
 if (!$productId) {
     header('Location: products.php');
     exit;
@@ -16,12 +15,11 @@ try {
     $ch = curl_init($apiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
-    
     if (curl_errno($ch)) {
         $errorMsg = 'Không thể kết nối đến máy chủ, vui lòng thử lại sau';
     } else {
         $jsonData = json_decode($response, true);
-        if ($jsonData['success'] && isset($jsonData['data'])) {
+        if (!empty($jsonData['success']) && isset($jsonData['data'])) {
             $product = $jsonData['data'];
         } else {
             $errorMsg = $jsonData['message'] ?? 'Không thể tải thông tin sản phẩm';
@@ -32,53 +30,41 @@ try {
     $errorMsg = 'Đã xảy ra lỗi: ' . $e->getMessage();
 }
 
-// Get related products
+// Fetch related products
 $relatedProducts = [];
-if ($product && isset($product['productInfo']['code'])) {
+if ($product && !empty($product['productInfo']['code'])) {
     $productCode = $product['productInfo']['code'];
     $relatedApiUrl = "http://localhost:5000/api/products/related?productCode={$productCode}&count=5";
-    
     try {
         $ch = curl_init($relatedApiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $relatedResponse = curl_exec($ch);
-        
         if (!curl_errno($ch)) {
             $relatedJsonData = json_decode($relatedResponse, true);
-            if ($relatedJsonData['success'] && isset($relatedJsonData['data'])) {
+            if (!empty($relatedJsonData['success']) && isset($relatedJsonData['data'])) {
                 $relatedProducts = $relatedJsonData['data'];
             }
         }
         curl_close($ch);
     } catch (Exception $e) {
-        // Silently handle errors for related products
+        // Ignore related products errors
     }
 }
 
-// Helper function to format currency
+// Helper: Format currency
 function formatCurrency($amount) {
     return number_format($amount, 0, ',', '.') . ' ₫';
 }
 
-// Get product images (main + detail images)
+// Helper: Get product images (main + detail)
 function getProductImages($product) {
     $images = [];
-    
-    // Add main image first
     if (!empty($product['productInfo']['imageUrl'])) {
-        $images[] = [
-            'url' => $product['productInfo']['imageUrl'],
-            'priority' => 0
-        ];
+        $images[] = ['url' => $product['productInfo']['imageUrl'], 'priority' => 0];
     }
-    
-    // Add detail images
     if (!empty($product['productDetail']['image']) && is_array($product['productDetail']['image'])) {
-        foreach ($product['productDetail']['image'] as $image) {
-            $images[] = $image;
-        }
+        foreach ($product['productDetail']['image'] as $image) $images[] = $image;
     }
-    
     return $images;
 }
 ?>
@@ -553,12 +539,9 @@ function getProductImages($product) {
     <?php include '../includes/navbar.php'; ?>
 
     <div class="container">
-        <?php if (!empty($errorMsg)): ?>
-            <!-- Error display -->
+        <?php if ($errorMsg): ?>
             <div class="product-container error-container">
-                <div class="error-icon">
-                    <i class="bi bi-exclamation-circle"></i>
-                </div>
+                <div class="error-icon"><i class="bi bi-exclamation-circle"></i></div>
                 <h3>Không thể tải thông tin sản phẩm</h3>
                 <p class="mb-4"><?= htmlspecialchars($errorMsg) ?></p>
                 <a href="products.php" class="btn btn-add-cart">
@@ -566,28 +549,23 @@ function getProductImages($product) {
                 </a>
             </div>
         <?php elseif ($product): ?>
-            <!-- Product details -->
             <div class="product-container">
                 <div class="row">
-                    <!-- Product Images Section -->
+                    <!-- Product Images -->
                     <div class="col-lg-5 mb-4">
-                        <?php 
+                        <?php
                         $images = getProductImages($product);
-                        $mainImageUrl = !empty($images) ? $images[0]['url'] : 'https://via.placeholder.com/400x400?text=No+Image';
+                        $mainImageUrl = $images[0]['url'] ?? 'https://via.placeholder.com/400x400?text=No+Image';
                         ?>
-                        
-                        <!-- Main image display -->
                         <div class="product-image-container" id="mainImageContainer">
-                            <img id="mainImage" src="<?= htmlspecialchars($mainImageUrl) ?>" 
+                            <img id="mainImage" src="<?= htmlspecialchars($mainImageUrl) ?>"
                                  alt="<?= htmlspecialchars($product['productInfo']['name']) ?>"
                                  onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
                         </div>
-                        
-                        <!-- Thumbnail navigation -->
                         <?php if (count($images) > 1): ?>
                             <div class="product-image-nav" id="imageNav">
                                 <?php foreach ($images as $index => $image): ?>
-                                    <img src="<?= htmlspecialchars($image['url']) ?>" 
+                                    <img src="<?= htmlspecialchars($image['url']) ?>"
                                          class="<?= $index === 0 ? 'active' : '' ?>"
                                          data-index="<?= $index ?>"
                                          alt="Product image <?= $index + 1 ?>"
@@ -596,11 +574,9 @@ function getProductImages($product) {
                             </div>
                         <?php endif; ?>
                     </div>
-                    
-                    <!-- Product Information Section -->
+                    <!-- Product Info -->
                     <div class="col-lg-7">
                         <h1 class="product-title"><?= htmlspecialchars($product['productInfo']['name']) ?></h1>
-                        
                         <div class="product-meta">
                             <?php if (!empty($product['productInfo']['brand'])): ?>
                                 <div class="product-meta-item">
@@ -608,14 +584,12 @@ function getProductImages($product) {
                                     <span>Thương hiệu: <?= htmlspecialchars($product['productInfo']['brand']) ?></span>
                                 </div>
                             <?php endif; ?>
-                            
                             <?php if (!empty($product['productInfo']['category'])): ?>
                                 <div class="product-meta-item">
                                     <i class="bi bi-folder"></i>
                                     <span>Danh mục: <?= htmlspecialchars(is_array($product['productInfo']['category']) ? implode(', ', $product['productInfo']['category']) : $product['productInfo']['category']) ?></span>
                                 </div>
                             <?php endif; ?>
-                            
                             <?php if (!empty($product['productInfo']['status'])): ?>
                                 <div class="product-meta-item">
                                     <i class="bi bi-info-circle"></i>
@@ -623,35 +597,28 @@ function getProductImages($product) {
                                 </div>
                             <?php endif; ?>
                         </div>
-                        
                         <div class="product-code">
                             Mã sản phẩm: <?= htmlspecialchars($product['productInfo']['code']) ?>
                         </div>
-                        
-                        <!-- Price Information -->
                         <div class="price-container">
                             <div class="d-flex align-items-center">
                                 <span class="current-price"><?= formatCurrency($product['price']['currentPrice']) ?></span>
-                                
                                 <?php if ($product['price']['originalPrice'] > $product['price']['currentPrice']): ?>
                                     <span class="original-price"><?= formatCurrency($product['price']['originalPrice']) ?></span>
                                     <span class="discount-badge">-<?= htmlspecialchars($product['price']['discountPercentage']) ?>%</span>
                                 <?php endif; ?>
                             </div>
                         </div>
-                        
-                        <!-- Gift Section -->
                         <?php if (!empty($product['gifts']) && is_array($product['gifts'])): ?>
                             <div class="gift-section">
                                 <div class="gift-section-title">
                                     <i class="bi bi-gift"></i>
                                     <span>Quà tặng kèm</span>
                                 </div>
-                                
                                 <?php foreach ($product['gifts'] as $gift): ?>
                                     <div class="gift-item">
                                         <div class="gift-item-image">
-                                            <img src="<?= htmlspecialchars($gift['image']) ?>" 
+                                            <img src="<?= htmlspecialchars($gift['image']) ?>"
                                                  alt="<?= htmlspecialchars($gift['name']) ?>"
                                                  onerror="this.src='https://via.placeholder.com/48x48?text=Gift'">
                                         </div>
@@ -663,22 +630,18 @@ function getProductImages($product) {
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
-                        
-                        <!-- Short Description -->
                         <?php if (!empty($product['productDetail']['shortDescription'])): ?>
                             <div class="short-desc">
                                 <?= htmlspecialchars($product['productDetail']['shortDescription']) ?>
                             </div>
                         <?php endif; ?>
-                        
-                        <!-- Product Options Selection -->
                         <?php if (!empty($product['productOptions'])): ?>
                             <?php foreach ($product['productOptions'] as $optionGroup): ?>
                                 <div class="option-selector">
                                     <div class="option-label"><?= htmlspecialchars($optionGroup['title']) ?>:</div>
                                     <div class="option-values">
                                         <?php foreach ($optionGroup['options'] as $option): ?>
-                                            <div class="option-value <?= $option['selected'] ? 'selected' : '' ?>" 
+                                            <div class="option-value <?= $option['selected'] ? 'selected' : '' ?>"
                                                  data-option-id="<?= htmlspecialchars($option['id']) ?>">
                                                 <?= htmlspecialchars($option['label']) ?>
                                                 <?php if (isset($option['quantity']) && $option['quantity'] > 0): ?>
@@ -692,8 +655,6 @@ function getProductImages($product) {
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
-                        
-                        <!-- Quantity Selection -->
                         <div class="quantity-selector">
                             <div class="quantity-label">Số lượng:</div>
                             <div class="quantity-controls">
@@ -702,8 +663,6 @@ function getProductImages($product) {
                                 <div class="quantity-btn" id="increaseQty">+</div>
                             </div>
                         </div>
-                        
-                        <!-- Action Buttons -->
                         <div class="product-actions">
                             <button class="btn btn-add-cart" id="addToCartBtn" style="color: #ff9620;background-color: #ffffff0d;">
                                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
@@ -712,30 +671,25 @@ function getProductImages($product) {
                                 <i class="bi bi-heart"></i> Thêm vào yêu thích
                             </button>
                         </div>
-                        
-                        <!-- Product Details Tabs -->
                         <ul class="nav nav-tabs" id="productTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="specs-tab" data-bs-toggle="tab" 
-                                        data-bs-target="#specs-tab-pane" type="button" role="tab" 
+                                <button class="nav-link active" id="specs-tab" data-bs-toggle="tab"
+                                        data-bs-target="#specs-tab-pane" type="button" role="tab"
                                         aria-controls="specs-tab-pane" aria-selected="true">
                                     Thông số kỹ thuật
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="description-tab" data-bs-toggle="tab" 
-                                        data-bs-target="#description-tab-pane" type="button" role="tab" 
+                                <button class="nav-link" id="description-tab" data-bs-toggle="tab"
+                                        data-bs-target="#description-tab-pane" type="button" role="tab"
                                         aria-controls="description-tab-pane" aria-selected="false">
                                     Mô tả chi tiết
                                 </button>
                             </li>
                         </ul>
-                        
                         <div class="tab-content" id="productTabsContent">
-                            <!-- Specifications Tab -->
-                            <div class="tab-pane fade show active" id="specs-tab-pane" role="tabpanel" 
+                            <div class="tab-pane fade show active" id="specs-tab-pane" role="tabpanel"
                                  aria-labelledby="specs-tab" tabindex="0">
-                                
                                 <?php if (!empty($product['productDetail']['description'])): ?>
                                     <table class="specs-table">
                                         <tbody>
@@ -751,13 +705,8 @@ function getProductImages($product) {
                                     <p>Chưa có thông số kỹ thuật chi tiết cho sản phẩm này</p>
                                 <?php endif; ?>
                             </div>
-                            
-
-                            <!-- Description Tab -->
-                            <div class="tab-pane fade" id="description-tab-pane" role="tabpanel" 
+                            <div class="tab-pane fade" id="description-tab-pane" role="tabpanel"
                                  aria-labelledby="description-tab" tabindex="0">
-                                
-
                                 <?php if (!empty($product['productDetail']['description'])): ?>
                                     <div class="mt-3">
                                         <h4><?= htmlspecialchars($product['productInfo']['name']) ?></h4>
@@ -765,7 +714,7 @@ function getProductImages($product) {
                                         <ul class="mt-2">
                                             <?php foreach ($product['productDetail']['description'] as $desc): ?>
                                                 <li class="mb-2">
-                                                    <strong><?= htmlspecialchars($desc['name']) ?>:</strong> 
+                                                    <strong><?= htmlspecialchars($desc['name']) ?>:</strong>
                                                     <?= htmlspecialchars($desc['descriptionText']) ?>
                                                 </li>
                                             <?php endforeach; ?>
@@ -779,38 +728,32 @@ function getProductImages($product) {
                     </div>
                 </div>
             </div>
-            
-            <!-- Product Recommendations -->
+            <!-- Related Products -->
             <div class="product-container">
                 <h3 class="mb-4">Sản phẩm tương tự</h3>
-                
-                <?php if (!empty($relatedProducts)): ?>
+                <?php if ($relatedProducts): ?>
                     <div class="related-products">
                         <?php foreach ($relatedProducts as $relatedProduct): ?>
                             <div class="related-product-card">
                                 <a href="product-detail.php?id=<?= htmlspecialchars($relatedProduct['id']) ?>" class="text-decoration-none">
                                     <div class="related-product-image">
-                                        <img src="<?= htmlspecialchars($relatedProduct['imageUrl']) ?>" 
+                                        <img src="<?= htmlspecialchars($relatedProduct['imageUrl']) ?>"
                                              alt="<?= htmlspecialchars($relatedProduct['name']) ?>"
                                              onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
                                     </div>
                                     <h5 class="related-product-title"><?= htmlspecialchars($relatedProduct['name']) ?></h5>
-                                    
                                     <?php if (!empty($relatedProduct['brandName'])): ?>
                                         <div class="related-product-brand">
                                             <i class="bi bi-tag-fill me-1"></i> <?= htmlspecialchars($relatedProduct['brandName']) ?>
                                         </div>
                                     <?php endif; ?>
-                                    
                                     <?php if (!empty($relatedProduct['shortDescription'])): ?>
                                         <p class="mb-2 small text-truncate"><?= htmlspecialchars($relatedProduct['shortDescription']) ?></p>
                                     <?php endif; ?>
-                                    
                                     <div class="related-product-price">
                                         <span class="related-product-current-price">
                                             <?= formatCurrency($relatedProduct['currentPrice']) ?>
                                         </span>
-                                        
                                         <?php if (isset($relatedProduct['originalPrice']) && $relatedProduct['originalPrice'] > $relatedProduct['currentPrice']): ?>
                                             <span class="related-product-original-price">
                                                 <?= formatCurrency($relatedProduct['originalPrice']) ?>
@@ -830,79 +773,44 @@ function getProductImages($product) {
             </div>
         <?php endif; ?>
     </div>
-
     <?php include '../includes/footer.php'; ?>
-    
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Image gallery functionality
+            // Image gallery
             const thumbs = document.querySelectorAll('#imageNav img');
             const mainImage = document.getElementById('mainImage');
-            
             thumbs.forEach(thumb => {
                 thumb.addEventListener('click', function() {
-                    // Update active state
                     thumbs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
-                    
-                    // Update main image
                     mainImage.src = this.src;
                 });
             });
-            
             // Quantity controls
             const quantityInput = document.getElementById('quantity');
-            const decreaseBtn = document.getElementById('decreaseQty');
-            const increaseBtn = document.getElementById('increaseQty');
-            
-            decreaseBtn.addEventListener('click', function() {
-                const currentValue = parseInt(quantityInput.value);
-                if (currentValue > 1) {
-                    quantityInput.value = currentValue - 1;
-                }
-            });
-            
-            increaseBtn.addEventListener('click', function() {
-                const currentValue = parseInt(quantityInput.value);
-                if (currentValue < 10) {
-                    quantityInput.value = currentValue + 1;
-                }
-            });
-            
+            document.getElementById('decreaseQty').onclick = () => {
+                let v = parseInt(quantityInput.value);
+                if (v > 1) quantityInput.value = v - 1;
+            };
+            document.getElementById('increaseQty').onclick = () => {
+                let v = parseInt(quantityInput.value);
+                if (v < 10) quantityInput.value = v + 1;
+            };
             quantityInput.addEventListener('change', function() {
                 let value = parseInt(this.value);
-                if (isNaN(value) || value < 1) {
-                    this.value = 1;
-                } else if (value > 10) {
-                    this.value = 10;
-                }
+                if (isNaN(value) || value < 1) this.value = 1;
+                else if (value > 10) this.value = 10;
             });
-            
             // Product options selection
-            const optionValues = document.querySelectorAll('.option-value');
-            optionValues.forEach(option => {
+            document.querySelectorAll('.option-value').forEach(option => {
                 option.addEventListener('click', function() {
-                    // Kiểm tra xem option đã được chọn hay chưa, nếu đã chọn thì không làm gì
-                    if (this.classList.contains('selected')) {
-                        return;
-                    }
-                    
-                    // Get all options in the same group
+                    if (this.classList.contains('selected')) return;
                     const optionsGroup = this.closest('.option-values');
-                    const options = optionsGroup.querySelectorAll('.option-value');
-                    
-                    // Update selection
-                    options.forEach(opt => opt.classList.remove('selected'));
+                    optionsGroup.querySelectorAll('.option-value').forEach(opt => opt.classList.remove('selected'));
                     this.classList.add('selected');
-                    
-                    // Get the selected option ID
                     const optionId = this.dataset.optionId;
-                    
-                    // If option has ID, load the product with that ID
                     if (optionId) {
-                        // Hiển thị một thông báo hoặc trạng thái đang tải (tùy chọn)
                         const loadingOverlay = document.createElement('div');
                         loadingOverlay.style.position = 'fixed';
                         loadingOverlay.style.top = '0';
@@ -914,52 +822,37 @@ function getProductImages($product) {
                         loadingOverlay.style.justifyContent = 'center';
                         loadingOverlay.style.alignItems = 'center';
                         loadingOverlay.style.zIndex = '9999';
-                        
                         const spinner = document.createElement('div');
                         spinner.className = 'spinner-border text-light';
                         spinner.setAttribute('role', 'status');
-                        
                         const srOnly = document.createElement('span');
                         srOnly.className = 'visually-hidden';
                         srOnly.textContent = 'Đang tải...';
-                        
                         spinner.appendChild(srOnly);
                         loadingOverlay.appendChild(spinner);
                         document.body.appendChild(loadingOverlay);
-                        
-                        // Update URL with the new product/option ID
                         const currentUrl = new URL(window.location.href);
                         currentUrl.searchParams.set('id', optionId);
-                        
-                        // Gọi API để lấy thông tin sản phẩm mới
                         fetch(`http://localhost:5000/api/products/${optionId}`)
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success && data.data) {
-                                    // Chuyển trang đến URL mới với ID sản phẩm đã chọn
                                     window.location.href = currentUrl.toString();
                                 } else {
-                                    // Xử lý trường hợp lỗi khi gọi API
                                     alert('Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.');
                                     document.body.removeChild(loadingOverlay);
                                 }
                             })
-                            .catch(error => {
-                                console.error('Error fetching product data:', error);
+                            .catch(() => {
                                 alert('Đã xảy ra lỗi khi tải thông tin sản phẩm. Vui lòng thử lại sau.');
                                 document.body.removeChild(loadingOverlay);
                             });
                     }
                 });
             });
-            
-            // Add to cart functionality
-            const addToCartBtn = document.getElementById('addToCartBtn');
-            addToCartBtn.addEventListener('click', function() {
-                // Get selected quantity
+            // Add to cart
+            document.getElementById('addToCartBtn').onclick = function() {
                 const quantity = parseInt(quantityInput.value) || 1;
-                
-                // Get selected product options
                 const selectedOptions = [];
                 document.querySelectorAll('.option-selector').forEach(selector => {
                     const title = selector.querySelector('.option-label').textContent.trim();
@@ -972,11 +865,8 @@ function getProductImages($product) {
                         });
                     }
                 });
-                
-                // For demo purposes, just show an alert
                 alert('Đã thêm sản phẩm vào giỏ hàng!');
-                
-                // You would typically send this data to the server
+                // Send data to server if needed
                 console.log('Added to cart:', {
                     productId: '<?= htmlspecialchars($product['productInfo']['id'] ?? '') ?>',
                     productName: '<?= htmlspecialchars($product['productInfo']['name'] ?? '') ?>',
@@ -984,7 +874,7 @@ function getProductImages($product) {
                     selectedOptions: selectedOptions,
                     price: <?= isset($product['price']['currentPrice']) ? $product['price']['currentPrice'] : 0 ?>
                 });
-            });
+            };
         });
     </script>
 </body>

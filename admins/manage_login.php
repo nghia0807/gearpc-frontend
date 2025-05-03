@@ -1,8 +1,8 @@
 <?php
-// --- Use a separate session for admins ---
+// --- Admin session setup ---
 session_name('admin_session');
 session_set_cookie_params([
-    'path' => '/admin', // Admin session cookie path
+    'path' => '/admin',
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
@@ -10,70 +10,69 @@ session_start();
 
 $error = '';
 
-// --- Logout logic for admin session ---
+// --- Handle logout ---
 if (isset($_GET['logout'])) {
     $_SESSION = [];
-    if (ini_get("session.use_cookies")) {
+    if (ini_get('session.use_cookies')) {
         $params = session_get_cookie_params();
         setcookie(session_name(), '', time() - 42000,
-            $params["path"], $params["domain"],
-            $params["secure"], $params["httponly"]
+            $params['path'], $params['domain'],
+            $params['secure'], $params['httponly']
         );
     }
     session_destroy();
-    header("Location: manage_login.php");
-    exit();
+    header('Location: manage_login.php');
+    exit;
 }
 
+// --- Handle login POST ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
+
     if ($username === '' || $password === '') {
         $error = 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.';
     } else {
+        // Call backend API for authentication
         $ch = curl_init('http://localhost:5000/api/auth/login');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-            'username' => $username,
-            'password' => $password
-        ]));
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode([
+                'username' => $username,
+                'password' => $password
+            ])
+        ]);
         $response = curl_exec($ch);
         $err = curl_error($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+
         if ($err) {
             $error = 'Lỗi kết nối máy chủ.';
         } else {
             $respData = json_decode($response, true);
-            if ($httpCode === 200 && isset($respData['success']) && $respData['success'] === true) {
-                $role = $respData['data']['user']['role'] ?? null;
-                if ($role && in_array($role, ['Manager', 'Admin'])) {
+            if ($httpCode === 200 && ($respData['success'] ?? false)) {
+                $user = $respData['data']['user'] ?? [];
+                $role = $user['role'] ?? null;
+                if (in_array($role, ['Manager', 'Admin'], true)) {
+                    // Set session variables for authorized admin
                     $_SESSION['token'] = $respData['data']['token'];
-                    $_SESSION['user'] = $respData['data']['user'];
+                    $_SESSION['user'] = $user;
                     $_SESSION['role'] = $role;
-                    // Xử lý expiration: nếu là số thì giữ nguyên, nếu là string thì chuyển sang timestamp
+                    // Handle expiration (timestamp or string)
                     $expiration = $respData['data']['expiration'] ?? null;
-                    if ($expiration) {
-                        if (is_numeric($expiration)) {
-                            $_SESSION['expiration'] = $expiration;
-                        } else {
-                            // Nếu là string ISO hoặc định dạng khác, chuyển sang timestamp
-                            $_SESSION['expiration'] = strtotime($expiration);
-                        }
-                    } else {
-                        // Nếu không có expiration, đặt mặc định 1 giờ
-                        $_SESSION['expiration'] = time() + 3600;
-                    }
+                    $_SESSION['expiration'] = is_numeric($expiration)
+                        ? $expiration
+                        : ($expiration ? strtotime($expiration) : time() + 3600);
                     header('Location: admin_categories.php');
-                    exit();
-                } else {
-                    // Clear session for security
-                    $_SESSION = [];
-                    session_destroy();
-                    $error = 'Bạn không có quyền truy cập.';
+                    exit;
                 }
+                // Unauthorized role
+                $_SESSION = [];
+                session_destroy();
+                $error = 'Bạn không có quyền truy cập.';
             } else {
                 $error = $respData['message'] ?? 'Đăng nhập thất bại';
             }
