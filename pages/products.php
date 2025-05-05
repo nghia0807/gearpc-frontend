@@ -1,4 +1,10 @@
 <?php
+// --- Use user_session for user pages ---
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('user_session');
+    session_start();
+}
+
 // Get filter parameters from URL
 $categoryCode = isset($_GET['category']) ? trim($_GET['category']) : '';
 $brandCode = isset($_GET['brand']) ? trim($_GET['brand']) : '';
