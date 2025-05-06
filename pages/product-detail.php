@@ -57,6 +57,31 @@ if ($product && !empty($product['productInfo']['code'])) {
     }
 }
 
+// Fetch variant combinations for this product (if any)
+$variantCombinations = [];
+if (!empty($product['productInfo']['code'])) {
+    $variantApiUrl = "http://localhost:5000/api/products/{$product['productInfo']['code']}/variants";
+    try {
+        $ch = curl_init($variantApiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        if (!empty($_SESSION['token'])) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $_SESSION['token']
+            ]);
+        }
+        $variantResponse = curl_exec($ch);
+        if (!curl_errno($ch)) {
+            $variantJson = json_decode($variantResponse, true);
+            if (!empty($variantJson['success']) && isset($variantJson['data']['combinations'])) {
+                $variantCombinations = $variantJson['data']['combinations'];
+            }
+        }
+        curl_close($ch);
+    } catch (Exception $e) {
+        // Ignore variant errors
+    }
+}
+
 // Helper: Format currency
 function formatCurrency($amount) {
     return number_format($amount, 0, ',', '.') . ' ₫';
@@ -842,6 +867,51 @@ function getProductImages($product) {
                     }
                 });
             });
+            // --- Variant Combination: reload page with correct id ---
+            <?php if (!empty($variantCombinations)): ?>
+            window.variantCombinations = <?= json_encode($variantCombinations, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+
+            // Helper: get selected options as {title: value}
+            function getSelectedOptions() {
+                const selected = {};
+                document.querySelectorAll('.option-selector').forEach(selector => {
+                    const title = selector.querySelector('.option-label').textContent.trim().replace(':', '');
+                    const selectedOption = selector.querySelector('.option-value.selected');
+                    if (selectedOption) {
+                        selected[title] = selectedOption.textContent.trim();
+                    }
+                });
+                return selected;
+            }
+
+            // Find matching combination by selectedOptions
+            function findCombination(selectedOptions) {
+                return window.variantCombinations.find(combo => {
+                    for (const key in combo.selectedOptions) {
+                        if (combo.selectedOptions[key] !== (selectedOptions[key] || '')) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+            }
+
+            // Listen for option changes
+            document.querySelectorAll('.option-value').forEach(option => {
+                option.addEventListener('click', function() {
+                    setTimeout(function() {
+                        const selectedOptions = getSelectedOptions();
+                        const combo = findCombination(selectedOptions);
+                        if (combo && combo.id && combo.id !== '<?= htmlspecialchars($product['productInfo']['id']) ?>') {
+                            // Reload page with new id
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('id', combo.id);
+                            window.location.href = url.toString();
+                        }
+                    }, 100);
+                });
+            });
+            <?php endif; ?>
             // Add to cart
             document.getElementById('addToCartBtn').onclick = function() {
                 const quantity = parseInt(quantityInput.value) || 1;
