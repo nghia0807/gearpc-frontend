@@ -1,9 +1,12 @@
 <?php
-// admin_products.php
-// Admin interface for managing products
-
 session_name('admin_session');
 session_start();
+
+// Kiểm tra token tồn tại, nếu không thì chuyển hướng về trang đăng nhập
+if (!isset($_SESSION['token'])) {
+    header('Location: manage_login.php');
+    exit;
+}
 
 $token = $_SESSION['token'];
 $apiBaseUrl = 'http://localhost:5000/api/products';
@@ -33,7 +36,8 @@ function fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, &$alerts, &$t
     curl_close($ch);
 
     $data = json_decode($response, true);
-    if (!$data || !$data['success'] || $httpCode !== 200) {
+    $success = isset($data['success']) ? $data['success'] : false;
+    if (!$data || !$success || $httpCode !== 200) {
         $alerts[] = ['type' => 'danger', 'msg' => isset($data['message']) ? $data['message'] : 'Không thể tải sản phẩm, vui lòng thử lại'];
         return [];
     }
@@ -52,7 +56,8 @@ function fetchAll($url, $token) {
     $response = curl_exec($ch);
     curl_close($ch);
     $data = json_decode($response, true);
-    if (!$data || !$data['success']) return [];
+    $success = isset($data['success']) ? $data['success'] : false;
+    if (!$data || !$success) return [];
     return $data['data']['data'] ?? [];
 }
 $brandsList = fetchAll('http://localhost:5000/api/brands/get', $token);
