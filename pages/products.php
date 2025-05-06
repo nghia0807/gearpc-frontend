@@ -270,7 +270,7 @@ if ($categoryCode) {
 
         .product-img-container {
             background-color: #ffffff;
-            height: 180px;
+            height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -365,9 +365,9 @@ if ($categoryCode) {
         }
 
         .btn-add-cart {
-            background-color: #000000;
+            background-color: #1e1e1e;
             color: #ffa33a;
-            border: 1px solid #ffa33a;
+            border: 2px solid #ffa33a;
             border-radius: 6px;
             padding: 0.5rem;
             text-decoration: none;
@@ -568,7 +568,7 @@ if ($categoryCode) {
                         <a href="products.php" class="btn btn-view-product mt-3">View All Products</a>
                     </div>
                 <?php else: ?>
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
                         <?php foreach ($products as $product): ?>
                             <div class="col">
                                 <a href="product-detail.php?id=<?= htmlspecialchars($product['id']) ?>"

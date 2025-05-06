@@ -58,24 +58,28 @@ if ($product && !empty($product['productInfo']['code'])) {
 }
 
 // Helper: Format currency
-function formatCurrency($amount) {
+function formatCurrency($amount)
+{
     return number_format($amount, 0, ',', '.') . ' ₫';
 }
 
 // Helper: Get product images (main + detail)
-function getProductImages($product) {
+function getProductImages($product)
+{
     $images = [];
     if (!empty($product['productInfo']['imageUrl'])) {
         $images[] = ['url' => $product['productInfo']['imageUrl'], 'priority' => 0];
     }
     if (!empty($product['productDetail']['image']) && is_array($product['productDetail']['image'])) {
-        foreach ($product['productDetail']['image'] as $image) $images[] = $image;
+        foreach ($product['productDetail']['image'] as $image)
+            $images[] = $image;
     }
     return $images;
 }
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -88,12 +92,14 @@ function getProductImages($product) {
             background-color: #121212;
             color: #ffffff;
         }
+
         .product-container {
             background-color: #1e1e1e;
             border-radius: 10px;
             padding: 2rem;
             margin: 2rem 0;
         }
+
         /* Product Images */
         .product-image-container {
             background-color: #fff;
@@ -107,11 +113,13 @@ function getProductImages($product) {
             align-items: center;
             justify-content: center;
         }
+
         .product-image-container img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
         }
+
         .product-image-nav {
             display: flex;
             gap: 0.5rem;
@@ -119,16 +127,20 @@ function getProductImages($product) {
             overflow-x: auto;
             padding-bottom: 0.5rem;
         }
+
         .product-image-nav::-webkit-scrollbar {
             height: 6px;
         }
+
         .product-image-nav::-webkit-scrollbar-track {
             background: #1e1e1e;
         }
+
         .product-image-nav::-webkit-scrollbar-thumb {
             background: #333;
             border-radius: 3px;
         }
+
         .product-image-nav img {
             width: 70px;
             height: 70px;
@@ -139,6 +151,7 @@ function getProductImages($product) {
             padding: 3px;
             background: #fff;
         }
+
         .product-image-nav img.active {
             border-color: #ffa33a;
         }
@@ -151,28 +164,32 @@ function getProductImages($product) {
             line-height: 1.3;
             color: #ffffff;
         }
+
         .product-meta {
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
             margin-bottom: 1rem;
         }
+
         .product-meta-item {
             display: flex;
             align-items: center;
             font-size: 0.9rem;
             color: #ffffff;
         }
+
         .product-meta-item i {
             margin-right: 0.5rem;
             color: #6694ea;
         }
+
         .product-code {
             color: #ffffff;
             font-size: 0.9rem;
             margin-bottom: 1rem;
         }
-        
+
         /* Pricing */
         .price-container {
             background-color: rgba(255, 255, 255, 0.05);
@@ -180,17 +197,20 @@ function getProductImages($product) {
             padding: 1.25rem;
             margin-bottom: 1.5rem;
         }
+
         .current-price {
             font-size: 1.75rem;
             font-weight: bold;
             color: #ffa33a;
         }
+
         .original-price {
             color: #ffffff;
             text-decoration: line-through;
             font-size: 1.1rem;
             margin-left: 0.75rem;
         }
+
         .discount-badge {
             background-color: #ffa33a;
             color: #000;
@@ -200,26 +220,30 @@ function getProductImages($product) {
             border-radius: 4px;
             margin-left: 0.5rem;
         }
+
         .short-desc {
             color: #ffffff;
             margin-bottom: 1.5rem;
             line-height: 1.6;
         }
-        
+
         /* Options and Quantity */
         .option-selector {
             margin-bottom: 1rem;
         }
+
         .option-label {
             font-weight: 600;
             margin-bottom: 0.5rem;
             color: #ffffff;
         }
+
         .option-values {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
         }
+
         .option-value {
             padding: 0.5rem 1rem;
             background-color: rgba(255, 255, 255, 0.05);
@@ -229,29 +253,35 @@ function getProductImages($product) {
             border: 1px solid #333;
             color: #ffffff;
         }
+
         .option-value:hover {
-            border-color: #6694ea;
+            border-color: #ffa33a;
         }
+
         .option-value.selected {
-            background-color: #6694ea;
-            color: #fff;
-            border-color: #6694ea;
+            background-color: #ffa33a;
+            color: #000000;
+            border-color: #ffa33a;
         }
+
         .quantity-selector {
             display: flex;
             align-items: center;
             margin-bottom: 1.5rem;
         }
+
         .quantity-label {
             font-weight: 600;
             margin-right: 1rem;
             min-width: 80px;
             color: #ffffff;
         }
+
         .quantity-controls {
             display: flex;
             align-items: center;
         }
+
         .quantity-btn {
             width: 36px;
             height: 36px;
@@ -265,9 +295,11 @@ function getProductImages($product) {
             cursor: pointer;
             user-select: none;
         }
+
         .quantity-btn:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
+
         .quantity-input {
             width: 60px;
             height: 36px;
@@ -278,10 +310,11 @@ function getProductImages($product) {
             border-right: none;
             color: #fff;
         }
+
         .quantity-input:focus {
             outline: none;
         }
-        
+
         /* Action Buttons */
         .product-actions {
             display: flex;
@@ -289,6 +322,7 @@ function getProductImages($product) {
             gap: 0.75rem;
             margin-bottom: 2rem;
         }
+
         .btn-add-cart {
             background-color: #ffa33a;
             border-color: #ffa33a;
@@ -299,14 +333,17 @@ function getProductImages($product) {
             display: flex;
             align-items: center;
         }
+
         .btn-add-cart:hover {
             background-color: #ff9620;
             border-color: #ff9620;
             color: #000;
         }
+
         .btn-add-cart i {
             margin-right: 0.5rem;
         }
+
         .btn-wishlist {
             border: 1px solid #ffa33a;
             background-color: transparent;
@@ -317,13 +354,15 @@ function getProductImages($product) {
             display: flex;
             align-items: center;
         }
+
         .btn-wishlist:hover {
             background-color: rgba(255, 163, 58, 0.1);
         }
+
         .btn-wishlist i {
             margin-right: 0.5rem;
         }
-        
+
         /* Gift section */
         .gift-section {
             background-color: rgba(255, 163, 58, 0.1);
@@ -332,6 +371,7 @@ function getProductImages($product) {
             padding: 1rem;
             margin-bottom: 1.5rem;
         }
+
         .gift-section-title {
             display: flex;
             align-items: center;
@@ -339,10 +379,12 @@ function getProductImages($product) {
             font-weight: 600;
             margin-bottom: 0.75rem;
         }
+
         .gift-section-title i {
             margin-right: 0.5rem;
             font-size: 1.25rem;
         }
+
         .gift-item {
             display: flex;
             align-items: center;
@@ -351,9 +393,11 @@ function getProductImages($product) {
             padding: 0.5rem;
             margin-bottom: 0.5rem;
         }
+
         .gift-item:last-child {
             margin-bottom: 0;
         }
+
         .gift-item-image {
             width: 48px;
             height: 48px;
@@ -363,29 +407,34 @@ function getProductImages($product) {
             margin-right: 0.75rem;
             overflow: hidden;
         }
+
         .gift-item-image img {
             width: 100%;
             height: 100%;
             object-fit: contain;
         }
+
         .gift-item-info {
             flex: 1;
         }
+
         .gift-item-name {
             font-weight: 600;
             color: #ffffff;
             margin-bottom: 0.25rem;
         }
+
         .gift-item-code {
             font-size: 0.8rem;
             color: #999;
         }
-        
+
         /* Product Tabs */
         .nav-tabs {
             border-bottom: 1px solid #333;
             margin-bottom: 1.5rem;
         }
+
         .nav-tabs .nav-link {
             color: #ffffff;
             background-color: transparent;
@@ -394,10 +443,16 @@ function getProductImages($product) {
             font-weight: 600;
             position: relative;
         }
-        .nav-tabs .nav-link.active {
+
+        .nav-tabs .nav-link:hover {
             color: #ffa33a;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #ffffff;
             background-color: transparent;
         }
+
         .nav-tabs .nav-link.active::after {
             content: '';
             position: absolute;
@@ -407,45 +462,51 @@ function getProductImages($product) {
             height: 2px;
             background-color: #ffa33a;
         }
+
         .tab-content {
             padding: 1rem 0;
             color: #ffffff;
         }
-        
+
         /* Specifications Table */
         .specs-table {
             width: 100%;
             color: #ffffff;
         }
+
         .specs-table tr:nth-child(odd) {
             background-color: rgba(255, 255, 255, 0.05);
         }
+
         .specs-table td {
             padding: 0.75rem 1rem;
         }
+
         .specs-table td:first-child {
             font-weight: 600;
             width: 30%;
         }
-        
+
         /* Error State */
         .error-container {
             text-align: center;
             padding: 3rem 1rem;
             color: #ffffff;
         }
+
         .error-icon {
             font-size: 3rem;
             color: #ffa33a;
             margin-bottom: 1rem;
         }
-        
+
         /* Related Products */
         .related-products {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 1.5rem;
         }
+
         .related-product-card {
             background-color: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
@@ -455,10 +516,12 @@ function getProductImages($product) {
             display: flex;
             flex-direction: column;
         }
+
         .related-product-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
+
         .related-product-image {
             height: 140px;
             display: flex;
@@ -469,11 +532,13 @@ function getProductImages($product) {
             padding: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .related-product-image img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
         }
+
         .related-product-title {
             font-weight: 600;
             margin-bottom: 0.5rem;
@@ -485,61 +550,74 @@ function getProductImages($product) {
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
         .related-product-brand {
             font-size: 0.8rem;
             color: #6694ea;
             margin-bottom: 0.75rem;
         }
+
         .related-product-price {
             margin-top: auto;
         }
+
         .related-product-current-price {
             font-weight: 600;
             color: #ffa33a;
             font-size: 1.1rem;
         }
+
         .related-product-original-price {
             font-size: 0.85rem;
             color: #999;
             text-decoration: line-through;
             margin-left: 0.5rem;
         }
-        
+
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .product-container {
                 padding: 1.25rem;
             }
+
             .product-image-container {
                 height: 280px;
             }
+
             .product-title {
                 font-size: 1.5rem;
             }
+
             .current-price {
                 font-size: 1.5rem;
             }
+
             .product-actions {
                 flex-direction: column;
             }
-            .btn-add-cart, .btn-wishlist {
+
+            .btn-add-cart,
+            .btn-wishlist {
                 width: 100%;
                 justify-content: center;
             }
+
             .specs-table td:first-child {
                 width: 40%;
             }
+
             .related-products {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
         }
-        
+
         /* Make sure all text is white */
         .text-muted {
             color: #ffffff !important;
         }
     </style>
 </head>
+
 <body>
     <?php include '../includes/header.php'; ?>
     <?php include '../includes/navbar.php'; ?>
@@ -565,17 +643,15 @@ function getProductImages($product) {
                         ?>
                         <div class="product-image-container" id="mainImageContainer">
                             <img id="mainImage" src="<?= htmlspecialchars($mainImageUrl) ?>"
-                                 alt="<?= htmlspecialchars($product['productInfo']['name']) ?>"
-                                 onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
+                                alt="<?= htmlspecialchars($product['productInfo']['name']) ?>"
+                                onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
                         </div>
                         <?php if (count($images) > 1): ?>
                             <div class="product-image-nav" id="imageNav">
                                 <?php foreach ($images as $index => $image): ?>
-                                    <img src="<?= htmlspecialchars($image['url']) ?>"
-                                         class="<?= $index === 0 ? 'active' : '' ?>"
-                                         data-index="<?= $index ?>"
-                                         alt="Product image <?= $index + 1 ?>"
-                                         onerror="this.src='https://via.placeholder.com/70x70?text=No+Image'">
+                                    <img src="<?= htmlspecialchars($image['url']) ?>" class="<?= $index === 0 ? 'active' : '' ?>"
+                                        data-index="<?= $index ?>" alt="Product image <?= $index + 1 ?>"
+                                        onerror="this.src='https://via.placeholder.com/70x70?text=No+Image'">
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
@@ -593,7 +669,8 @@ function getProductImages($product) {
                             <?php if (!empty($product['productInfo']['category'])): ?>
                                 <div class="product-meta-item">
                                     <i class="bi bi-folder"></i>
-                                    <span>Danh mục: <?= htmlspecialchars(is_array($product['productInfo']['category']) ? implode(', ', $product['productInfo']['category']) : $product['productInfo']['category']) ?></span>
+                                    <span>Danh mục:
+                                        <?= htmlspecialchars(is_array($product['productInfo']['category']) ? implode(', ', $product['productInfo']['category']) : $product['productInfo']['category']) ?></span>
                                 </div>
                             <?php endif; ?>
                             <?php if (!empty($product['productInfo']['status'])): ?>
@@ -610,8 +687,10 @@ function getProductImages($product) {
                             <div class="d-flex align-items-center">
                                 <span class="current-price"><?= formatCurrency($product['price']['currentPrice']) ?></span>
                                 <?php if ($product['price']['originalPrice'] > $product['price']['currentPrice']): ?>
-                                    <span class="original-price"><?= formatCurrency($product['price']['originalPrice']) ?></span>
-                                    <span class="discount-badge">-<?= htmlspecialchars($product['price']['discountPercentage']) ?>%</span>
+                                    <span
+                                        class="original-price"><?= formatCurrency($product['price']['originalPrice']) ?></span>
+                                    <span
+                                        class="discount-badge">-<?= htmlspecialchars($product['price']['discountPercentage']) ?>%</span>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -625,8 +704,8 @@ function getProductImages($product) {
                                     <div class="gift-item">
                                         <div class="gift-item-image">
                                             <img src="<?= htmlspecialchars($gift['image']) ?>"
-                                                 alt="<?= htmlspecialchars($gift['name']) ?>"
-                                                 onerror="this.src='https://via.placeholder.com/48x48?text=Gift'">
+                                                alt="<?= htmlspecialchars($gift['name']) ?>"
+                                                onerror="this.src='https://via.placeholder.com/48x48?text=Gift'">
                                         </div>
                                         <div class="gift-item-info">
                                             <div class="gift-item-name"><?= htmlspecialchars($gift['name']) ?></div>
@@ -647,14 +726,9 @@ function getProductImages($product) {
                                     <div class="option-label"><?= htmlspecialchars($optionGroup['title']) ?>:</div>
                                     <div class="option-values">
                                         <?php foreach ($optionGroup['options'] as $option): ?>
-                                            <div class="option-value <?= $option['selected'] ? 'selected' : '' ?>"
-                                                 data-option-id="<?= htmlspecialchars($option['id']) ?>">
-                                                <?= htmlspecialchars($option['label']) ?>
-                                                <?php if (isset($option['quantity']) && $option['quantity'] > 0): ?>
-                                                    <span class="ms-1">(<?= $option['quantity'] ?> còn lại)</span>
-                                                <?php elseif (isset($option['quantity']) && $option['quantity'] == 0): ?>
-                                                    <span class="ms-1 text-danger">(Hết hàng)</span>
-                                                <?php endif; ?>
+                                            <div class="option-value <?= !empty($option['selected']) ? 'selected' : '' ?>"
+                                                data-option-id="<?= htmlspecialchars($option['id'] ?? '') ?>">
+                                                <?= htmlspecialchars($option['label'] ?? 'Không xác định') ?>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
@@ -670,7 +744,8 @@ function getProductImages($product) {
                             </div>
                         </div>
                         <div class="product-actions">
-                            <button class="btn btn-add-cart" id="addToCartBtn" style="color: #ff9620;background-color: #ffffff0d;">
+                            <button class="btn btn-add-cart" id="addToCartBtn"
+                                style="color: #ff9620;background-color: #ffffff0d;">
                                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
                             </button>
                             <button class="btn btn-wishlist" style="color: #ff9620;background-color: #ffffff0d;">
@@ -680,22 +755,22 @@ function getProductImages($product) {
                         <ul class="nav nav-tabs" id="productTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="specs-tab" data-bs-toggle="tab"
-                                        data-bs-target="#specs-tab-pane" type="button" role="tab"
-                                        aria-controls="specs-tab-pane" aria-selected="true">
+                                    data-bs-target="#specs-tab-pane" type="button" role="tab" aria-controls="specs-tab-pane"
+                                    aria-selected="true">
                                     Thông số kỹ thuật
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="description-tab" data-bs-toggle="tab"
-                                        data-bs-target="#description-tab-pane" type="button" role="tab"
-                                        aria-controls="description-tab-pane" aria-selected="false">
+                                    data-bs-target="#description-tab-pane" type="button" role="tab"
+                                    aria-controls="description-tab-pane" aria-selected="false">
                                     Mô tả chi tiết
                                 </button>
                             </li>
                         </ul>
                         <div class="tab-content" id="productTabsContent">
                             <div class="tab-pane fade show active" id="specs-tab-pane" role="tabpanel"
-                                 aria-labelledby="specs-tab" tabindex="0">
+                                aria-labelledby="specs-tab" tabindex="0">
                                 <?php if (!empty($product['productDetail']['description'])): ?>
                                     <table class="specs-table">
                                         <tbody>
@@ -712,7 +787,7 @@ function getProductImages($product) {
                                 <?php endif; ?>
                             </div>
                             <div class="tab-pane fade" id="description-tab-pane" role="tabpanel"
-                                 aria-labelledby="description-tab" tabindex="0">
+                                aria-labelledby="description-tab" tabindex="0">
                                 <?php if (!empty($product['productDetail']['description'])): ?>
                                     <div class="mt-3">
                                         <h4><?= htmlspecialchars($product['productInfo']['name']) ?></h4>
@@ -741,11 +816,12 @@ function getProductImages($product) {
                     <div class="related-products">
                         <?php foreach ($relatedProducts as $relatedProduct): ?>
                             <div class="related-product-card">
-                                <a href="product-detail.php?id=<?= htmlspecialchars($relatedProduct['id']) ?>" class="text-decoration-none">
+                                <a href="product-detail.php?id=<?= htmlspecialchars($relatedProduct['id']) ?>"
+                                    class="text-decoration-none">
                                     <div class="related-product-image">
                                         <img src="<?= htmlspecialchars($relatedProduct['imageUrl']) ?>"
-                                             alt="<?= htmlspecialchars($relatedProduct['name']) ?>"
-                                             onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
+                                            alt="<?= htmlspecialchars($relatedProduct['name']) ?>"
+                                            onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
                                     </div>
                                     <h5 class="related-product-title"><?= htmlspecialchars($relatedProduct['name']) ?></h5>
                                     <?php if (!empty($relatedProduct['brandName'])): ?>
@@ -754,7 +830,9 @@ function getProductImages($product) {
                                         </div>
                                     <?php endif; ?>
                                     <?php if (!empty($relatedProduct['shortDescription'])): ?>
-                                        <p class="mb-2 small text-truncate"><?= htmlspecialchars($relatedProduct['shortDescription']) ?></p>
+                                        <p class="mb-2 small text-truncate" style="color: #ffffff;">
+                                            <?= htmlspecialchars($relatedProduct['shortDescription']) ?>
+                                        </p>
                                     <?php endif; ?>
                                     <div class="related-product-price">
                                         <span class="related-product-current-price">
@@ -782,12 +860,12 @@ function getProductImages($product) {
     <?php include '../includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Image gallery
             const thumbs = document.querySelectorAll('#imageNav img');
             const mainImage = document.getElementById('mainImage');
             thumbs.forEach(thumb => {
-                thumb.addEventListener('click', function() {
+                thumb.addEventListener('click', function () {
                     thumbs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
                     mainImage.src = this.src;
@@ -803,14 +881,14 @@ function getProductImages($product) {
                 let v = parseInt(quantityInput.value);
                 if (v < 10) quantityInput.value = v + 1;
             };
-            quantityInput.addEventListener('change', function() {
+            quantityInput.addEventListener('change', function () {
                 let value = parseInt(this.value);
                 if (isNaN(value) || value < 1) this.value = 1;
                 else if (value > 10) this.value = 10;
             });
             // Product options selection
             document.querySelectorAll('.option-value').forEach(option => {
-                option.addEventListener('click', function() {
+                option.addEventListener('click', function () {
                     if (this.classList.contains('selected')) return;
                     const optionsGroup = this.closest('.option-values');
                     optionsGroup.querySelectorAll('.option-value').forEach(opt => opt.classList.remove('selected'));
@@ -857,7 +935,7 @@ function getProductImages($product) {
                 });
             });
             // Add to cart
-            document.getElementById('addToCartBtn').onclick = function() {
+            document.getElementById('addToCartBtn').onclick = function () {
                 const quantity = parseInt(quantityInput.value) || 1;
                 const selectedOptions = [];
                 document.querySelectorAll('.option-selector').forEach(selector => {
@@ -884,4 +962,5 @@ function getProductImages($product) {
         });
     </script>
 </body>
+
 </html>
