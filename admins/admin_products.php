@@ -767,8 +767,12 @@ document.addEventListener('DOMContentLoaded', function () {
         contentDiv.innerHTML = '<div class="text-muted">Đang tải thông tin sản phẩm...</div>';
         modal.show();
 
-        fetch('get_product_detail.php?id=' + encodeURIComponent(productId), {
+        fetch('http://localhost:5000/api/products/' + encodeURIComponent(productId), {
             method: 'GET',
+            headers: {
+                'Authorization': 'Bearer <?= htmlspecialchars($token) ?>',
+                'Accept': 'application/json'
+            },
             credentials: 'same-origin'
         })
         .then(async response => {

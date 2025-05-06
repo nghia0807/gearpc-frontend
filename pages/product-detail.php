@@ -1,4 +1,10 @@
 <?php
+// --- Use user_session for user pages ---
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('user_session');
+    session_start();
+}
+
 // Check if product ID is provided
 $productId = $_GET['id'] ?? null;
 if (!$productId) {
