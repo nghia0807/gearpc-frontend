@@ -358,6 +358,12 @@ if ($categoryCode) {
     <?php include '../includes/header.php'; ?>
     <?php include '../includes/navbar.php'; ?>
     <div class="container py-4">
+        <?php
+        if (isset($_SESSION['message'])) {
+            echo '<div class="alert alert-success">' . $_SESSION['message'] . '</div>';
+            unset($_SESSION['message']);
+        }
+        ?>
         <h1 class="page-title">
             <?php if ($activeCategoryName): ?>
                 <span><?= htmlspecialchars($activeCategoryName) ?></span>
@@ -438,6 +444,7 @@ if ($categoryCode) {
                         <a href="products.php" class="btn btn-view-product mt-3">View All Products</a>
                     </div>
                 <?php else: ?>
+                    <!-- Product card -->
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
                         <?php foreach ($products as $product): ?>
                             <?php include '../components/product-card.php'; ?>
@@ -489,17 +496,6 @@ if ($categoryCode) {
     </div>
     <?php include '../includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Add to cart functionality (demo)
-            document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-                button.addEventListener('click', function () {
-                    alert('Added to cart!');
-                    // Implement AJAX add-to-cart here if needed
-                });
-            });
-        });
-    </script>
 </body>
 
 </html>

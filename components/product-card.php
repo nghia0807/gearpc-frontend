@@ -109,10 +109,10 @@ if (!isset($product) || empty($product)) {
         text-decoration: none;
         font-weight: 500;
         transition: background-color 0.2s;
-        width: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        width: calc(100% - 2rem);
+        margin: 0 auto;
+        display: block;
+        text-align: center;
     }
 
     .btn-add-cart:hover {
@@ -151,11 +151,14 @@ if (!isset($product) || empty($product)) {
             </div>
         </a>
         <div class="product-action">
-            <button class="btn-add-cart add-to-cart-btn w-100 m-4 d-flex gap-2"
-                data-product-id="<?= htmlspecialchars($product['id']) ?>">
-                <i class="bi bi-cart-plus"></i>
-                <span>Add to cart</span>
-            </button>
+            <!-- Form gửi dữ liệu đến add-to-cart.php -->
+            <form method="POST" action="/gearpc-frontend/actions/add-to-cart.php" class="w-100">
+                <input type="hidden" name="product_id" value="<?= htmlspecialchars($product['id']) ?>">
+                <button type="submit" class="btn-add-cart mb-4">
+                    <i class="bi bi-cart-plus"></i>
+                    <span>Add to cart</span>
+                </button>
+            </form>
         </div>
     </div>
 </div>
