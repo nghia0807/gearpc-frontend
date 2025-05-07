@@ -2,11 +2,20 @@
 session_name('user_session');
 session_start();
 
+if (isset($_SESSION['last_add_time']) && time() - $_SESSION['last_add_time'] < 3) {
+    http_response_code(429);
+    echo "Vui lòng đợi vài giây trước khi thêm tiếp.";
+    header('Location: /gearpc-frontend/pages/products.php');
+    exit;
+}
+
 if (!isset($_SESSION['token']) || !isset($_POST['product_id'])) {
     http_response_code(401);
     echo "Bạn chưa đăng nhập hoặc thiếu sản phẩm.";
     exit;
 }
+
+$_SESSION['last_add_time'] = time();
 
 $token = $_SESSION['token'];
 $productId = htmlspecialchars($_POST['product_id'], ENT_QUOTES, 'UTF-8');
