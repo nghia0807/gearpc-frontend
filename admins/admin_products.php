@@ -855,11 +855,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!gifts || gifts.length === 0) {
             giftList = '<div class="text-muted">Không có quà tặng</div>';
         } else {
-            giftList = '<ul class="list-group mb-2">';
+            giftList = '<div class="mb-2">';
             gifts.forEach((g, idx) => {
-                giftList += `<li class="list-group-item">${esc(JSON.stringify(g))}</li>`;
+                // Show gift image, images next to each other
+                if (g && g.image) {
+                    giftList += `<img src="${esc(g.image)}" alt="${esc(g.name || '')}" title="${esc(g.name || '')}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;margin-right:6px;margin-bottom:4px;background:#eee;">`;
+                }
             });
-            giftList += '</ul>';
+            giftList += '</div>';
         }
 
         let priceHtml = `<div>
@@ -912,7 +915,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const d = new Date(dt);
         if (isNaN(d.getTime())) return '';
         const pad = n => n < 10 ? '0' + n : n;
-        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${pad(d.getFullYear())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 });
 </script>

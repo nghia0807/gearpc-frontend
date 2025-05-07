@@ -11,6 +11,9 @@
             <li class="nav-item">
                 <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_products.php' ? ' active' : '' ?>" href="admin_products.php">Products</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_gifts.php' ? ' active' : '' ?>" href="admin_gifts.php">Gifts</a>
+            </li>
         </ul>
         <?php if (isset($_SESSION['user']['fullName'])): ?>
             <span class="navbar-text text-light me-3">
