@@ -3,15 +3,14 @@ session_name('user_session');
 session_start();
 
 if (isset($_SESSION['last_add_time']) && time() - $_SESSION['last_add_time'] < 3) {
-    http_response_code(429);
-    echo "Vui lòng đợi vài giây trước khi thêm tiếp.";
-    header('Location: /gearpc-frontend/pages/products.php');
+    $_SESSION['message'] = "⏳ Vui lòng đợi vài giây trước khi thêm tiếp.";
+    header('Location: ' . $_SERVER['HTTP_REFERER']);
     exit;
 }
 
 if (!isset($_SESSION['token']) || !isset($_POST['product_id'])) {
-    http_response_code(401);
-    echo "Bạn chưa đăng nhập hoặc thiếu sản phẩm.";
+    $_SESSION['message'] = "Bạn chưa đăng nhập hoặc thiếu sản phẩm.";
+    header('Location: ' . $_SERVER['HTTP_REFERER']);
     exit;
 }
 
@@ -35,7 +34,7 @@ curl_setopt_array($ch, [
     CURLOPT_POST => true,
     CURLOPT_HTTPHEADER => [
         'Content-Type: application/json',
-        'Authorization: ' . 'Bearer ' . $token
+        'Authorization: Bearer ' . $token
     ],
     CURLOPT_POSTFIELDS => json_encode($data),
     CURLOPT_TIMEOUT => 10
@@ -47,16 +46,12 @@ $curlErr = curl_error($ch);
 curl_close($ch);
 
 if ($curlErr) {
-    echo "Lỗi khi gọi API: $curlErr";
-    exit;
+    $_SESSION['message'] = "Lỗi khi gọi API: $curlErr";
+} elseif ($httpCode === 200) {
+    $_SESSION['message'] = "Đã thêm sản phẩm vào giỏ hàng!";
+} else {
+    $_SESSION['message'] = "Thêm sản phẩm thất bại. Mã lỗi: $httpCode";
 }
 
-if ($httpCode === 200) {
-    $_SESSION['message'] = 'Product added to cart successfully!';
-    header('Location: /gearpc-frontend/pages/products.php');
-    exit;
-} else {
-    echo "Thêm sản phẩm thất bại. Mã lỗi: $httpCode<br>";
-    echo "Phản hồi: $response";
-    exit;
-}
+header('Location: ' . $_SERVER['HTTP_REFERER']);
+exit;

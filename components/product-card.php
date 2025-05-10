@@ -156,7 +156,7 @@ if (!isset($product) || empty($product)) {
                 <input type="hidden" name="product_id" value="<?= htmlspecialchars($product['id']) ?>">
                 <button type="submit" class="btn-add-cart mb-4">
                     <i class="bi bi-cart-plus"></i>
-                    <span>Add to cart</span>
+                    <span>Thêm vào giỏ hàng</span>
                 </button>
             </form>
         </div>

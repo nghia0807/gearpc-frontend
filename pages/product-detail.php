@@ -623,6 +623,12 @@ function getProductImages($product)
     <?php include '../includes/navbar.php'; ?>
 
     <div class="container">
+        <?php
+        if (isset($_SESSION['message'])) {
+            echo '<div class="alert alert-success">' . $_SESSION['message'] . '</div>';
+            unset($_SESSION['message']);
+        }
+        ?>
         <?php if ($errorMsg): ?>
             <div class="product-container error-container">
                 <div class="error-icon"><i class="bi bi-exclamation-circle"></i></div>
@@ -735,23 +741,22 @@ function getProductImages($product)
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
-                        <div class="quantity-selector">
-                            <div class="quantity-label">Số lượng:</div>
-                            <div class="quantity-controls">
-                                <div class="quantity-btn" id="decreaseQty">-</div>
-                                <input type="number" id="quantity" class="quantity-input" value="1" min="1" max="10">
-                                <div class="quantity-btn" id="increaseQty">+</div>
+                        <form action="/gearpc-frontend/actions/add-to-cart.php" method="POST">
+                            <div class="quantity-selector">
+                                <div class="quantity-label">Số lượng:</div>
+                                <div class="quantity-controls">
+                                    <div class="quantity-btn" id="decreaseQty">-</div>
+                                    <input type="number" name="quantity" id="quantity" class="quantity-input" value="1" min="1" max="10">
+                                    <div class="quantity-btn" id="increaseQty">+</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn btn-add-cart" id="addToCartBtn"
-                                style="color: #ff9620;background-color: #ffffff0d;">
+
+                            <input type="hidden" name="product_id" value="<?= htmlspecialchars($product['productInfo']['id'] ?? '') ?>">
+
+                            <button type="submit" class="btn btn-add-cart mb-4" style="color: #ff9620;background-color: #ffffff0d;">
                                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
                             </button>
-                            <button class="btn btn-wishlist" style="color: #ff9620;background-color: #ffffff0d;">
-                                <i class="bi bi-heart"></i> Thêm vào yêu thích
-                            </button>
-                        </div>
+                        </form>
                         <ul class="nav nav-tabs" id="productTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="specs-tab" data-bs-toggle="tab"
@@ -860,12 +865,12 @@ function getProductImages($product)
     <?php include '../includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Image gallery
             const thumbs = document.querySelectorAll('#imageNav img');
             const mainImage = document.getElementById('mainImage');
             thumbs.forEach(thumb => {
-                thumb.addEventListener('click', function () {
+                thumb.addEventListener('click', function() {
                     thumbs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
                     mainImage.src = this.src;
@@ -881,14 +886,14 @@ function getProductImages($product)
                 let v = parseInt(quantityInput.value);
                 if (v < 10) quantityInput.value = v + 1;
             };
-            quantityInput.addEventListener('change', function () {
+            quantityInput.addEventListener('change', function() {
                 let value = parseInt(this.value);
                 if (isNaN(value) || value < 1) this.value = 1;
                 else if (value > 10) this.value = 10;
             });
             // Product options selection
             document.querySelectorAll('.option-value').forEach(option => {
-                option.addEventListener('click', function () {
+                option.addEventListener('click', function() {
                     if (this.classList.contains('selected')) return;
                     const optionsGroup = this.closest('.option-values');
                     optionsGroup.querySelectorAll('.option-value').forEach(opt => opt.classList.remove('selected'));
@@ -935,7 +940,7 @@ function getProductImages($product)
                 });
             });
             // Add to cart
-            document.getElementById('addToCartBtn').onclick = function () {
+            document.getElementById('addToCartBtn').onclick = function() {
                 const quantity = parseInt(quantityInput.value) || 1;
                 const selectedOptions = [];
                 document.querySelectorAll('.option-selector').forEach(selector => {
