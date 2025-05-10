@@ -1,9 +1,12 @@
 <?php
-// admin_products.php
-// Admin interface for managing products
-
 session_name('admin_session');
 session_start();
+
+// Kiểm tra token tồn tại, nếu không thì chuyển hướng về trang đăng nhập
+if (!isset($_SESSION['token'])) {
+    header('Location: manage_login.php');
+    exit;
+}
 
 $token = $_SESSION['token'];
 $apiBaseUrl = 'http://localhost:5000/api/products';
@@ -33,7 +36,8 @@ function fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, &$alerts, &$t
     curl_close($ch);
 
     $data = json_decode($response, true);
-    if (!$data || !$data['success'] || $httpCode !== 200) {
+    $success = isset($data['success']) ? $data['success'] : false;
+    if (!$data || !$success || $httpCode !== 200) {
         $alerts[] = ['type' => 'danger', 'msg' => isset($data['message']) ? $data['message'] : 'Không thể tải sản phẩm, vui lòng thử lại'];
         return [];
     }
@@ -52,7 +56,8 @@ function fetchAll($url, $token) {
     $response = curl_exec($ch);
     curl_close($ch);
     $data = json_decode($response, true);
-    if (!$data || !$data['success']) return [];
+    $success = isset($data['success']) ? $data['success'] : false;
+    if (!$data || !$success) return [];
     return $data['data']['data'] ?? [];
 }
 $brandsList = fetchAll('http://localhost:5000/api/brands/get', $token);
@@ -850,11 +855,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!gifts || gifts.length === 0) {
             giftList = '<div class="text-muted">Không có quà tặng</div>';
         } else {
-            giftList = '<ul class="list-group mb-2">';
+            giftList = '<div class="mb-2">';
             gifts.forEach((g, idx) => {
-                giftList += `<li class="list-group-item">${esc(JSON.stringify(g))}</li>`;
+                // Show gift image, images next to each other
+                if (g && g.image) {
+                    giftList += `<img src="${esc(g.image)}" alt="${esc(g.name || '')}" title="${esc(g.name || '')}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;margin-right:6px;margin-bottom:4px;background:#eee;">`;
+                }
             });
-            giftList += '</ul>';
+            giftList += '</div>';
         }
 
         let priceHtml = `<div>
@@ -907,7 +915,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const d = new Date(dt);
         if (isNaN(d.getTime())) return '';
         const pad = n => n < 10 ? '0' + n : n;
-        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${pad(d.getFullYear())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 });
 </script>

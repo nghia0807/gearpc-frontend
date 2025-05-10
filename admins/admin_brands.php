@@ -2,6 +2,12 @@
 session_name('admin_session');
 session_start();
 
+// Kiểm tra token tồn tại, nếu không thì chuyển hướng về trang đăng nhập
+if (!isset($_SESSION['token'])) {
+    header('Location: manage_login.php');
+    exit;
+}
+
 $token = $_SESSION['token'];
 $apiBase = 'http://localhost:5000/api/brands';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
