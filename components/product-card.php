@@ -152,7 +152,7 @@ if (!isset($product) || empty($product)) {
         </a>
         <div class="product-action">
             <!-- Form gửi dữ liệu đến add-to-cart.php -->
-            <form method="POST" action="/gearpc-frontend/actions/add-to-cart.php" class="w-100">
+            <form method="POST" action="../actions/add-to-cart.php" class="w-100">
                 <input type="hidden" name="product_id" value="<?= htmlspecialchars($product['id']) ?>">
                 <button type="submit" class="btn-add-cart mb-4">
                     <i class="bi bi-cart-plus"></i>

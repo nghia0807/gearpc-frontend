@@ -52,9 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_gift'])) {
     }
 }
 
-// Handle update gift POST
+// Handle update gift POST (by id)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_gift'])) {
-    $code = trim($_POST['edit_code'] ?? '');
+    $id = trim($_POST['edit_id'] ?? '');
     $name = trim($_POST['edit_name'] ?? '');
     $imageBase64 = '';
 
@@ -64,11 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_gift'])) {
         $imageBase64 = 'data:' . mime_content_type($_FILES['edit_image']['tmp_name']) . ';base64,' . base64_encode($imgData);
     }
 
-    if ($code === '' || $name === '') {
-        $alerts[] = ['type' => 'danger', 'msg' => 'Mã và tên quà tặng không được để trống.'];
+    if ($id === '' || $name === '') {
+        $alerts[] = ['type' => 'danger', 'msg' => 'ID và tên quà tặng không được để trống.'];
     } else {
         $putData = [
-            'code' => $code,
+            'id' => $id,
             'name' => $name,
             'imageBase64' => $imageBase64
         ];
@@ -228,7 +228,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
       </div>
       <div class="modal-body">
-        <input type="hidden" id="edit_code" name="edit_code">
+        <input type="hidden" id="edit_id" name="edit_id">
         <div class="mb-3">
             <label for="edit_code_display" class="form-label">Mã quà tặng</label>
             <input type="text" class="form-control" id="edit_code_display" disabled>
@@ -258,10 +258,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Edit modal logic ---
     document.querySelectorAll('.editGiftBtn').forEach(function(btn) {
         btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
             const code = this.getAttribute('data-code');
             const name = this.getAttribute('data-name');
             const image = this.getAttribute('data-image');
-            document.getElementById('edit_code').value = code;
+            document.getElementById('edit_id').value = id;
             document.getElementById('edit_code_display').value = code;
             document.getElementById('edit_name').value = name;
             const imgPreview = document.getElementById('edit_image_preview');
