@@ -25,7 +25,7 @@
                 Create Manager Account
             </button>
         <?php endif; ?>
-        <a href="manage_login.php?logout=1" class="btn btn-outline-light btn-sm">Đăng xuất</a>
+        <a href="manage_login.php?logout=1" class="btn btn-outline-light btn-sm">Logout</a>
     </div>
 </nav>
 

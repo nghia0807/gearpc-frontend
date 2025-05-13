@@ -770,7 +770,7 @@ function getProductImages($product)
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
-                        <form action="/gearpc-frontend/actions/add-to-cart.php" method="POST">
+                        <form action="../actions/add-to-cart.php" method="POST">
                             <div class="quantity-selector">
                                 <div class="quantity-label">Số lượng:</div>
                                 <div class="quantity-controls">

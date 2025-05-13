@@ -42,6 +42,19 @@ $cartItems = $data['data']['items'] ?? [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ hàng - GearPC</title>
     <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         .cart-container {
             max-width: 1000px;
             margin: auto;
@@ -49,6 +62,7 @@ $cartItems = $data['data']['items'] ?? [];
             background-color: #fdfdfd;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            flex: 1 0 auto;
         }
 
         .cart-header-title {
@@ -181,6 +195,11 @@ $cartItems = $data['data']['items'] ?? [];
             .remove-form {
                 margin-top: 10px;
             }
+        }
+
+        /* Sticky footer */
+        .footer {
+            flex-shrink: 0;
         }
     </style>
 

@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_gift'])) {
     }
 
     if ($code === '' || $name === '') {
-        $alerts[] = ['type' => 'danger', 'msg' => 'Mã và tên quà tặng không được để trống.'];
+        $alerts[] = ['type' => 'danger', 'msg' => 'Gift code and name cannot be empty.'];
     } else {
         $postData = [
             'code' => $code,
@@ -45,9 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_gift'])) {
         $resAdd = $err ? ['success' => false, 'message' => $err] : json_decode($response, true);
 
         if (!empty($resAdd['success'])) {
-            $alerts[] = ['type' => 'success', 'msg' => 'Thêm quà tặng thành công.'];
+            $alerts[] = ['type' => 'success', 'msg' => 'Gift added successfully.'];
         } else {
-            $alerts[] = ['type' => 'danger', 'msg' => $resAdd['message'] ?? 'Không thể thêm quà tặng.'];
+            $alerts[] = ['type' => 'danger', 'msg' => $resAdd['message'] ?? 'Unable to add gift.'];
         }
     }
 }
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_gift'])) {
     }
 
     if ($id === '' || $name === '') {
-        $alerts[] = ['type' => 'danger', 'msg' => 'ID và tên quà tặng không được để trống.'];
+        $alerts[] = ['type' => 'danger', 'msg' => 'Gift ID and name cannot be empty.'];
     } else {
         $putData = [
             'id' => $id,
@@ -86,9 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_gift'])) {
         $resEdit = $err ? ['success' => false, 'message' => $err] : json_decode($response, true);
 
         if (!empty($resEdit['success'])) {
-            $alerts[] = ['type' => 'success', 'msg' => 'Cập nhật quà tặng thành công.'];
+            $alerts[] = ['type' => 'success', 'msg' => 'Gift updated successfully.'];
         } else {
-            $alerts[] = ['type' => 'danger', 'msg' => $resEdit['message'] ?? 'Không thể cập nhật quà tặng.'];
+            $alerts[] = ['type' => 'danger', 'msg' => $resEdit['message'] ?? 'Unable to update gift.'];
         }
     }
 }
@@ -114,14 +114,14 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
     $gifts = $res['data']['data'];
     $totalCount = $res['data']['totalCount'];
 } else {
-    $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Không thể tải danh sách quà tặng.'];
+    $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to load gifts.'];
 }
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Quà tặng</title>
+    <title>Gift Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
@@ -132,13 +132,13 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
         <div class="alert alert-<?= $alert['type'] ?>"><?= htmlspecialchars($alert['msg']) ?></div>
     <?php endforeach; ?>
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Danh sách quà tặng</h4>
+        <h4>Gift List</h4>
         <div>
             <button id="btnDeleteSelectedGifts" class="btn btn-danger" disabled>
-                <i class="fa fa-trash"></i> Xóa đã chọn
+                <i class="fa fa-trash"></i> Delete Selected
             </button>
             <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addGiftModal">
-                <i class="fa fa-plus"></i> Thêm quà tặng
+                <i class="fa fa-plus"></i> Add Gift
             </button>
         </div>
     </div>
@@ -150,10 +150,10 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                         <input type="checkbox" id="selectAllGifts">
                     </th>
                     <th>ID</th>
-                    <th>Mã</th>
-                    <th>Tên</th>
-                    <th>Hình ảnh</th>
-                    <th style="width: 110px;">Thao tác</th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th style="width: 110px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -179,12 +179,12 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                             data-image="<?= htmlspecialchars($gift['image']) ?>"
                             data-bs-toggle="modal"
                             data-bs-target="#editGiftModal"
-                        ><i class="fa fa-pen-to-square"></i> Sửa</button>
+                        ><i class="fa fa-pen-to-square"></i> Edit</button>
                     </td>
                 </tr>
             <?php endforeach; ?>
             <?php if (empty($gifts)): ?>
-                <tr><td colspan="6" class="text-center">Không có quà tặng nào.</td></tr>
+                <tr><td colspan="6" class="text-center">No gifts found.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
@@ -196,25 +196,25 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
   <div class="modal-dialog">
     <form method="post" enctype="multipart/form-data" class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addGiftModalLabel">Thêm quà tặng</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        <h5 class="modal-title" id="addGiftModalLabel">Add Gift</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-            <label for="code" class="form-label">Mã quà tặng</label>
+            <label for="code" class="form-label">Gift Code</label>
             <input type="text" class="form-control" id="code" name="code" required>
         </div>
         <div class="mb-3">
-            <label for="name" class="form-label">Tên quà tặng</label>
+            <label for="name" class="form-label">Gift Name</label>
             <input type="text" class="form-control" id="name" name="name" required>
         </div>
         <div class="mb-3">
-            <label for="image" class="form-label">Hình ảnh</label>
+            <label for="image" class="form-label">Image</label>
             <input type="file" class="form-control" id="image" name="image" accept="image/*">
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" name="add_gift" class="btn btn-success">Thêm</button>
+        <button type="submit" name="add_gift" class="btn btn-success">Add</button>
       </div>
     </form>
   </div>
@@ -225,21 +225,21 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
   <div class="modal-dialog">
     <form method="post" enctype="multipart/form-data" class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editGiftModalLabel">Sửa quà tặng</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        <h5 class="modal-title" id="editGiftModalLabel">Edit Gift</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="edit_id" name="edit_id">
         <div class="mb-3">
-            <label for="edit_code_display" class="form-label">Mã quà tặng</label>
+            <label for="edit_code_display" class="form-label">Gift Code</label>
             <input type="text" class="form-control" id="edit_code_display" disabled>
         </div>
         <div class="mb-3">
-            <label for="edit_name" class="form-label">Tên quà tặng</label>
+            <label for="edit_name" class="form-label">Gift Name</label>
             <input type="text" class="form-control" id="edit_name" name="edit_name" required>
         </div>
         <div class="mb-3">
-            <label for="edit_image" class="form-label">Hình ảnh (chọn để thay đổi)</label>
+            <label for="edit_image" class="form-label">Image (choose to change)</label>
             <input type="file" class="form-control" id="edit_image" name="edit_image" accept="image/*">
             <div class="mt-2">
                 <img id="edit_image_preview" src="" alt="Gift Image" style="max-width:80px;max-height:80px;display:none;">
@@ -248,7 +248,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
       </div>
       <div class="modal-footer">
         <button type="submit" name="edit_gift" class="btn btn-warning">
-            <i class="fa fa-pen-to-square"></i> Cập nhật
+            <i class="fa fa-pen-to-square"></i> Save
         </button>
       </div>
     </form>
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .filter(cb => cb.checked)
             .map(cb => cb.getAttribute('data-code'));
         if (codes.length === 0) return;
-        if (!confirm('Bạn có chắc chắn muốn xóa các quà tặng đã chọn?')) return;
+        if (!confirm('Are you sure you want to delete the selected gifts?')) return;
         deleteGiftsByCodes(codes);
     });
 
@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function() {
             const code = this.getAttribute('data-code');
             if (!code) return;
-            if (!confirm('Bạn có chắc chắn muốn xóa quà tặng này?')) return;
+            if (!confirm('Are you sure you want to delete this gift?')) return;
             deleteGiftsByCodes([code]);
         });
     });

@@ -29,7 +29,7 @@ function fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, &$alerts, &$t
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     if (curl_errno($ch)) {
-        $alerts[] = ['type' => 'danger', 'msg' => 'Không thể kết nối đến API.'];
+        $alerts[] = ['type' => 'danger', 'msg' => 'Unable to connect to API.'];
         curl_close($ch);
         return [];
     }
@@ -38,7 +38,7 @@ function fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, &$alerts, &$t
     $data = json_decode($response, true);
     $success = isset($data['success']) ? $data['success'] : false;
     if (!$data || !$success || $httpCode !== 200) {
-        $alerts[] = ['type' => 'danger', 'msg' => isset($data['message']) ? $data['message'] : 'Không thể tải sản phẩm, vui lòng thử lại'];
+        $alerts[] = ['type' => 'danger', 'msg' => isset($data['message']) ? $data['message'] : 'Unable to load products, please try again'];
         return [];
     }
     $totalCount = $data['data']['totalCount'];
@@ -68,10 +68,10 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
 
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Sản phẩm</title>
+    <title>Product Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
@@ -159,13 +159,13 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
         <div class="alert alert-<?= $alert['type'] ?>"><?= htmlspecialchars($alert['msg']) ?></div>
     <?php endforeach; ?>
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Danh sách sản phẩm</h4>
+        <h4>Product List</h4>
         <div>
             <button id="btnDeleteSelected" class="btn btn-danger" disabled>
-                <i class="fa fa-trash"></i> Xóa đã chọn
+                <i class="fa fa-trash"></i> Delete Selected
             </button>
             <button id="btnAddProduct" class="btn btn-success">
-                <i class="fa fa-plus"></i> Thêm sản phẩm
+                <i class="fa fa-plus"></i> Add Product
             </button>
         </div>
     </div>
@@ -178,20 +178,20 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                         <input type="checkbox" id="selectAllProducts">
                     </th>
                     <th>ID</th>
-                    <th>Mã SP</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Hình ảnh</th>
-                    <th>Thương hiệu</th>
-                    <th>Giá hiện tại</th>
-                    <th>Giá gốc</th>
-                    <th>Mô tả ngắn</th>
-                    <th style="width: 120px;">Hành động</th>
+                    <th>Product Code</th>
+                    <th>Product Name</th>
+                    <th>Image</th>
+                    <th>Brand</th>
+                    <th>Current Price</th>
+                    <th>Original Price</th>
+                    <th>Short Description</th>
+                    <th style="width: 120px;">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php if (empty($products)): ?>
                     <tr>
-                        <td colspan="10" class="text-center text-muted">Không có sản phẩm nào.</td>
+                        <td colspan="10" class="text-center text-muted">No products found.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
@@ -204,7 +204,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                             <td><?= htmlspecialchars($product['name']) ?></td>
                             <td>
                                 <?php if (!empty($product['imageUrl'])): ?>
-                                    <img src="<?= htmlspecialchars($product['imageUrl']) ?>" alt="Ảnh sản phẩm" class="product-img-thumb">
+                                    <img src="<?= htmlspecialchars($product['imageUrl']) ?>" alt="Product Image" class="product-img-thumb">
                                 <?php else: ?>
                                     <img src="https://via.placeholder.com/64x64?text=No+Image" alt="No Image" class="product-img-thumb">
                                 <?php endif; ?>
@@ -215,10 +215,10 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                             <td><?= htmlspecialchars($product['shortDescription']) ?></td>
                             <td class="action-btns">
                                 <button class="btn btn-sm btn-info btn-view-product" data-id="<?= htmlspecialchars($product['id']) ?>">
-                                    <i class="fa-solid fa-eye"></i> Xem
+                                    <i class="fa-solid fa-eye"></i> View
                                 </button>
                                 <button class="btn btn-sm btn-warning" disabled>
-                                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
                                 </button>
                             </td>
                         </tr>
@@ -230,7 +230,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
         <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
             <div class="card-footer bg-white text-center">
                 <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">
-                    <i class="fa-solid fa-angles-down"></i> Tải thêm
+                    <i class="fa-solid fa-angles-down"></i> Load More
                 </a>
             </div>
         <?php endif; ?>
@@ -245,41 +245,41 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
     <div class="modal-content">
       <form id="addProductForm" autocomplete="off">
         <div class="modal-header">
-          <h5 class="modal-title" id="addProductModalLabel">Thêm sản phẩm mới</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+          <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" style="overflow-y:auto; max-height:70vh;">
           <div id="addProductAlert"></div>
-          <!-- Thông tin chính -->
+          <!-- Main Info -->
           <div class="card mb-3 border-primary">
             <div class="card-header bg-primary text-white py-2">
-              <strong>Thông tin sản phẩm</strong>
+              <strong>Product Information</strong>
             </div>
             <div class="card-body pb-2">
               <div class="row mb-2">
                 <div class="col-md-6 mb-2">
-                  <label class="form-label">Tên sản phẩm</label>
+                  <label class="form-label">Product Name</label>
                   <input type="text" class="form-control" name="name" required>
                 </div>
                 <div class="col-md-6 mb-2">
-                  <label class="form-label">Mã sản phẩm</label>
+                  <label class="form-label">Product Code</label>
                   <input type="text" class="form-control" name="code" required>
                 </div>
               </div>
               <div class="mb-2">
-                <label class="form-label">Ảnh đại diện</label>
+                <label class="form-label">Main Image</label>
                 <input type="file" class="form-control" name="image" accept="image/*" required>
               </div>
             </div>
           </div>
-          <!-- Danh mục, Thương hiệu, Trạng thái -->
+          <!-- Category, Brand, Status -->
           <div class="card mb-3 border-success">
             <div class="card-header bg-success text-white py-2">
-              <strong>Phân loại & Trạng thái</strong>
+              <strong>Classification & Status</strong>
             </div>
             <div class="card-body pb-2">
               <div class="mb-2">
-                <label class="form-label">Danh mục</label>
+                <label class="form-label">Categories</label>
                 <div class="row">
                   <?php foreach ($categoriesList as $cat): ?>
                     <div class="col-md-4">
@@ -295,9 +295,9 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
               </div>
               <div class="row">
                 <div class="col-md-6 mb-2">
-                  <label class="form-label">Thương hiệu</label>
+                  <label class="form-label">Brand</label>
                   <select class="form-select" name="brandCode" required>
-                    <option value="">-- Chọn thương hiệu --</option>
+                    <option value="">-- Select Brand --</option>
                     <?php foreach ($brandsList as $brand): ?>
                       <option value="<?= htmlspecialchars($brand['code']) ?>">
                         <?= htmlspecialchars($brand['name']) ?>
@@ -306,7 +306,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                   </select>
                 </div>
                 <div class="col-md-6 mb-2">
-                  <label class="form-label">Trạng thái</label>
+                  <label class="form-label">Status</label>
                   <select class="form-select" name="status" required>
                     <option value="New">New</option>
                     <option value="Active">Active</option>
@@ -322,26 +322,26 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
               <strong>Gift Codes</strong>
             </div>
             <div class="card-body pb-2">
-              <label class="form-label">Gift Codes (mã, cách nhau bởi dấu phẩy, có thể bỏ trống)</label>
-              <input type="text" class="form-control" name="giftCodes" placeholder="VD: gift1,gift2">
+              <label class="form-label">Gift Codes (comma separated, optional)</label>
+              <input type="text" class="form-control" name="giftCodes" placeholder="e.g. gift1,gift2">
             </div>
           </div>
           <!-- VARIANTS SECTION -->
           <div class="card mb-3 border-info">
             <div class="card-header bg-info text-white py-2">
-              <strong>Biến thể sản phẩm</strong>
+              <strong>Product Variants</strong>
             </div>
             <div class="card-body pb-2">
               <div id="variantsSection">
                 <!-- Variant blocks will be inserted here by JS -->
               </div>
-              <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btnAddVariant">+ Thêm biến thể</button>
+              <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btnAddVariant">+ Add Variant</button>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Thêm sản phẩm</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="submit" class="btn btn-success">Add Product</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </form>
     </div>
@@ -353,16 +353,16 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="viewProductModalLabel">Chi tiết sản phẩm</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        <h5 class="modal-title" id="viewProductModalLabel">Product Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div id="viewProductModalContent" class="text-muted">
-          Đang tải thông tin sản phẩm...
+          Loading product information...
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .filter(cb => cb.checked)
             .map(cb => cb.getAttribute('data-code'));
         if (codes.length === 0) return;
-        if (!confirm('Bạn có chắc chắn muốn xóa các sản phẩm đã chọn?')) return;
+        if (!confirm('Are you sure you want to delete the selected products?')) return;
         deleteProductsByCodes(codes);
     });
 
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function() {
             const code = this.getAttribute('data-code');
             if (!code) return;
-            if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
+            if (!confirm('Are you sure you want to delete this product?')) return;
             deleteProductsByCodes([code]);
         });
     });
@@ -468,17 +468,17 @@ document.addEventListener('DOMContentLoaded', function () {
         return `
         <div class="variant-block border rounded p-2 mb-3" data-variant-idx="${idx}">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="fw-bold">Biến thể #${idx + 1}</span>
+            <span class="fw-bold">Variant #${idx + 1}</span>
             <button type="button" class="btn btn-sm btn-outline-danger btnRemoveVariant" ${idx === 0 ? 'style="display:none;"' : ''}>&times;</button>
           </div>
           <div class="mb-2">
-            <label class="form-label">Tiêu đề biến thể</label>
-            <input type="text" class="form-control" name="variant_optionTitle_${idx}" placeholder="VD: Màu sắc" required>
+            <label class="form-label">Variant Title</label>
+            <input type="text" class="form-control" name="variant_optionTitle_${idx}" placeholder="e.g. Color" required>
           </div>
           <div class="mb-2">
-            <label class="form-label">Options cho biến thể này</label>
+            <label class="form-label">Options for this variant</label>
             <div class="variant-options-list" data-variant-idx="${idx}"></div>
-            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddOption" data-variant-idx="${idx}">+ Thêm option</button>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddOption" data-variant-idx="${idx}">+ Add Option</button>
           </div>
         </div>
         `;
@@ -492,32 +492,32 @@ document.addEventListener('DOMContentLoaded', function () {
             <button type="button" class="btn btn-sm btn-outline-danger btnRemoveOption" ${optionIdx === 0 ? 'style="display:none;"' : ''}>&times;</button>
           </div>
           <div class="mb-2">
-            <label class="form-label">Nhãn option</label>
-            <input type="text" class="form-control" name="variant_${variantIdx}_optionLabel_${optionIdx}" placeholder="VD: Đỏ" required>
+            <label class="form-label">Option Label</label>
+            <input type="text" class="form-control" name="variant_${variantIdx}_optionLabel_${optionIdx}" placeholder="e.g. Red" required>
           </div>
           <div class="mb-2">
-            <label class="form-label">Giá gốc</label>
+            <label class="form-label">Original Price</label>
             <input type="number" class="form-control" name="variant_${variantIdx}_originalPrice_${optionIdx}" required>
           </div>
           <div class="mb-2">
-            <label class="form-label">Giá hiện tại</label>
+            <label class="form-label">Current Price</label>
             <input type="number" class="form-control" name="variant_${variantIdx}_currentPrice_${optionIdx}" required>
           </div>
           <div class="mb-2">
-            <label class="form-label">Mô tả ngắn</label>
+            <label class="form-label">Short Description</label>
             <input type="text" class="form-control" name="variant_${variantIdx}_shortDescription_${optionIdx}">
           </div>
           <!-- Multiple Descriptions -->
           <div class="mb-2">
-            <label class="form-label">Mô tả chi tiết (có thể thêm nhiều)</label>
+            <label class="form-label">Detailed Descriptions (add multiple if needed)</label>
             <div class="variantDescriptionsList" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}"></div>
-            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddDescription" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}">+ Thêm mô tả</button>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddDescription" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}">+ Add Description</button>
           </div>
           <!-- Multiple Images -->
           <div class="mb-2">
-            <label class="form-label">Ảnh option (có thể thêm nhiều)</label>
+            <label class="form-label">Option Images (add multiple if needed)</label>
             <div class="variantImagesList" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}"></div>
-            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddImage" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}">+ Thêm ảnh</button>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddImage" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}">+ Add Image</button>
           </div>
         </div>
         `;
@@ -526,8 +526,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function createDescriptionRow(variantIdx, optionIdx, descIdx = 0, name = '', text = '', priority = 0) {
         return `
         <div class="input-group mb-1 variant-desc-row" data-desc-idx="${descIdx}">
-            <input type="text" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_name[]" placeholder="Tên mô tả" value="${name}">
-            <input type="text" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_text[]" placeholder="Nội dung mô tả" value="${text}">
+            <input type="text" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_name[]" placeholder="Description Name" value="${name}">
+            <input type="text" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_text[]" placeholder="Description Content" value="${text}">
             <input type="number" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_priority[]" placeholder="Priority" value="${priority}">
             <button type="button" class="btn btn-outline-danger btn-remove-desc" tabindex="-1">&times;</button>
         </div>`;
@@ -766,7 +766,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function showProductDetail(productId) {
         const modal = new bootstrap.Modal(document.getElementById('viewProductModal'));
         const contentDiv = document.getElementById('viewProductModalContent');
-        contentDiv.innerHTML = '<div class="text-muted">Đang tải thông tin sản phẩm...</div>';
+        contentDiv.innerHTML = '<div class="text-muted">Loading product information...</div>';
         modal.show();
 
         fetch('http://localhost:5000/api/products/' + encodeURIComponent(productId), {
@@ -783,13 +783,13 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(data => {
             if (!data.success || !data.data) {
-                contentDiv.innerHTML = '<div class="alert alert-danger">Không thể tải thông tin sản phẩm.</div>';
+                contentDiv.innerHTML = '<div class="alert alert-danger">Unable to load product information.</div>';
                 return;
             }
             contentDiv.innerHTML = renderProductDetail(data.data);
         })
         .catch(err => {
-            contentDiv.innerHTML = '<div class="alert alert-danger">Lỗi kết nối server, vui lòng thử lại.</div>';
+            contentDiv.innerHTML = '<div class="alert alert-danger">Server connection error, please try again.</div>';
         });
     }
 
@@ -809,7 +809,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const createdDate = data.createdDate ? formatDateTime(data.createdDate) : '';
         const createdBy = esc(data.createdBy || '');
 
-        let imgThumb = info.imageUrl ? `<img src="${esc(info.imageUrl)}" class="modal-product-thumb me-2 mb-2" alt="Ảnh sản phẩm">` :
+        let imgThumb = info.imageUrl ? `<img src="${esc(info.imageUrl)}" class="modal-product-thumb me-2 mb-2" alt="Product Image">` :
             `<img src="https://via.placeholder.com/96x96?text=No+Image" class="modal-product-thumb me-2 mb-2" alt="No Image">`;
 
         let imgList = '';
@@ -824,7 +824,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let descList = '';
         if (detail.description && detail.description.length > 0) {
-            descList = '<div class="mb-2"><span class="modal-product-label">Mô tả:</span><ul class="ps-4" style="list-style-type: disc; margin-bottom: 0;">';
+            descList = '<div class="mb-2"><span class="modal-product-label">Description:</span><ul class="ps-4" style="list-style-type: disc; margin-bottom: 0;">';
             detail.description.forEach(d => {
                 descList += `<li>
                     <span class="modal-product-label">${esc(d.name)}:</span> ${esc(d.descriptionText)}
@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let giftList = '';
         if (!gifts || gifts.length === 0) {
-            giftList = '<div class="text-muted">Không có quà tặng</div>';
+            giftList = '<div class="text-muted">No gifts</div>';
         } else {
             giftList = '<div class="mb-2">';
             gifts.forEach((g, idx) => {
@@ -863,10 +863,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         let priceHtml = `<div>
-            <span class="modal-product-label">Giá gốc:</span> ${formatPrice(price.originalPrice)}₫<br>
-            <span class="modal-product-label">Giá hiện tại:</span> ${formatPrice(price.currentPrice)}₫<br>
-            <span class="modal-product-label">Giá khuyến mãi:</span> ${formatPrice(price.discountPrice)}₫<br>
-            <span class="modal-product-label">Giảm giá:</span> ${price.discountPercentage ? esc(price.discountPercentage + '%') : '0%'}
+            <span class="modal-product-label">Original Price:</span> ${formatPrice(price.originalPrice)}₫<br>
+            <span class="modal-product-label">Current Price:</span> ${formatPrice(price.currentPrice)}₫<br>
+            <span class="modal-product-label">Discount Price:</span> ${formatPrice(price.discountPrice)}₫<br>
+            <span class="modal-product-label">Discount:</span> ${price.discountPercentage ? esc(price.discountPercentage + '%') : '0%'}
         </div>`;
 
         return `
@@ -878,25 +878,25 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="col-md-8">
                 <div class="mb-2">
                     <span class="modal-product-label">ID:</span> ${esc(info.id)}<br>
-                    <span class="modal-product-label">Mã SP:</span> ${esc(info.code)}<br>
-                    <span class="modal-product-label">Tên:</span> ${esc(info.name)}<br>
-                    <span class="modal-product-label">Trạng thái:</span> ${esc(info.status)}<br>
-                    <span class="modal-product-label">Danh mục:</span> ${categories}<br>
-                    <span class="modal-product-label">Thương hiệu:</span> ${esc(info.brand)}
+                    <span class="modal-product-label">Product Code:</span> ${esc(info.code)}<br>
+                    <span class="modal-product-label">Name:</span> ${esc(info.name)}<br>
+                    <span class="modal-product-label">Status:</span> ${esc(info.status)}<br>
+                    <span class="modal-product-label">Categories:</span> ${categories}<br>
+                    <span class="modal-product-label">Brand:</span> ${esc(info.brand)}
                 </div>
                 <div class="mb-2">${priceHtml}</div>
                 <div class="mb-2">
-                    <span class="modal-product-label">Mô tả ngắn:</span> ${esc(detail.shortDescription)}
+                    <span class="modal-product-label">Short Description:</span> ${esc(detail.shortDescription)}
                 </div>
                 ${descList}
                 ${optionList}
                 <div class="mb-2">
-                    <span class="modal-product-label">Quà tặng:</span><br>
+                    <span class="modal-product-label">Gifts:</span><br>
                     ${giftList}
                 </div>
                 <div class="modal-product-meta">
-                    <span class="modal-product-label">Ngày tạo:</span> ${createdDate}<br>
-                    <span class="modal-product-label">Người tạo:</span> ${createdBy}
+                    <span class="modal-product-label">Created:</span> ${createdDate}<br>
+                    <span class="modal-product-label">Created by:</span> ${createdBy}
                 </div>
             </div>
         </div>

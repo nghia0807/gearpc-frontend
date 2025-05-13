@@ -2,7 +2,7 @@
 session_name('admin_session');
 session_start();
 
-// Kiểm tra token tồn tại, nếu không thì chuyển hướng về trang đăng nhập
+// Check if token exists, otherwise redirect to login page
 if (!isset($_SESSION['token'])) {
     header('Location: manage_login.php');
     exit;
@@ -132,10 +132,10 @@ function brandImage($img) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Thương hiệu</title>
+    <title>Brand Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -146,13 +146,13 @@ function brandImage($img) {
         <!-- <div class="alert alert-<?= $alert['type'] ?>"><?= htmlspecialchars($alert['msg']) ?></div> -->
     <?php endforeach; ?>
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Danh sách thương hiệu</h4>
+        <h4>Brand List</h4>
         <div>
             <button id="btnDeleteSelectedBrands" class="btn btn-danger" disabled>
-                <i class="fa fa-trash"></i> Xóa đã chọn
+                <i class="fa fa-trash"></i> Delete Selected
             </button>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
-                <i class="fa fa-plus"></i> Thêm thương hiệu
+                <i class="fa fa-plus"></i> Add Brand
             </button>
         </div>
     </div>
@@ -164,10 +164,10 @@ function brandImage($img) {
                         <input type="checkbox" id="selectAllBrands">
                     </th>
                     <th>ID</th>
-                    <th>Mã</th>
-                    <th>Tên</th>
-                    <th>Hình ảnh</th>
-                    <th style="width: 110px;">Hành động</th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th style="width: 110px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -186,18 +186,18 @@ function brandImage($img) {
                                 data-code="<?= htmlspecialchars($brand['code']) ?>"
                                 data-name="<?= htmlspecialchars($brand['name']) ?>"
                                 data-image="<?= htmlspecialchars($brand['image']) ?>"
-                        ><i class="fa fa-pen-to-square"></i> Sửa</button>
+                        ><i class="fa fa-pen-to-square"></i> Edit</button>
                     </td>
                 </tr>
             <?php endforeach; ?>
             <?php if (empty($brands)): ?>
-                <tr><td colspan="6" class="text-center">Không có thương hiệu nào.</td></tr>
+                <tr><td colspan="6" class="text-center">No brands found.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
     </div>
     <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
-        <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">Tải thêm</a>
+        <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">Load More</a>
     <?php endif; ?>
 </div>
 
@@ -206,20 +206,20 @@ function brandImage($img) {
   <div class="modal-dialog">
     <form method="post" class="modal-content" enctype="multipart/form-data" id="addBrandForm">
       <div class="modal-header">
-        <h5 class="modal-title" id="addModalLabel">Thêm thương hiệu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        <h5 class="modal-title" id="addModalLabel">Add Brand</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-            <label for="code" class="form-label">Mã thương hiệu</label>
+            <label for="code" class="form-label">Brand Code</label>
             <input type="text" class="form-control" id="code" name="code" required>
         </div>
         <div class="mb-3">
-            <label for="name" class="form-label">Tên thương hiệu</label>
+            <label for="name" class="form-label">Brand Name</label>
             <input type="text" class="form-control" id="name" name="name" required>
         </div>
         <div class="mb-3">
-            <label for="image" class="form-label">Hình ảnh</label>
+            <label for="image" class="form-label">Image</label>
             <input type="file" class="form-control" id="image" accept="image/*">
             <input type="hidden" name="imageBase64" id="imageBase64">
             <div class="mt-2">
@@ -228,7 +228,7 @@ function brandImage($img) {
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" name="add_brand" class="btn btn-success">Thêm</button>
+        <button type="submit" name="add_brand" class="btn btn-success">Add</button>
       </div>
     </form>
   </div>
@@ -239,21 +239,21 @@ function brandImage($img) {
   <div class="modal-dialog">
     <form method="post" class="modal-content" enctype="multipart/form-data" id="editBrandForm">
       <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Sửa thương hiệu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        <h5 class="modal-title" id="editModalLabel">Edit Brand</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="edit_id" name="edit_id">
         <div class="mb-3">
-            <label for="edit_code" class="form-label">Mã thương hiệu</label>
+            <label for="edit_code" class="form-label">Brand Code</label>
             <input type="text" class="form-control" id="edit_code" name="edit_code" readonly>
         </div>
         <div class="mb-3">
-            <label for="edit_name" class="form-label">Tên thương hiệu</label>
+            <label for="edit_name" class="form-label">Brand Name</label>
             <input type="text" class="form-control" id="edit_name" name="edit_name" required>
         </div>
         <div class="mb-3">
-            <label for="edit_image" class="form-label">Hình ảnh</label>
+            <label for="edit_image" class="form-label">Image</label>
             <input type="file" class="form-control" id="edit_image" accept="image/*">
             <input type="hidden" name="edit_imageBase64" id="edit_imageBase64">
             <div class="mt-2">
@@ -263,7 +263,7 @@ function brandImage($img) {
       </div>
       <div class="modal-footer">
         <button type="submit" name="edit_brand" class="btn btn-warning">
-            <i class="fa fa-pen-to-square"></i> Lưu
+            <i class="fa fa-pen-to-square"></i> Save
         </button>
       </div>
     </form>
@@ -355,7 +355,7 @@ btnDeleteSelectedBrands.addEventListener('click', function() {
         .filter(cb => cb.checked)
         .map(cb => cb.getAttribute('data-code'));
     if (codes.length === 0) return;
-    if (!confirm('Bạn có chắc chắn muốn xóa các thương hiệu đã chọn?')) return;
+    if (!confirm('Are you sure you want to delete the selected brands?')) return;
     // Submit via hidden form (POST)
     const form = document.createElement('form');
     form.method = 'POST';
