@@ -2,7 +2,7 @@
 // --- Admin session setup ---
 session_name('admin_session');
 session_set_cookie_params([
-    'path' => '/admin',
+    'path' => '/',
     'httponly' => true,
     'samesite' => 'Lax'
 ]);

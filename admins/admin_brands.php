@@ -84,11 +84,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_brand'])) {
     }
 }
 
-// Delete Brand
+// Delete Brand (single or multiple)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_brand'])) {
-    $code = trim($_POST['delete_code'] ?? '');
-    if ($code !== '') {
-        $res = apiRequest('DELETE', "$apiBase/delete", $token, [$code]);
+    $codes = [];
+    if (!empty($_POST['delete_code'])) {
+        // Single delete
+        $codes[] = trim($_POST['delete_code']);
+    } elseif (!empty($_POST['delete_codes'])) {
+        // Multiple delete (from JS)
+        $codes = json_decode($_POST['delete_codes'], true);
+        if (!is_array($codes)) $codes = [];
+    }
+    if (!empty($codes)) {
+        $res = apiRequest('DELETE', "$apiBase/delete", $token, $codes);
         if (!empty($res['success'])) {
             $alerts[] = ['type' => 'success', 'msg' => 'Xóa thương hiệu thành công.'];
         } else {
@@ -129,6 +137,7 @@ function brandImage($img) {
     <meta charset="UTF-8">
     <title>Quản lý Thương hiệu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
@@ -138,42 +147,51 @@ function brandImage($img) {
     <?php endforeach; ?>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Danh sách thương hiệu</h4>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">Thêm thương hiệu</button>
+        <div>
+            <button id="btnDeleteSelectedBrands" class="btn btn-danger" disabled>
+                <i class="fa fa-trash"></i> Xóa đã chọn
+            </button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
+                <i class="fa fa-plus"></i> Thêm thương hiệu
+            </button>
+        </div>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered align-middle">
             <thead class="table-light">
                 <tr>
+                    <th>
+                        <input type="checkbox" id="selectAllBrands">
+                    </th>
                     <th>ID</th>
                     <th>Mã</th>
                     <th>Tên</th>
                     <th>Hình ảnh</th>
-                    <th>Hành động</th>
+                    <th style="width: 110px;">Hành động</th>
                 </tr>
             </thead>
             <tbody>
             <?php foreach ($brands as $brand): ?>
                 <tr>
+                    <td>
+                        <input type="checkbox" class="brand-checkbox" data-code="<?= htmlspecialchars($brand['code']) ?>">
+                    </td>
                     <td><?= htmlspecialchars($brand['id']) ?></td>
                     <td><?= htmlspecialchars($brand['code']) ?></td>
                     <td><?= htmlspecialchars($brand['name']) ?></td>
                     <td><?= brandImage($brand['image']) ?></td>
                     <td>
-                        <button class="btn btn-primary btn-sm editBtn"
+                        <button class="btn btn-warning btn-sm editBtn"
                                 data-id="<?= htmlspecialchars($brand['id']) ?>"
                                 data-code="<?= htmlspecialchars($brand['code']) ?>"
                                 data-name="<?= htmlspecialchars($brand['name']) ?>"
                                 data-image="<?= htmlspecialchars($brand['image']) ?>"
-                                >Sửa</button>
-                        <form method="post" class="d-inline" onsubmit="return confirm('Xác nhận xóa?');">
-                            <input type="hidden" name="delete_code" value="<?= htmlspecialchars($brand['code']) ?>">
-                            <button type="submit" name="delete_brand" class="btn btn-danger btn-sm">Xóa</button>
-                        </form>
+                        ><i class="fa fa-pen-to-square"></i> Sửa</button>
                     </td>
                 </tr>
             <?php endforeach; ?>
             <?php if (empty($brands)): ?>
-                <tr><td colspan="5" class="text-center">Không có thương hiệu nào.</td></tr>
+                <tr><td colspan="6" class="text-center">Không có thương hiệu nào.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
@@ -244,7 +262,9 @@ function brandImage($img) {
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" name="edit_brand" class="btn btn-primary">Lưu</button>
+        <button type="submit" name="edit_brand" class="btn btn-warning">
+            <i class="fa fa-pen-to-square"></i> Lưu
+        </button>
       </div>
     </form>
   </div>
@@ -305,6 +325,53 @@ document.getElementById('edit_image').addEventListener('change', function(e) {
         };
         reader.readAsDataURL(file);
     }
+});
+
+// --- Multiple delete logic for brands ---
+const selectAllBrands = document.getElementById('selectAllBrands');
+const brandCheckboxes = document.querySelectorAll('.brand-checkbox');
+const btnDeleteSelectedBrands = document.getElementById('btnDeleteSelectedBrands');
+
+function updateDeleteSelectedBrandBtn() {
+    const anyChecked = Array.from(brandCheckboxes).some(cb => cb.checked);
+    btnDeleteSelectedBrands.disabled = !anyChecked;
+}
+
+if (selectAllBrands) {
+    selectAllBrands.addEventListener('change', function() {
+        brandCheckboxes.forEach(cb => cb.checked = selectAllBrands.checked);
+        updateDeleteSelectedBrandBtn();
+    });
+}
+brandCheckboxes.forEach(cb => {
+    cb.addEventListener('change', function() {
+        updateDeleteSelectedBrandBtn();
+        if (!this.checked && selectAllBrands.checked) selectAllBrands.checked = false;
+    });
+});
+
+btnDeleteSelectedBrands.addEventListener('click', function() {
+    const codes = Array.from(brandCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.getAttribute('data-code'));
+    if (codes.length === 0) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa các thương hiệu đã chọn?')) return;
+    // Submit via hidden form (POST)
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.style.display = 'none';
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'delete_codes';
+    input.value = JSON.stringify(codes);
+    form.appendChild(input);
+    const input2 = document.createElement('input');
+    input2.type = 'hidden';
+    input2.name = 'delete_brand';
+    input2.value = '1';
+    form.appendChild(input2);
+    document.body.appendChild(form);
+    form.submit();
 });
 </script>
 </body>

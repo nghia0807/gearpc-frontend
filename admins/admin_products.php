@@ -185,7 +185,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                     <th>Giá hiện tại</th>
                     <th>Giá gốc</th>
                     <th>Mô tả ngắn</th>
-                    <th>Hành động</th>
+                    <th style="width: 120px;">Hành động</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -219,9 +219,6 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                                 </button>
                                 <button class="btn btn-sm btn-warning" disabled>
                                     <i class="fa-solid fa-pen-to-square"></i> Sửa
-                                </button>
-                                <button class="btn btn-sm btn-danger btn-delete-product" data-code="<?= htmlspecialchars($product['code']) ?>">
-                                    <i class="fa-solid fa-trash"></i> Xóa
                                 </button>
                             </td>
                         </tr>

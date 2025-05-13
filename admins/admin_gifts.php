@@ -123,6 +123,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
     <meta charset="UTF-8">
     <title>Quản lý Quà tặng</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
@@ -133,8 +134,12 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Danh sách quà tặng</h4>
         <div>
-            <button id="btnDeleteSelectedGifts" class="btn btn-danger" disabled>Xóa đã chọn</button>
-            <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addGiftModal">Thêm quà tặng</button>
+            <button id="btnDeleteSelectedGifts" class="btn btn-danger" disabled>
+                <i class="fa fa-trash"></i> Xóa đã chọn
+            </button>
+            <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addGiftModal">
+                <i class="fa fa-plus"></i> Thêm quà tặng
+            </button>
         </div>
     </div>
     <div class="table-responsive">
@@ -148,7 +153,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                     <th>Mã</th>
                     <th>Tên</th>
                     <th>Hình ảnh</th>
-                    <th>Thao tác</th>
+                    <th style="width: 110px;">Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -174,11 +179,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                             data-image="<?= htmlspecialchars($gift['image']) ?>"
                             data-bs-toggle="modal"
                             data-bs-target="#editGiftModal"
-                        >Sửa</button>
-                        <button 
-                            class="btn btn-danger btn-sm btn-delete-gift"
-                            data-code="<?= htmlspecialchars($gift['code']) ?>"
-                        >Xóa</button>
+                        ><i class="fa fa-pen-to-square"></i> Sửa</button>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -246,7 +247,9 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" name="edit_gift" class="btn btn-warning">Cập nhật</button>
+        <button type="submit" name="edit_gift" class="btn btn-warning">
+            <i class="fa fa-pen-to-square"></i> Cập nhật
+        </button>
       </div>
     </form>
   </div>

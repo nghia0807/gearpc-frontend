@@ -2,7 +2,7 @@
 // Use a dedicated session for user authentication
 session_name('user_session');
 session_set_cookie_params([
-    'path' => '/user',
+    'path' => '/',
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
