@@ -73,29 +73,29 @@
             </a>
             <ul class="dropdown-menu p-2" aria-labelledby="navbarDropdownDeals" style="background-color: #212121;">
               <li>
-                <a class="dropdown-item blue-text" href="../pages/products.php">
+                <a class="dropdown-item blue-text" href="index.php?page=products">
                   <i class="bi bi-stars deal-icon"></i>Today's Best Deals
                 </a>
               </li>
               <li>
-                <a class="dropdown-item blue-text" href="../pages/products.php?category=laptops">
+                <a class="dropdown-item blue-text" href="index.php?page=products&category=laptops">
                   Laptop Deals
                 </a>
               </li>
               <li>
-                <a class="dropdown-item blue-text" href="../pages/products.php?category=headphones">
+                <a class="dropdown-item blue-text" href="index.php?page=products&category=headphones">
                   Headphone Deals
                 </a>
               </li>
               <li>
-                <a class="dropdown-item blue-text" href="../pages/products.php?category=keyboards">
+                <a class="dropdown-item blue-text" href="index.php?page=products&category=keyboards">
                   Keyboard Deals
                 </a>
               </li>
             </ul>
           </li>
           <li class="nav-item" style="display: flex; align-items: center;">
-            <a class="nav-link pe-0" href="../pages/products.php?sort=bestseller" style="color: yellow !important; font-size: 14px; font-weight: bold;">
+            <a class="nav-link pe-0" href="index.php?page=products&sort=bestseller" style="color: yellow !important; font-size: 14px; font-weight: bold;">
               Best Seller
             </a>
             <span class="fire-icon">🔥</span>

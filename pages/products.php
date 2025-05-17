@@ -1,9 +1,5 @@
 <?php
-// --- Use user_session for user pages ---
-if (session_status() === PHP_SESSION_NONE) {
-    session_name('user_session');
-    session_start();
-}
+require_once __DIR__ . '/../includes/session_init.php';
 
 // Get filter parameters from URL
 $categoryCode = isset($_GET['category']) ? trim($_GET['category']) : '';
@@ -355,8 +351,6 @@ if ($categoryCode) {
 </head>
 
 <body>
-    <?php include '../includes/header.php'; ?>
-    <?php include '../includes/navbar.php'; ?>
     <div class="container py-4">
         <?php
         if (isset($_SESSION['message'])) {
@@ -447,7 +441,7 @@ if ($categoryCode) {
                     <!-- Product card -->
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
                         <?php foreach ($products as $product): ?>
-                            <?php include '../components/product-card.php'; ?>
+                            <?php include 'components/product-card.php'; ?>
                         <?php endforeach; ?>
                     </div>
                     <!-- Pagination -->
@@ -494,7 +488,6 @@ if ($categoryCode) {
             </div>
         </div>
     </div>
-    <?php include '../includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

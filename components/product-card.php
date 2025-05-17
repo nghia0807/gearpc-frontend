@@ -122,7 +122,7 @@ if (!isset($product) || empty($product)) {
 </style>
 <div class="col">
     <div class="product-card">
-        <a href="product-detail.php?id=<?= htmlspecialchars($product['id']) ?>" class="text-decoration-none">
+        <a href="index.php?page=product-detail&id=<?= htmlspecialchars($product['id']) ?>" class="text-decoration-none">
             <div class="product-img-container">
                 <img src="<?= htmlspecialchars($product['imageUrl'] ?? '') ?>"
                     alt="<?= htmlspecialchars($product['name']) ?>" class="product-img"
@@ -152,7 +152,7 @@ if (!isset($product) || empty($product)) {
         </a>
         <div class="product-action">
             <!-- Form gửi dữ liệu đến add-to-cart.php -->
-            <form method="POST" action="../actions/add-to-cart.php" class="w-100">
+            <form method="POST" action="actions/add-to-cart.php" class="w-100">
                 <input type="hidden" name="product_id" value="<?= htmlspecialchars($product['id']) ?>">
                 <button type="submit" class="btn-add-cart mb-4">
                     <i class="bi bi-cart-plus"></i>

@@ -1,25 +1,5 @@
 <?php
-// --- Use user_session for user pages ---
-if (session_status() === PHP_SESSION_NONE) {
-    session_name('user_session');
-    session_start();
-}
-
-// --- Logout logic for header logout button ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
-    // Clear session and cookie for user_session
-    $_SESSION = [];
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000,
-            $params["path"], $params["domain"],
-            $params["secure"], $params["httponly"]
-        );
-    }
-    session_destroy();
-    header('Location: ../pages/login.php');
-    exit();
-}
+require_once __DIR__ . '/session_init.php';
 
 // --- Session check for login state and expiration ---
 $isLoggedIn = false;
@@ -176,8 +156,8 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
   <nav class="navbar navbar-expand-lg navbar-dark bg-black">
     <div class="container me-4">
       <!-- Logo -->
-      <a class="navbar-brand" href="#">
-        <img src="../assets/img/logo.png" alt="Site Logo" width="50px" height="50px" />
+      <a class="navbar-brand" href="index.php">
+        <img src="assets/img/logo.png" alt="Site Logo" width="50px" height="50px" />
       </a>
 
       <!-- Toggler for mobile view -->
@@ -214,12 +194,12 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
         <!-- Right side: Cart, Login/Register/User -->
         <ul class="navbar-nav">
           <li class="nav-item me-3">
-            <a class="nav-link header-items" href="order.php">
+            <a class="nav-link header-items" href="index.php?page=order">
               <i class="bi bi-truck me-1"></i> Orders
             </a>
           </li>
           <li class="nav-item me-3">
-            <a class="nav-link header-items" href="cart.php">
+            <a class="nav-link header-items" href="index.php?page=cart">
               <i class="bi bi-cart"></i> Cart
             </a>
           </li>
@@ -235,7 +215,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
               </button>
               <div class="user-popover" id="userPopover" tabindex="-1">
                 <div class="user-popover-arrow"></div>
-                <a class="dropdown-item" href="profile.php">
+                <a class="dropdown-item" href="index.php?page=profile">
                   <i class="bi bi-person-square pe-1"></i>
                   Profile
                 </a>
@@ -249,7 +229,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
             </li>
           <?php else: ?>
             <li class="nav-item">
-              <a class="nav-link header-items" href="../pages/login.php">
+              <a class="nav-link header-items" href="pages/login.php">
                 <i class="bi bi-person"></i> Đăng nhập
               </a>
             </li>
