@@ -13,8 +13,9 @@ $apiBaseUrl = 'http://localhost:5000/api/products';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];
-$products = [];
-$totalCount = 0;
+
+// Toast component
+include '../components/toasts.php';
 
 // --- Fetch products from API ---
 function fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, &$alerts, &$totalCount)
@@ -167,6 +168,19 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
         .product-actions .btn {
             margin-right: 0.25rem;
         }
+        /* Improved action buttons styling */
+        .product-actions .btn-group {
+            white-space: nowrap;
+        }
+        .product-actions .btn {
+            padding: .25rem .5rem;
+            border-radius: 0.25rem;
+        }
+        .product-actions .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        }
         @media (max-width: 768px) {
             .main-card {
                 padding: 1rem 0.5rem;
@@ -196,33 +210,156 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
             margin-bottom: 6px;
             background: #eee;
         }
+        
+        /* New table styling to match admin_gifts.php */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            padding: 15px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .table tbody tr {
+            transition: all 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        /* Custom checkbox styling */
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #0d6efd;
+        }
+        
+        /* Product image container */
+        .product-image-container {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e3e6ea;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto;
+        }
+        
+        .product-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            border-radius: 6px;
+            padding: 6px 12px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .action-btn i {
+            font-size: 14px;
+        }
+        
+        .action-btn.view {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
+        
+        .action-btn.view:hover {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        
+        .action-btn.edit {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-color: #ffc107;
+            color: #b08900;
+        }
+        
+        .action-btn.edit:hover {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        /* Text styling */
+        .product-code {
+            font-weight: 600;
+            color: #0d6efd;
+        }
+        
+        .product-name {
+            font-weight: 500;
+        }
+        
+        .product-id {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        /* Table responsive with horizontal scroll */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
     </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
 <div class="container">
     <div class="main-card">
-        <!-- Toast Container -->
-        <div aria-live="polite" aria-atomic="true" class="position-relative">
-            <div id="toastContainer" class="toast-container position-absolute bottom-0 end-0 p-3" style="z-index: 1080;">
-                <?php foreach ($alerts as $alert): ?>
-                <div class="toast align-items-center text-bg-<?= $alert['type'] ?> border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3500">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <?= htmlspecialchars($alert['msg']) ?>
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        <!-- End Toast Container -->
+        <?php renderToasts(null, 1080, 3500); ?>
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <h4 class="mb-0">Product List</h4>
             <div class="d-flex gap-2">
                 <button id="btnDeleteSelected" class="btn btn-danger" disabled>
-                    <i class="fa fa-trash"></i> Delete Selected
+                    <i class="fa fa-trash"></i> Delete
                 </button>
                 <button id="btnAddProduct" class="btn btn-success">
                     <i class="fa fa-plus"></i> Add Product
@@ -232,53 +369,60 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
         <div class="card shadow-sm">
             <div class="table-responsive">
                 <table class="table table-bordered align-middle mb-0">
-                    <thead class="table-light">
+                    <thead class="bg-light">
                     <tr>
-                        <th style="width:32px;">
-                            <input type="checkbox" id="selectAllProducts">
+                        <th class="text-center" style="width:40px;">
+                            <input type="checkbox" id="selectAllProducts" class="custom-checkbox">
                         </th>
-                        <th>ID</th>
+                        <th style="width:60px;">ID</th>
                         <th>Product Code</th>
                         <th>Product Name</th>
-                        <th>Image</th>
+                        <th class="text-center">Image</th>
                         <th>Brand</th>
                         <th>Current Price</th>
                         <th>Original Price</th>
-                        <th>Short Description</th>
-                        <th style="width: 120px;">Actions</th>
+                        <th style="width: 120px;" class="text-center">Actions</th>
                     </tr>
                     </thead>
                     <tbody>
                     <?php if (empty($products)): ?>
                         <tr>
-                            <td colspan="10" class="text-center text-muted">No products found.</td>
+                            <td colspan="9" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fa fa-box fa-2x mb-2"></i>
+                                    <p>No products found.</p>
+                                </div>
+                            </td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($products as $product): ?>
                             <tr>
-                                <td>
-                                    <input type="checkbox" class="product-checkbox" data-code="<?= htmlspecialchars($product['code']) ?>">
+                                <td class="text-center">
+                                    <input type="checkbox" class="product-checkbox custom-checkbox" data-code="<?= htmlspecialchars($product['code']) ?>">
                                 </td>
-                                <td><?= htmlspecialchars($product['id']) ?></td>
-                                <td><?= htmlspecialchars($product['code']) ?></td>
-                                <td><?= htmlspecialchars($product['name']) ?></td>
-                                <td>
+                                <td><span class="product-id"><?= htmlspecialchars($product['id']) ?></span></td>
+                                <td><span class="product-code"><?= htmlspecialchars($product['code']) ?></span></td>
+                                <td><span class="product-name"><?= htmlspecialchars($product['name']) ?></span></td>
+                                <td class="text-center">
                                     <?php if (!empty($product['imageUrl'])): ?>
-                                        <img src="<?= htmlspecialchars($product['imageUrl']) ?>" alt="Product Image" class="product-img-thumb">
+                                        <div class="product-image-container">
+                                            <img src="<?= htmlspecialchars($product['imageUrl']) ?>" alt="Product Image">
+                                        </div>
                                     <?php else: ?>
-                                        <img src="https://via.placeholder.com/64x64?text=No+Image" alt="No Image" class="product-img-thumb">
+                                        <div class="product-image-container">
+                                            <i class="fa fa-image text-muted"></i>
+                                        </div>
                                     <?php endif; ?>
                                 </td>
                                 <td><?= htmlspecialchars($product['brandName']) ?></td>
                                 <td><?= number_format($product['currentPrice'], 0, ',', '.') ?>₫</td>
                                 <td><?= number_format($product['originalPrice'], 0, ',', '.') ?>₫</td>
-                                <td><?= htmlspecialchars($product['shortDescription']) ?></td>
-                                <td class="action-btns">
-                                    <button class="btn btn-sm btn-info btn-view-product" data-id="<?= htmlspecialchars($product['id']) ?>">
-                                        <i class="fa-solid fa-eye"></i> View
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm action-btn view btn-view-product" data-id="<?= htmlspecialchars($product['id']) ?>" title="View Details">
+                                        <i class="fa-solid fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-warning" disabled>
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    <button type="button" class="btn btn-sm action-btn edit" disabled title="Edit Product">
+                                        <i class="fa-solid fa-pen"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -288,7 +432,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                 </table>
             </div>
             <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
-                <div class="card-footer bg-white text-center">
+                <div class="card-footer bg-white text-center py-3">
                     <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">
                         <i class="fa-solid fa-angles-down"></i> Load More
                     </a>
@@ -631,6 +775,8 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="form-text mb-2">Select multiple images for this option</div>
             <div class="variantOptionImagesPreview d-flex flex-wrap gap-2 mt-2"></div>
             <div class="variantOptionImagesPriority mt-2"></div>
+            <!-- Add a container for legacy image rows if needed -->
+            <div class="variantImagesList"></div>
           </div>
         </div>
         `;
@@ -716,26 +862,17 @@ document.addEventListener('DOMContentLoaded', function () {
         optionsList.insertAdjacentHTML('beforeend', createOptionBlock(variantIdx, optionIdx));
         refreshOptionRemoveBtns();
 
-        // Add one description and one image row by default
+        // Add one description row by default
         const descList = optionsList.lastElementChild.querySelector('.variantDescriptionsList');
-        const imgList = optionsList.lastElementChild.querySelector('.variantImagesList');
         descList.insertAdjacentHTML('beforeend', createDescriptionRow(variantIdx, optionIdx, 0, '', '', 0));
-        imgList.insertAdjacentHTML('beforeend', createImageRow(variantIdx, optionIdx, 0, 0));
         refreshDescriptionRemoveBtns();
-        refreshImageRemoveBtns();
 
-        // Add handler for add description/image buttons
+        // Add handler for add description button
         optionsList.lastElementChild.querySelector('.btnAddDescription').onclick = function() {
             const descList = this.parentElement.querySelector('.variantDescriptionsList');
             const descIdx = descList.children.length;
             descList.insertAdjacentHTML('beforeend', createDescriptionRow(variantIdx, optionIdx, descIdx, '', '', descIdx));
             refreshDescriptionRemoveBtns();
-        };
-        optionsList.lastElementChild.querySelector('.btnAddImage').onclick = function() {
-            const imgList = this.parentElement.querySelector('.variantImagesList');
-            const imgIdx = imgList.children.length;
-            imgList.insertAdjacentHTML('beforeend', createImageRow(variantIdx, optionIdx, imgIdx, imgIdx));
-            refreshImageRemoveBtns();
         };
     }
 
@@ -1129,5 +1266,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+<?php initializeToasts(); ?>
 </body>
 </html>

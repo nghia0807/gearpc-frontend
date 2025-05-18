@@ -11,6 +11,9 @@ $token = $_SESSION['token'];
 $apiUrl = 'http://localhost:5000/api/gifts/get?pageIndex=0&pageSize=10';
 $alerts = [];
 
+// Toast component
+include '../components/toasts.php';
+
 // Handle add gift POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_gift'])) {
     $code = trim($_POST['code'] ?? '');
@@ -222,85 +225,206 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                 padding: 1rem 0.5rem;
             }
         }
+        
+        /* New table styling */
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            padding: 15px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .table tbody tr {
+            transition: all 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        /* Custom checkbox styling */
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #0d6efd;
+        }
+        
+        /* Image container */
+        .gift-image-container {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e3e6ea;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto;
+        }
+        
+        .gift-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            border-radius: 6px;
+            padding: 6px 12px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .action-btn i {
+            font-size: 14px;
+        }
+        
+        .action-btn.edit {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-color: #ffc107;
+            color: #b08900;
+        }
+        
+        .action-btn.edit:hover {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .action-btn.delete {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        
+        .action-btn.delete:hover {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        
+        /* Text styling */
+        .gift-code {
+            font-weight: 600;
+            color: #0d6efd;
+        }
+        
+        .gift-name {
+            font-weight: 500;
+        }
+        
+        .gift-id {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
 <div class="container">
     <div class="main-card">
-        <!-- Toast Container -->
-        <div aria-live="polite" aria-atomic="true" class="position-relative">
-            <div id="toastContainer" class="toast-container position-absolute bottom-0 end-0 p-3" style="z-index: 1080;">
-                <?php foreach ($alerts as $alert): ?>
-                <div class="toast align-items-center text-bg-<?= $alert['type'] ?> border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3500">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <?= htmlspecialchars($alert['msg']) ?>
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        <!-- End Toast Container -->
+        <?php renderToasts(null, 1080, 3500); ?>
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <h4 class="mb-0">Gift List</h4>
             <div class="d-flex gap-2">
                 <button id="btnDeleteSelectedGifts" class="btn btn-danger" disabled>
-                    <i class="fa fa-trash"></i> Delete Selected
+                    <i class="fa fa-trash"></i> Delete
                 </button>
                 <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addGiftModal">
                     <i class="fa fa-plus"></i> Add Gift
                 </button>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle shadow-sm">
-                <thead class="table-light">
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="selectAllGifts">
-                        </th>
-                        <th>ID</th>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Image</th>
-                        <th style="width: 110px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($gifts as $gift): ?>
-                    <tr>
-                        <td>
-                            <input type="checkbox" class="gift-checkbox" data-code="<?= htmlspecialchars($gift['code']) ?>">
-                        </td>
-                        <td><?= htmlspecialchars($gift['id']) ?></td>
-                        <td><?= htmlspecialchars($gift['code']) ?></td>
-                        <td><?= htmlspecialchars($gift['name']) ?></td>
-                        <td>
-                            <?php if (!empty($gift['image'])): ?>
-                                <img src="<?= htmlspecialchars($gift['image']) ?>" alt="Gift Image" style="max-width:80px;max-height:80px;">
-                            <?php endif; ?>
-                        </td>
-                        <td class="gift-actions">
-                            <button 
-                                class="btn btn-warning btn-sm editGiftBtn"
-                                data-id="<?= htmlspecialchars($gift['id']) ?>"
-                                data-code="<?= htmlspecialchars($gift['code']) ?>"
-                                data-name="<?= htmlspecialchars($gift['name']) ?>"
-                                data-image="<?= htmlspecialchars($gift['image']) ?>"
-                                data-bs-toggle="modal"
-                                data-bs-target="#editGiftModal"
-                            ><i class="fa fa-pen-to-square"></i> Edit</button>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                <?php if (empty($gifts)): ?>
-                    <tr><td colspan="6" class="text-center text-muted">No gifts found.</td></tr>
-                <?php endif; ?>
-                </tbody>
-            </table>
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle shadow-sm mb-0">
+                    <thead>
+                        <tr class="bg-light">
+                            <th class="text-center" style="width: 40px;">
+                                <input type="checkbox" id="selectAllGifts" class="custom-checkbox">
+                            </th>
+                            <th style="width: 60px;">ID</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th class="text-center" style="width: 120px;">Image</th>
+                            <th style="width: 70px;" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($gifts as $gift): ?>
+                        <tr>
+                            <td class="text-center">
+                                <input type="checkbox" class="gift-checkbox custom-checkbox" data-code="<?= htmlspecialchars($gift['code']) ?>">
+                            </td>
+                            <td><span class="gift-id"><?= htmlspecialchars($gift['id']) ?></span></td>
+                            <td><span class="gift-code"><?= htmlspecialchars($gift['code']) ?></span></td>
+                            <td><span class="gift-name"><?= htmlspecialchars($gift['name']) ?></span></td>
+                            <td class="text-center">
+                                <?php if (!empty($gift['image'])): ?>
+                                    <div class="gift-image-container">
+                                        <img src="<?= htmlspecialchars($gift['image']) ?>" alt="Gift Image">
+                                    </div>
+                                <?php else: ?>
+                                    <div class="gift-image-container">
+                                        <i class="fa fa-image text-muted"></i>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                                <button 
+                                    class="btn btn-sm action-btn edit editGiftBtn"
+                                    data-id="<?= htmlspecialchars($gift['id']) ?>"
+                                    data-code="<?= htmlspecialchars($gift['code']) ?>"
+                                    data-name="<?= htmlspecialchars($gift['name']) ?>"
+                                    data-image="<?= htmlspecialchars($gift['image']) ?>"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editGiftModal"
+                                    ><i class="fa fa-pen"></i> Edit
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php if (empty($gifts)): ?>
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fa fa-box fa-2x mb-2"></i>
+                                    <p>No gifts found.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php if ($totalCount > 10): ?>
+                <div class="card-footer bg-white text-center py-3">
+                    <a href="?page=1" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-angles-down"></i> Load More
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -309,7 +433,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
 <div class="modal fade" id="addGiftModal" tabindex="-1" aria-labelledby="addGiftModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" enctype="multipart/form-data" class="modal-content">
-      <div class="modal-header bg-primary text-white rounded-top">
+      <div class="modal-header bg-success bg-gradient text-white">
         <h5 class="modal-title" id="addGiftModalLabel">
           <i class="fa fa-plus me-2"></i>Add Gift
         </h5>
@@ -317,23 +441,28 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
       </div>
       <div class="modal-body px-4 py-3" style="background: #f8f9fb;">
         <div class="mb-3">
-            <label for="code" class="form-label fw-semibold text-primary">Gift Code</label>
+            <label for="code" class="form-label fw-semibold text-success">Gift Code <span class="text-danger">*</span></label>
             <input type="text" class="form-control shadow-sm" id="code" name="code" required placeholder="Enter gift code">
+            <div class="form-text">Must be a unique identifier</div>
         </div>
         <div class="mb-3">
-            <label for="name" class="form-label fw-semibold text-primary">Gift Name</label>
+            <label for="name" class="form-label fw-semibold text-success">Gift Name <span class="text-danger">*</span></label>
             <input type="text" class="form-control shadow-sm" id="name" name="name" required placeholder="Enter gift name">
+            <div class="form-text">Shown as gift title on all pages</div>
         </div>
         <div class="mb-3">
-            <label for="image" class="form-label fw-semibold text-primary">Image</label>
+            <label for="image" class="form-label fw-semibold text-success">Image</label>
             <input type="file" class="form-control shadow-sm" id="image" name="image" accept="image/*">
+            <div class="form-text">Optional: Upload a gift image</div>
         </div>
       </div>
       <div class="modal-footer bg-light rounded-bottom">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="fa-solid fa-times"></i> Cancel
+        </button>
         <button type="submit" name="add_gift" class="btn btn-success px-4">
           <i class="fa fa-plus"></i> Add
         </button>
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
       </div>
     </form>
   </div>
@@ -343,29 +472,37 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
 <div class="modal fade" id="editGiftModal" tabindex="-1" aria-labelledby="editGiftModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" enctype="multipart/form-data" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editGiftModalLabel">Edit Gift</h5>
+      <div class="modal-header bg-warning bg-gradient text-dark">
+        <h5 class="modal-title" id="editGiftModalLabel">
+          <i class="fa-solid fa-edit me-2"></i>Edit Gift
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body px-4 py-3" style="background: #f8f9fb;">
         <input type="hidden" id="edit_id" name="edit_id">
         <div class="mb-3">
-            <label for="edit_code_display" class="form-label">Gift Code</label>
+            <label for="edit_code_display" class="form-label fw-semibold text-warning">Gift Code</label>
             <input type="text" class="form-control" id="edit_code_display" disabled>
+            <div class="form-text">Gift code cannot be changed</div>
         </div>
         <div class="mb-3">
-            <label for="edit_name" class="form-label">Gift Name</label>
+            <label for="edit_name" class="form-label fw-semibold text-warning">Gift Name <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="edit_name" name="edit_name" required>
+            <div class="form-text">Update the gift display name</div>
         </div>
         <div class="mb-3">
-            <label for="edit_image" class="form-label">Image (choose to change)</label>
+            <label for="edit_image" class="form-label fw-semibold text-warning">Image</label>
             <input type="file" class="form-control" id="edit_image" name="edit_image" accept="image/*">
+            <div class="form-text">Choose a new image to update (optional)</div>
             <div class="mt-2">
                 <img id="edit_image_preview" src="" alt="Gift Image" style="max-width:80px;max-height:80px;display:none;">
             </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="fa-solid fa-times"></i> Cancel
+        </button>
         <button type="submit" name="edit_gift" class="btn btn-warning">
             <i class="fa fa-pen-to-square"></i> Save
         </button>
@@ -477,5 +614,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+<?php initializeToasts(); ?>
 </body>
 </html>
