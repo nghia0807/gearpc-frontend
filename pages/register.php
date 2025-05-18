@@ -128,7 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
   <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
-    <img src="logo.png" alt="Logo" class="mb-4" />
+    <a href="../index.php" class="mb-4">
+      <img src="../assets/img/logo.png" alt="Logo"/>
+    </a>
     <h5 class="mb-4 fw-bold">Create Account</h5>
     <!-- Alert for API or validation messages -->
     <?php if ($alert): ?>

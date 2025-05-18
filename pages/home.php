@@ -51,12 +51,8 @@ $icons = [
     'Keyboards' => 'bi bi-keyboard',
 ];
 ?>
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Home</title>
@@ -78,43 +74,37 @@ $icons = [
         }
     </style>
 </head>
-<body>
-    <?php include '../includes/header.php'; include '../includes/navbar.php'; ?>
-    <div class="content">
-        <div class="container-fluid">
-            <div class="row">
-                <nav class="sidebar-menu col-md-3 col-12 p-3 mt-3">
-                    <?php if ($errorMsg): ?>
-                        <div class="alert alert-danger"><?= htmlspecialchars($errorMsg) ?></div>
-                    <?php elseif ($categories): ?>
-                        <div class="list-group">
-                            <?php foreach ($categories as $cat): ?>
-                                <?php
-                                if (!is_array($cat) || !isset($cat['id']) || !isset($cat['name'])) continue;
-                                $iconClass = $icons[$cat['name']] ?? 'fas fa-folder';
-                                ?>
-                                <a href="/category/<?= urlencode($cat['name']) ?>" class="list-group-item list-group-item-action">
-                                    <i class="<?= $iconClass ?>"></i> <?= htmlspecialchars($cat['name']) ?>
-                                </a>
-                            <?php endforeach; ?>
-                        </div>
-                        <?php if ($totalCount > count($categories)): ?>
-                            <a href="?pageIndex=<?= $pageIndex + 1 ?>" class="btn btn-primary mt-3">Load More</a>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <p>Không có danh mục nào</p>
-                    <?php endif; ?>
-                </nav>
-                <main class="col-md-9 col-12">
-                    <div class="p-3">
-                        <h2>Sản phẩm nổi bật</h2>
-                        <!-- ...existing or sample content... -->
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="sidebar-menu col-md-3 col-12 p-3 mt-3">
+                <?php if ($errorMsg): ?>
+                    <div class="alert alert-danger"><?= htmlspecialchars($errorMsg) ?></div>
+                <?php elseif ($categories): ?>
+                    <div class="list-group">
+                        <?php foreach ($categories as $cat): ?>
+                            <?php
+                            if (!is_array($cat) || !isset($cat['id']) || !isset($cat['name'])) continue;
+                            $iconClass = $icons[$cat['name']] ?? 'fas fa-folder';
+                            ?>
+                            <a href="index.php?page=category&name=<?= urlencode($cat['name']) ?>" class="list-group-item list-group-item-action">
+                                <i class="<?= $iconClass ?>"></i> <?= htmlspecialchars($cat['name']) ?>
+                            </a>
+                        <?php endforeach; ?>
                     </div>
-                </main>
-            </div>
+                    <?php if ($totalCount > count($categories)): ?>
+                        <a href="index.php?page=home&pageIndex=<?= $pageIndex + 1 ?>" class="btn btn-primary mt-3">Load More</a>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <p>Không có danh mục nào</p>
+                <?php endif; ?>
+            </nav>
+            <main class="col-md-9 col-12">
+                <div class="p-3">
+                    <h2>Sản phẩm nổi bật</h2>
+                    <!-- ...existing or sample content... -->
+                </div>
+            </main>
         </div>
     </div>
-    <?php include '../includes/footer.php'; ?>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>

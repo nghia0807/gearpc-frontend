@@ -47,25 +47,40 @@
       width: 16px;
       text-align: center;
     }
+    @media (max-width: 991.98px) {
+      .navbar .navbar-collapse {
+        display: flex !important;
+      }
+    }
+    /* Remove mobile paddings/margins for desktop */
+    .navbar-items .navbar-nav {
+      margin-bottom: 0 !important;
+    }
+    .navbar-toggler {
+      display: none !important;
+    }
+    /* Always show navbar expanded */
+    .navbar-collapse {
+      display: flex !important;
+      flex-basis: auto !important;
+    }
+    /* Adjust container for desktop width */
+    .container-fluid {
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
   </style>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark p-2 navbar-items" style="background-color: #363636;">
     <div class="container-fluid">
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarContent"
-        aria-controls="navbarContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <!-- Remove toggler button for mobile -->
+      <!-- <button ...navbar-toggler...> ... </button> -->
 
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <!-- Remove collapse wrapper, keep content always visible -->
+      <div class="navbar-collapse" id="navbarContent" style="display: flex !important;">
+        <ul class="navbar-nav me-auto mb-0">
           <!-- Deals dropdown -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownDeals" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -73,29 +88,29 @@
             </a>
             <ul class="dropdown-menu p-2" aria-labelledby="navbarDropdownDeals" style="background-color: #212121;">
               <li>
-                <a class="dropdown-item blue-text" href="../pages/products.php">
+                <a class="dropdown-item blue-text" href="index.php?page=products">
                   <i class="bi bi-stars deal-icon"></i>Today's Best Deals
                 </a>
               </li>
               <li>
-                <a class="dropdown-item blue-text" href="../pages/products.php?category=laptops">
+                <a class="dropdown-item blue-text" href="index.php?page=products&category=laptops">
                   Laptop Deals
                 </a>
               </li>
               <li>
-                <a class="dropdown-item blue-text" href="../pages/products.php?category=headphones">
+                <a class="dropdown-item blue-text" href="index.php?page=products&category=headphones">
                   Headphone Deals
                 </a>
               </li>
               <li>
-                <a class="dropdown-item blue-text" href="../pages/products.php?category=keyboards">
+                <a class="dropdown-item blue-text" href="index.php?page=products&category=keyboards">
                   Keyboard Deals
                 </a>
               </li>
             </ul>
           </li>
           <li class="nav-item" style="display: flex; align-items: center;">
-            <a class="nav-link pe-0" href="../pages/products.php?sort=bestseller" style="color: yellow !important; font-size: 14px; font-weight: bold;">
+            <a class="nav-link pe-0" href="index.php?page=products&sort=bestseller" style="color: yellow !important; font-size: 14px; font-weight: bold;">
               Best Seller
             </a>
             <span class="fire-icon">🔥</span>
@@ -107,7 +122,7 @@
             <a class="nav-link" href="#" >News</a>
           </li>
         </ul>
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <ul class="navbar-nav ms-auto mb-0">
           <li class="nav-item">
             <a class="nav-link" href="#" >
               <i class="bi bi-question-circle"></i> Help Center

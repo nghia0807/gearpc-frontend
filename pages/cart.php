@@ -1,6 +1,5 @@
 <?php
-session_name('user_session');
-session_start();
+require_once __DIR__ . '/../includes/session_init.php';
 
 // Lấy token từ session
 $token = $_SESSION['token'] ?? null;
@@ -34,14 +33,24 @@ if ($httpCode !== 200) {
 $data = json_decode($response, true);
 $cartItems = $data['data']['items'] ?? [];
 ?>
-<!DOCTYPE html>
-<html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ hàng - GearPC</title>
     <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         .cart-container {
             max-width: 1000px;
             margin: auto;
@@ -49,6 +58,7 @@ $cartItems = $data['data']['items'] ?? [];
             background-color: #fdfdfd;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            flex: 1 0 auto;
         }
 
         .cart-header-title {
@@ -182,63 +192,58 @@ $cartItems = $data['data']['items'] ?? [];
                 margin-top: 10px;
             }
         }
+
+        /* Sticky footer */
+        .footer {
+            flex-shrink: 0;
+        }
     </style>
-
 </head>
-
-<body>
-    <?php include '../includes/header.php';
-    include '../includes/navbar.php'; ?>
-    <div class="cart-container">
-        <div class="cart-header-title">
-            <h2>🛒 Giỏ hàng của bạn</h2>
-            <form method="POST" action="/gearpc-frontend/actions/clear-cart.php">
-                <button type="submit" class="clear-cart-btn">Xóa tất cả</button>
-            </form>
-        </div>
-
-        <div class="cart-header cart-item" style="font-weight: bold; background-color: #f2f2f2;">
-            <div class="cart-item-image">Ảnh</div>
-            <div class="cart-item-name">Tên sản phẩm</div>
-            <div class="cart-item-price">Đơn giá</div>
-            <div class="cart-item-quantity">Số lượng</div>
-            <div class="cart-item-total">Thành tiền</div>
-            <div class="remove-form">Xóa</div>
-        </div>
-
-        <?php foreach ($cartItems as $item): ?>
-            <div class="cart-item">
-                <div class="cart-item-image">
-                    <a href="/gearpc-frontend/pages/product-detail.php?id=<?= htmlspecialchars($item['itemId']) ?>">
-                        <img src="<?= htmlspecialchars($item['imageUrl']) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
-                    </a>
-                </div>
-                <div class="cart-item-name">
-                    <a href="/gearpc-frontend/pages/product-detail.php?id=<?= htmlspecialchars($item['itemId']) ?>" style="text-decoration: none; color: inherit;">
-                        <?= htmlspecialchars($item['name']) ?>
-                    </a>
-                </div>
-                <div class="cart-item-price"><?= number_format($item['price'], 0, ',', '.') ?> ₫</div>
-                <div class="cart-item-quantity">
-                    <form action="/gearpc-frontend/actions/update-cart.php" method="POST" class="quantity-form">
-                        <input type="hidden" name="item_id" value="<?= htmlspecialchars($item['itemId']) ?>">
-                        <button type="submit" name="action" value="decrease" class="quantity-btn">-</button>
-                        <input type="number" name="quantity" value="<?= htmlspecialchars($item['quantity']) ?>" min="1" readonly>
-                        <button type="submit" name="action" value="increase" class="quantity-btn">+</button>
-                    </form>
-                </div>
-                <div class="cart-item-total"><?= number_format($item['totalPrice'], 0, ',', '.') ?> ₫</div>
-                <form action="/gearpc-frontend/actions/remove-cart-item.php" method="POST" class="remove-form">
-                    <input type="hidden" name="item_id" value="<?= htmlspecialchars($item['itemId']) ?>">
-                    <button type="submit" class="remove-btn" title="Xóa sản phẩm">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
-                </form>
-            </div>
-        <?php endforeach; ?>
+<div class="cart-container">
+    <div class="cart-header-title">
+        <h2>🛒 Giỏ hàng của bạn</h2>
+        <form method="POST" action="actions/clear-cart.php">
+            <button type="submit" class="clear-cart-btn">Xóa tất cả</button>
+        </form>
     </div>
 
-    <?php include '../includes/footer.php'; ?>
-</body>
+    <div class="cart-header cart-item" style="font-weight: bold; background-color: #f2f2f2;">
+        <div class="cart-item-image">Ảnh</div>
+        <div class="cart-item-name">Tên sản phẩm</div>
+        <div class="cart-item-price">Đơn giá</div>
+        <div class="cart-item-quantity">Số lượng</div>
+        <div class="cart-item-total">Thành tiền</div>
+        <div class="remove-form">Xóa</div>
+    </div>
 
-</html>
+    <?php foreach ($cartItems as $item): ?>
+        <div class="cart-item">
+            <div class="cart-item-image">
+                <a href="index.php?page=product-detail&id=<?= htmlspecialchars($item['itemId']) ?>">
+                    <img src="<?= htmlspecialchars($item['imageUrl']) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
+                </a>
+            </div>
+            <div class="cart-item-name">
+                <a href="index.php?page=product-detail&id=<?= htmlspecialchars($item['itemId']) ?>" style="text-decoration: none; color: inherit;">
+                    <?= htmlspecialchars($item['name']) ?>
+                </a>
+            </div>
+            <div class="cart-item-price"><?= number_format($item['price'], 0, ',', '.') ?> ₫</div>
+            <div class="cart-item-quantity">
+                <form action="actions/update-cart.php" method="POST" class="quantity-form">
+                    <input type="hidden" name="item_id" value="<?= htmlspecialchars($item['itemId']) ?>">
+                    <button type="submit" name="action" value="decrease" class="quantity-btn">-</button>
+                    <input type="number" name="quantity" value="<?= htmlspecialchars($item['quantity']) ?>" min="1" readonly>
+                    <button type="submit" name="action" value="increase" class="quantity-btn">+</button>
+                </form>
+            </div>
+            <div class="cart-item-total"><?= number_format($item['totalPrice'], 0, ',', '.') ?> ₫</div>
+            <form action="actions/remove-cart-item.php" method="POST" class="remove-form">
+                <input type="hidden" name="item_id" value="<?= htmlspecialchars($item['itemId']) ?>">
+                <button type="submit" class="remove-btn" title="Xóa sản phẩm">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            </form>
+        </div>
+    <?php endforeach; ?>
+</div>

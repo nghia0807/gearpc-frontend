@@ -1,9 +1,6 @@
 <?php
-// --- Use user_session for user pages ---
-if (session_status() === PHP_SESSION_NONE) {
-    session_name('user_session');
-    session_start();
-}
+require_once __DIR__ . '/../includes/session_init.php';
+
 
 // Check if product ID is provided
 $productId = $_GET['id'] ?? null;
@@ -643,9 +640,6 @@ function getProductImages($product)
 </head>
 
 <body>
-    <?php include '../includes/header.php'; ?>
-    <?php include '../includes/navbar.php'; ?>
-
     <div class="container">
         <?php
         if (isset($_SESSION['message'])) {
@@ -658,7 +652,7 @@ function getProductImages($product)
                 <div class="error-icon"><i class="bi bi-exclamation-circle"></i></div>
                 <h3>Unable to load product information</h3>
                 <p class="mb-4"><?= htmlspecialchars($errorMsg) ?></p>
-                <a href="products.php" class="btn btn-add-cart">
+                <a href="index.php?page=products" class="btn btn-add-cart">
                     <i class="bi bi-arrow-left"></i> Back to product list
                 </a>
             </div>
@@ -770,7 +764,7 @@ function getProductImages($product)
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
-                        <form action="/gearpc-frontend/actions/add-to-cart.php" method="POST">
+                        <form action="actions/add-to-cart.php" method="POST">
                             <div class="quantity-selector">
                                 <div class="quantity-label">Số lượng:</div>
                                 <div class="quantity-controls">
@@ -850,7 +844,7 @@ function getProductImages($product)
                     <div class="related-products">
                         <?php foreach ($relatedProducts as $relatedProduct): ?>
                             <div class="related-product-card">
-                                <a href="product-detail.php?id=<?= htmlspecialchars($relatedProduct['id']) ?>"
+                                <a href="index.php?page=product-detail&id=<?= htmlspecialchars($relatedProduct['id']) ?>"
                                     class="text-decoration-none">
                                     <div class="related-product-image">
                                         <img src="<?= htmlspecialchars($relatedProduct['imageUrl']) ?>"
@@ -891,7 +885,6 @@ function getProductImages($product)
             </div>
         <?php endif; ?>
     </div>
-    <?php include '../includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

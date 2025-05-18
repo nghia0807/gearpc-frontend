@@ -2,7 +2,7 @@
 session_name('admin_session');
 session_start();
 
-// Kiểm tra token tồn tại, nếu không thì chuyển hướng về trang đăng nhập
+// Check if token exists, otherwise redirect to login page
 if (!isset($_SESSION['token'])) {
     header('Location: manage_login.php');
     exit;
@@ -48,13 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
     $code = trim($_POST['code'] ?? '');
     $name = trim($_POST['name'] ?? '');
     if ($code === '' || $name === '') {
-        $alerts[] = ['type' => 'danger', 'msg' => 'Mã và tên danh mục không được để trống.'];
+        $alerts[] = ['type' => 'danger', 'msg' => 'Category code and name cannot be empty.'];
     } else {
         $res = apiRequest('POST', "$apiBase/add", $token, ['code' => $code, 'name' => $name]);
         if (!empty($res['success'])) {
-            $alerts[] = ['type' => 'success', 'msg' => 'Thêm danh mục thành công.'];
+            $alerts[] = ['type' => 'success', 'msg' => 'Category added successfully.'];
         } else {
-            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Không thể thêm danh mục.'];
+            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to add category.'];
         }
     }
 }
@@ -64,26 +64,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_category'])) {
     $id = trim($_POST['edit_id'] ?? '');
     $name = trim($_POST['edit_name'] ?? '');
     if ($id === '' || $name === '') {
-        $alerts[] = ['type' => 'danger', 'msg' => 'Tên danh mục không được để trống.'];
+        $alerts[] = ['type' => 'danger', 'msg' => 'Category name cannot be empty.'];
     } else {
         $res = apiRequest('PUT', "$apiBase/update", $token, ['id' => $id, 'name' => $name]);
         if (!empty($res['success'])) {
-            $alerts[] = ['type' => 'success', 'msg' => 'Cập nhật danh mục thành công.'];
+            $alerts[] = ['type' => 'success', 'msg' => 'Category updated successfully.'];
         } else {
-            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Không thể cập nhật danh mục.'];
+            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to update category.'];
         }
     }
 }
 
-// Delete Category
+// Delete Category (single or multiple)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_category'])) {
-    $code = trim($_POST['delete_code'] ?? '');
-    if ($code !== '') {
-        $res = apiRequest('DELETE', "$apiBase/delete", $token, [$code]);
+    $codes = [];
+    if (!empty($_POST['delete_code'])) {
+        // Single delete
+        $codes[] = trim($_POST['delete_code']);
+    } elseif (!empty($_POST['delete_codes'])) {
+        // Multiple delete (from JS)
+        $codes = json_decode($_POST['delete_codes'], true);
+        if (!is_array($codes)) $codes = [];
+    }
+    if (!empty($codes)) {
+        $res = apiRequest('DELETE', "$apiBase/delete", $token, $codes);
         if (!empty($res['success'])) {
-            $alerts[] = ['type' => 'success', 'msg' => 'Xóa danh mục thành công.'];
+            $alerts[] = ['type' => 'success', 'msg' => 'Category deleted successfully.'];
         } else {
-            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Không thể xóa danh mục.'];
+            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to delete category.'];
         }
     }
 }
@@ -94,16 +102,16 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
     $categories = $res['data']['data'];
     $totalCount = $res['data']['totalCount'];
 } else {
-    $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Không thể tải danh mục.'];
+    $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to load categories.'];
 }
-
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Danh mục</title>
+    <title>Category Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
@@ -112,57 +120,64 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
         <div class="alert alert-<?= $alert['type'] ?>"><?= htmlspecialchars($alert['msg']) ?></div>
     <?php endforeach; ?>
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Danh sách danh mục</h4>
+        <h4>Category List</h4>
         <div>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal"><i class="fa fa-plus"></i> Thêm danh mục</button>
+            <button id="btnDeleteSelectedCategories" class="btn btn-danger" disabled>
+                <i class="fa fa-trash"></i> Delete Selected
+            </button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
+                <i class="fa fa-plus"></i> Add Category
+            </button>
         </div>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered align-middle">
             <thead class="table-light">
                 <tr>
+                    <th>
+                        <input type="checkbox" id="selectAllCategories">
+                    </th>
                     <th>ID</th>
-                    <th>Mã</th>
-                    <th>Tên</th>
-                    <th>Hành động</th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th style="width: 90px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
             <?php foreach ($categories as $cat): ?>
                 <tr>
+                    <td>
+                        <input type="checkbox" class="category-checkbox" data-code="<?= htmlspecialchars($cat['code']) ?>">
+                    </td>
                     <td><?= htmlspecialchars($cat['id']) ?></td>
                     <td><?= htmlspecialchars($cat['code']) ?></td>
                     <td><?= htmlspecialchars($cat['name']) ?></td>
                     <td>
-                        <button class="btn btn-primary btn-sm editBtn"
+                        <button class="btn btn-warning btn-sm editBtn"
                                 data-id="<?= htmlspecialchars($cat['id']) ?>"
                                 data-name="<?= htmlspecialchars($cat['name']) ?>"
-                                >Sửa</button>
-                        <form method="post" class="d-inline" onsubmit="return confirm('Xác nhận xóa?');">
-                            <input type="hidden" name="delete_code" value="<?= htmlspecialchars($cat['code']) ?>">
-                            <button type="submit" name="delete_category" class="btn btn-danger btn-sm">Xóa</button>
-                        </form>
+                        ><i class="fa fa-pen-to-square"></i> Edit</button>
                     </td>
                 </tr>
             <?php endforeach; ?>
             <?php if (empty($categories)): ?>
-                <tr><td colspan="4" class="text-center">Không có danh mục nào.</td></tr>
+                <tr><td colspan="5" class="text-center">No categories found.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>
     </div>
     <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
-        <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">Tải thêm</a>
+        <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">Load More</a>
     <?php endif; ?>
     <?php if ($showSelected): ?>
         <hr>
-        <h5>Danh mục rút gọn</h5>
+        <h5>Selected Categories</h5>
         <div class="table-responsive">
             <table class="table table-bordered align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>Mã</th>
-                        <th>Tên</th>
+                        <th>Code</th>
+                        <th>Name</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -173,7 +188,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                     </tr>
                 <?php endforeach; ?>
                 <?php if (empty($selectedCategories)): ?>
-                    <tr><td colspan="2" class="text-center">Không có dữ liệu.</td></tr>
+                    <tr><td colspan="2" class="text-center">No data.</td></tr>
                 <?php endif; ?>
                 </tbody>
             </table>
@@ -186,21 +201,21 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
   <div class="modal-dialog">
     <form method="post" class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addModalLabel">Thêm danh mục</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        <h5 class="modal-title" id="addModalLabel">Add Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-            <label for="code" class="form-label">Mã danh mục</label>
+            <label for="code" class="form-label">Category Code</label>
             <input type="text" class="form-control" id="code" name="code" required>
         </div>
         <div class="mb-3">
-            <label for="name" class="form-label">Tên danh mục</label>
+            <label for="name" class="form-label">Category Name</label>
             <input type="text" class="form-control" id="name" name="name" required>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" name="add_category" class="btn btn-success">Thêm</button>
+        <button type="submit" name="add_category" class="btn btn-success">Add</button>
       </div>
     </form>
   </div>
@@ -211,18 +226,20 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
   <div class="modal-dialog">
     <form method="post" class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Sửa danh mục</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        <h5 class="modal-title" id="editModalLabel">Edit Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="edit_id" name="edit_id">
         <div class="mb-3">
-            <label for="edit_name" class="form-label">Tên danh mục</label>
+            <label for="edit_name" class="form-label">Category Name</label>
             <input type="text" class="form-control" id="edit_name" name="edit_name" required>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" name="edit_category" class="btn btn-primary">Lưu</button>
+        <button type="submit" name="edit_category" class="btn btn-warning">
+            <i class="fa fa-pen-to-square"></i> Save
+        </button>
       </div>
     </form>
   </div>
@@ -237,6 +254,53 @@ document.querySelectorAll('.editBtn').forEach(btn => {
         var editModal = new bootstrap.Modal(document.getElementById('editModal'));
         editModal.show();
     });
+});
+
+// --- Multiple delete logic for categories ---
+const selectAllCategories = document.getElementById('selectAllCategories');
+const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+const btnDeleteSelectedCategories = document.getElementById('btnDeleteSelectedCategories');
+
+function updateDeleteSelectedBtn() {
+    const anyChecked = Array.from(categoryCheckboxes).some(cb => cb.checked);
+    btnDeleteSelectedCategories.disabled = !anyChecked;
+}
+
+if (selectAllCategories) {
+    selectAllCategories.addEventListener('change', function() {
+        categoryCheckboxes.forEach(cb => cb.checked = selectAllCategories.checked);
+        updateDeleteSelectedBtn();
+    });
+}
+categoryCheckboxes.forEach(cb => {
+    cb.addEventListener('change', function() {
+        updateDeleteSelectedBtn();
+        if (!this.checked && selectAllCategories.checked) selectAllCategories.checked = false;
+    });
+});
+
+btnDeleteSelectedCategories.addEventListener('click', function() {
+    const codes = Array.from(categoryCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.getAttribute('data-code'));
+    if (codes.length === 0) return;
+    if (!confirm('Are you sure you want to delete the selected categories?')) return;
+    // Submit via hidden form (POST)
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.style.display = 'none';
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'delete_codes';
+    input.value = JSON.stringify(codes);
+    form.appendChild(input);
+    const input2 = document.createElement('input');
+    input2.type = 'hidden';
+    input2.name = 'delete_category';
+    input2.value = '1';
+    form.appendChild(input2);
+    document.body.appendChild(form);
+    form.submit();
 });
 </script>
 </body>

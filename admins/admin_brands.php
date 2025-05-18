@@ -2,7 +2,7 @@
 session_name('admin_session');
 session_start();
 
-// Kiểm tra token tồn tại, nếu không thì chuyển hướng về trang đăng nhập
+// Check if token exists, otherwise redirect to login page
 if (!isset($_SESSION['token'])) {
     header('Location: manage_login.php');
     exit;
@@ -84,11 +84,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_brand'])) {
     }
 }
 
-// Delete Brand
+// Delete Brand (single or multiple)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_brand'])) {
-    $code = trim($_POST['delete_code'] ?? '');
-    if ($code !== '') {
-        $res = apiRequest('DELETE', "$apiBase/delete", $token, [$code]);
+    $codes = [];
+    if (!empty($_POST['delete_code'])) {
+        // Single delete
+        $codes[] = trim($_POST['delete_code']);
+    } elseif (!empty($_POST['delete_codes'])) {
+        // Multiple delete (from JS)
+        $codes = json_decode($_POST['delete_codes'], true);
+        if (!is_array($codes)) $codes = [];
+    }
+    if (!empty($codes)) {
+        $res = apiRequest('DELETE', "$apiBase/delete", $token, $codes);
         if (!empty($res['success'])) {
             $alerts[] = ['type' => 'success', 'msg' => 'Xóa thương hiệu thành công.'];
         } else {
@@ -124,93 +132,226 @@ function brandImage($img) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Thương hiệu</title>
+    <title>Brand Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background: #f8f9fb;
+        }
+        .main-card {
+            background: #fff;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(60,72,88,0.07);
+            padding: 2rem 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border: 1.5px solid #e0e6ed;
+        }
+        .main-card h4 {
+            font-weight: 600;
+            color: #222;
+        }
+        .table thead th {
+            background: #f5f6fa;
+            color: #333;
+            font-weight: 500;
+            border-top: none;
+        }
+        .table-bordered > :not(caption) > * > * {
+            border-color: #e3e6ea;
+        }
+        .btn {
+            border-radius: 0.375rem;
+            font-weight: 500;
+            box-shadow: none;
+        }
+        .btn-success, .btn-warning, .btn-danger, .btn-outline-secondary {
+            background: none;
+            color: inherit;
+            border: 1px solid #dee2e6;
+        }
+        .btn-success {
+            color: #198754;
+            border-color: #198754;
+        }
+        .btn-success:hover, .btn-success:focus {
+            background: #198754;
+            color: #fff;
+        }
+        .btn-warning {
+            color: #b08900;
+            border-color: #ffc107;
+        }
+        .btn-warning:hover, .btn-warning:focus {
+            background: #ffc107;
+            color: #222;
+        }
+        .btn-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-danger:hover, .btn-danger:focus {
+            background: #dc3545;
+            color: #fff;
+        }
+        .btn-outline-secondary {
+            color: #6c757d;
+            border-color: #ced4da;
+        }
+        .btn-outline-secondary:hover, .btn-outline-secondary:focus {
+            background: #e9ecef;
+            color: #222;
+        }
+        .modal-content {
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(60,72,88,0.10);
+        }
+        .modal-header {
+            border-bottom: 1px solid #e3e6ea;
+        }
+        .modal-title {
+            font-weight: 500;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .alert {
+            border-radius: 0.375rem;
+        }
+        .table tbody tr:hover {
+            background: #f6f8fa;
+        }
+        .table td, .table th {
+            vertical-align: middle;
+        }
+        .brand-actions .btn {
+            margin-right: 0.25rem;
+        }
+        @media (max-width: 768px) {
+            .main-card {
+                padding: 1rem 0.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
 <div class="container">
-    <?php foreach ($alerts as $alert): ?>
-        <!-- <div class="alert alert-<?= $alert['type'] ?>"><?= htmlspecialchars($alert['msg']) ?></div> -->
-    <?php endforeach; ?>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Danh sách thương hiệu</h4>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">Thêm thương hiệu</button>
+    <div class="main-card">
+        <!-- Toast Container -->
+        <div aria-live="polite" aria-atomic="true" class="position-relative">
+            <div id="toastContainer" class="toast-container position-absolute bottom-0 end-0 p-3" style="z-index: 1080;">
+                <?php foreach ($alerts as $alert): ?>
+                <div class="toast align-items-center text-bg-<?= $alert['type'] ?> border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3500">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <?= htmlspecialchars($alert['msg']) ?>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <!-- End Toast Container -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Brand List</h4>
+            <div class="d-flex gap-2">
+                <button id="btnDeleteSelectedBrands" class="btn btn-danger" disabled>
+                    <i class="fa fa-trash"></i> Delete Selected
+                </button>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
+                    <i class="fa fa-plus"></i> Add Brand
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle shadow-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAllBrands">
+                        </th>
+                        <th>ID</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Image</th>
+                        <th style="width: 110px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($brands as $brand): ?>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="brand-checkbox" data-code="<?= htmlspecialchars($brand['code']) ?>">
+                        </td>
+                        <td><?= htmlspecialchars($brand['id']) ?></td>
+                        <td><?= htmlspecialchars($brand['code']) ?></td>
+                        <td><?= htmlspecialchars($brand['name']) ?></td>
+                        <td><?= brandImage($brand['image']) ?></td>
+                        <td class="brand-actions">
+                            <button class="btn btn-warning btn-sm editBtn"
+                                    data-id="<?= htmlspecialchars($brand['id']) ?>"
+                                    data-code="<?= htmlspecialchars($brand['code']) ?>"
+                                    data-name="<?= htmlspecialchars($brand['name']) ?>"
+                                    data-image="<?= htmlspecialchars($brand['image']) ?>"
+                            ><i class="fa fa-pen-to-square"></i> Edit</button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                <?php if (empty($brands)): ?>
+                    <tr><td colspan="6" class="text-center text-muted">No brands found.</td></tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
+            <div class="d-flex justify-content-end mt-2">
+                <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">
+                    <i class="fa fa-angle-double-down"></i> Load More
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
-    <div class="table-responsive">
-        <table class="table table-bordered align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Mã</th>
-                    <th>Tên</th>
-                    <th>Hình ảnh</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($brands as $brand): ?>
-                <tr>
-                    <td><?= htmlspecialchars($brand['id']) ?></td>
-                    <td><?= htmlspecialchars($brand['code']) ?></td>
-                    <td><?= htmlspecialchars($brand['name']) ?></td>
-                    <td><?= brandImage($brand['image']) ?></td>
-                    <td>
-                        <button class="btn btn-primary btn-sm editBtn"
-                                data-id="<?= htmlspecialchars($brand['id']) ?>"
-                                data-code="<?= htmlspecialchars($brand['code']) ?>"
-                                data-name="<?= htmlspecialchars($brand['name']) ?>"
-                                data-image="<?= htmlspecialchars($brand['image']) ?>"
-                                >Sửa</button>
-                        <form method="post" class="d-inline" onsubmit="return confirm('Xác nhận xóa?');">
-                            <input type="hidden" name="delete_code" value="<?= htmlspecialchars($brand['code']) ?>">
-                            <button type="submit" name="delete_brand" class="btn btn-danger btn-sm">Xóa</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-            <?php if (empty($brands)): ?>
-                <tr><td colspan="5" class="text-center">Không có thương hiệu nào.</td></tr>
-            <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-    <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
-        <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">Tải thêm</a>
-    <?php endif; ?>
 </div>
 
 <!-- Add Modal -->
 <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" class="modal-content" enctype="multipart/form-data" id="addBrandForm">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addModalLabel">Thêm thương hiệu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      <div class="modal-header bg-primary text-white rounded-top">
+        <h5 class="modal-title" id="addModalLabel">
+          <i class="fa fa-plus me-2"></i>Add Brand
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body px-4 py-3" style="background: #f8f9fb;">
         <div class="mb-3">
-            <label for="code" class="form-label">Mã thương hiệu</label>
-            <input type="text" class="form-control" id="code" name="code" required>
+            <label for="code" class="form-label fw-semibold text-primary">Brand Code</label>
+            <input type="text" class="form-control shadow-sm" id="code" name="code" required placeholder="Enter brand code">
         </div>
         <div class="mb-3">
-            <label for="name" class="form-label">Tên thương hiệu</label>
-            <input type="text" class="form-control" id="name" name="name" required>
+            <label for="name" class="form-label fw-semibold text-primary">Brand Name</label>
+            <input type="text" class="form-control shadow-sm" id="name" name="name" required placeholder="Enter brand name">
         </div>
         <div class="mb-3">
-            <label for="image" class="form-label">Hình ảnh</label>
-            <input type="file" class="form-control" id="image" accept="image/*">
+            <label for="image" class="form-label fw-semibold text-primary">Image</label>
+            <input type="file" class="form-control shadow-sm" id="image" accept="image/*">
             <input type="hidden" name="imageBase64" id="imageBase64">
             <div class="mt-2">
                 <img id="imgPreview" src="https://via.placeholder.com/80x80?text=No+Image" class="img-thumbnail" width="80" height="80">
             </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="submit" name="add_brand" class="btn btn-success">Thêm</button>
+      <div class="modal-footer bg-light rounded-bottom">
+        <button type="submit" name="add_brand" class="btn btn-success px-4">
+          <i class="fa fa-plus"></i> Add
+        </button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
       </div>
     </form>
   </div>
@@ -221,21 +362,21 @@ function brandImage($img) {
   <div class="modal-dialog">
     <form method="post" class="modal-content" enctype="multipart/form-data" id="editBrandForm">
       <div class="modal-header">
-        <h5 class="modal-title" id="editModalLabel">Sửa thương hiệu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        <h5 class="modal-title" id="editModalLabel">Edit Brand</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="edit_id" name="edit_id">
         <div class="mb-3">
-            <label for="edit_code" class="form-label">Mã thương hiệu</label>
+            <label for="edit_code" class="form-label">Brand Code</label>
             <input type="text" class="form-control" id="edit_code" name="edit_code" readonly>
         </div>
         <div class="mb-3">
-            <label for="edit_name" class="form-label">Tên thương hiệu</label>
+            <label for="edit_name" class="form-label">Brand Name</label>
             <input type="text" class="form-control" id="edit_name" name="edit_name" required>
         </div>
         <div class="mb-3">
-            <label for="edit_image" class="form-label">Hình ảnh</label>
+            <label for="edit_image" class="form-label">Image</label>
             <input type="file" class="form-control" id="edit_image" accept="image/*">
             <input type="hidden" name="edit_imageBase64" id="edit_imageBase64">
             <div class="mt-2">
@@ -244,7 +385,9 @@ function brandImage($img) {
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" name="edit_brand" class="btn btn-primary">Lưu</button>
+        <button type="submit" name="edit_brand" class="btn btn-warning">
+            <i class="fa fa-pen-to-square"></i> Save
+        </button>
       </div>
     </form>
   </div>
@@ -305,6 +448,62 @@ document.getElementById('edit_image').addEventListener('change', function(e) {
         };
         reader.readAsDataURL(file);
     }
+});
+
+// --- Multiple delete logic for brands ---
+const selectAllBrands = document.getElementById('selectAllBrands');
+const brandCheckboxes = document.querySelectorAll('.brand-checkbox');
+const btnDeleteSelectedBrands = document.getElementById('btnDeleteSelectedBrands');
+
+function updateDeleteSelectedBrandBtn() {
+    const anyChecked = Array.from(brandCheckboxes).some(cb => cb.checked);
+    btnDeleteSelectedBrands.disabled = !anyChecked;
+}
+
+if (selectAllBrands) {
+    selectAllBrands.addEventListener('change', function() {
+        brandCheckboxes.forEach(cb => cb.checked = selectAllBrands.checked);
+        updateDeleteSelectedBrandBtn();
+    });
+}
+brandCheckboxes.forEach(cb => {
+    cb.addEventListener('change', function() {
+        updateDeleteSelectedBrandBtn();
+        if (!this.checked && selectAllBrands.checked) selectAllBrands.checked = false;
+    });
+});
+
+btnDeleteSelectedBrands.addEventListener('click', function() {
+    const codes = Array.from(brandCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.getAttribute('data-code'));
+    if (codes.length === 0) return;
+    if (!confirm('Are you sure you want to delete the selected brands?')) return;
+    // Submit via hidden form (POST)
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.style.display = 'none';
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'delete_codes';
+    input.value = JSON.stringify(codes);
+    form.appendChild(input);
+    const input2 = document.createElement('input');
+    input2.type = 'hidden';
+    input2.name = 'delete_brand';
+    input2.value = '1';
+    form.appendChild(input2);
+    document.body.appendChild(form);
+    form.submit();
+});
+
+// Show all toasts on page load
+document.addEventListener('DOMContentLoaded', function() {
+    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    toastElList.forEach(function(toastEl) {
+        var toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    });
 });
 </script>
 </body>

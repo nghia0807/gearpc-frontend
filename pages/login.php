@@ -2,7 +2,7 @@
 // Use a dedicated session for user authentication
 session_name('user_session');
 session_set_cookie_params([
-    'path' => '/user',
+    'path' => '/',
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
@@ -16,6 +16,9 @@ $errors = ['username' => '', 'password' => ''];
 function sanitize($data) {
     return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
+
+// Get redirect target from query or POST
+$redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? '../index.php?page=home';
 
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -81,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         $alert = 'Login successful! Redirecting...';
                         $alertType = 'success';
-                        echo "<script>setTimeout(function(){ window.location.href = 'home.php'; }, 500);</script>";
+                        echo "<script>setTimeout(function(){ window.location.href = '" . htmlspecialchars($redirect, ENT_QUOTES) . "'; }, 500);</script>";
                     }
                 } else {
                     $alert = 'Invalid or unauthorized role. Access denied.';
@@ -142,7 +145,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
   <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
-    <img src="../assets/img/logo.png" alt="Logo" class="mb-4" />
+    <a href="../index.php" class="mb-4">
+      <img src="../assets/img/logo.png" alt="Logo"/>
+    </a>
     <h5 class="mb-4 fw-bold">Sign In</h5>
     <!-- Alert for API or validation messages -->
     <?php if ($alert): ?>
@@ -151,6 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     <?php endif; ?>
     <form method="post" id="loginForm" novalidate>
+      <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirect) ?>" />
       <div class="mb-3 floating-group">
         <input type="text" class="form-control floating-input <?= $errors['username'] ? 'is-invalid' : '' ?>" id="username" name="username" placeholder=" " required minlength="8" value="<?= isset($username) ? htmlspecialchars($username) : '' ?>" />
         <label for="username">Username</label>

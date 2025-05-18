@@ -2,7 +2,7 @@
 // --- Admin session setup ---
 session_name('admin_session');
 session_set_cookie_params([
-    'path' => '/admin',
+    'path' => '/',
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password'] ?? '');
 
     if ($username === '' || $password === '') {
-        $error = 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.';
+        $error = 'Please enter both username and password.';
     } else {
         // Call backend API for authentication
         $ch = curl_init('http://localhost:5000/api/auth/login');
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         curl_close($ch);
 
         if ($err) {
-            $error = 'Lỗi kết nối máy chủ.';
+            $error = 'Server connection error.';
         } else {
             $respData = json_decode($response, true);
             if ($httpCode === 200 && ($respData['success'] ?? false)) {
@@ -74,17 +74,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_destroy();
                 $error = 'Bạn không có quyền truy cập.';
             } else {
-                $error = $respData['message'] ?? 'Đăng nhập thất bại';
+                $error = $respData['message'] ?? 'Login failed';
             }
         }
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng nhập Quản trị</title>
+    <title>Admin Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
@@ -107,20 +107,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container d-flex justify-content-center align-items-center" style="min-height:100vh;">
     <div class="card shadow" style="min-width:350px;">
         <div class="card-body">
-            <h4 class="card-title mb-4 text-center">Đăng nhập Quản trị</h4>
+            <h4 class="card-title mb-4 text-center">Admin Login</h4>
             <?php if ($error): ?>
                 <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             <form method="post" novalidate>
                 <div class="mb-3">
-                    <label for="username" class="form-label">Tên đăng nhập</label>
+                    <label for="username" class="form-label">Username</label>
                     <input type="text" class="form-control" id="username" name="username" required autofocus>
                 </div>
                 <div class="mb-3">
-                    <label for="password" class="form-label">Mật khẩu</label>
+                    <label for="password" class="form-label">Password</label>
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
             </form>
         </div>
     </div>
