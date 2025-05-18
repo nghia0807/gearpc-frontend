@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Footer</title>
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
@@ -21,6 +20,17 @@
         color: #fff;
         text-decoration: underline;
     }
+    @media (max-width: 991.98px) {
+      .tech-footer .row {
+        flex-direction: row !important;
+      }
+    }
+    .tech-footer .row {
+      flex-direction: row !important;
+    }
+    .tech-footer .col-md-4 {
+      margin-bottom: 0 !important;
+    }
     </style>
 </head>
 <body>
@@ -28,7 +38,7 @@
 <!-- Footer Component -->
 <footer class="tech-footer bg-black text-light py-4 mt-5">
     <div class="container">
-        <div class="row">
+        <div class="row" style="flex-direction: row !important;">
             <!-- About Us -->
             <div class="col-md-4 mb-3">
                 <h5 class="text-uppercase">About Us</h5>

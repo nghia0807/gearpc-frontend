@@ -1,33 +1,128 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="#">GearPC Admin</a>
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-                <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_categories.php' ? ' active' : '' ?>" href="admin_categories.php">Categories</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_brands.php' ? ' active' : '' ?>" href="admin_brands.php">Brands</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_products.php' ? ' active' : '' ?>" href="admin_products.php">Products</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_gifts.php' ? ' active' : '' ?>" href="admin_gifts.php">Gifts</a>
-            </li>
-        </ul>
+<style>
+/* Sidebar styles */
+#adminSidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 220px;
+    background: #1a2238; /* deep blue */
+    color: #fff;
+    z-index: 1040;
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 12px rgba(26,34,56,0.08);
+}
+#adminSidebar .sidebar-header {
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding: 0 1.5rem 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #28304a;
+    color: #e0e6ed;
+    letter-spacing: 1px;
+}
+#adminSidebar .nav-link {
+    color: #bfc9da;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.35rem;
+    margin-bottom: 0.25rem;
+    transition: background 0.2s, color 0.2s;
+    font-weight: 500;
+}
+#adminSidebar .nav-link.active, #adminSidebar .nav-link:hover {
+    background: #28304a;
+    color: #f7ca18;
+}
+#adminSidebar .sidebar-footer {
+    margin-top: auto;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #28304a;
+    background: #20294a;
+}
+#adminSidebar .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    border-radius: 0.35rem;
+    font-weight: 500;
+    box-shadow: none;
+}
+#adminSidebar .btn-outline-info {
+    color: #3abff8;
+    border-color: #3abff8;
+}
+#adminSidebar .btn-outline-info:hover, #adminSidebar .btn-outline-info:focus {
+    background: #3abff8;
+    color: #1a2238;
+}
+#adminSidebar .btn-outline-light {
+    color: #fff;
+    border-color: #fff;
+}
+#adminSidebar .btn-outline-light:hover, #adminSidebar .btn-outline-light:focus {
+    background: #f7ca18;
+    color: #1a2238;
+    border-color: #f7ca18;
+}
+#adminSidebar .navbar-text {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #f7ca18;
+    font-size: 0.98rem;
+    font-weight: 500;
+}
+body {
+    margin-left: 220px;
+    background: linear-gradient(120deg, #f7f7ff 0%, #dbeafe 100%);
+}
+@media (max-width: 768px) {
+    #adminSidebar {
+        width: 100vw;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        padding-top: 0;
+        box-shadow: none;
+    }
+    body {
+        margin-left: 0;
+    }
+}
+</style>
+
+<div id="adminSidebar">
+    <div class="sidebar-header">
+        GearPC Admin
+    </div>
+    <ul class="nav flex-column mb-2">
+        <li class="nav-item">
+            <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_categories.php' ? ' active' : '' ?>" href="admin_categories.php">Categories</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_brands.php' ? ' active' : '' ?>" href="admin_brands.php">Brands</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_products.php' ? ' active' : '' ?>" href="admin_products.php">Products</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link<?= basename($_SERVER['PHP_SELF']) === 'admin_gifts.php' ? ' active' : '' ?>" href="admin_gifts.php">Gifts</a>
+        </li>
+    </ul>
+    <div class="sidebar-footer">
         <?php if (isset($_SESSION['user']['fullName'])): ?>
-            <span class="navbar-text text-light me-3">
+            <span class="navbar-text">
                 <?= htmlspecialchars($_SESSION['user']['fullName']) ?>
             </span>
         <?php endif; ?>
         <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Admin'): ?>
-            <button type="button" class="btn btn-outline-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#createManagerModal">
+            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#createManagerModal">
                 Create Manager Account
             </button>
         <?php endif; ?>
         <a href="manage_login.php?logout=1" class="btn btn-outline-light btn-sm">Logout</a>
     </div>
-</nav>
+</div>
 
 <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Admin'): ?>
 <!-- Create Manager Modal -->

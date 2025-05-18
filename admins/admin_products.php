@@ -75,168 +75,229 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+        body {
+            background: #f8f9fb;
+        }
+        .main-card {
+            background: #fff;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(60,72,88,0.07);
+            padding: 2rem 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border: 1.5px solid #e0e6ed;
+        }
+        .main-card h4 {
+            font-weight: 600;
+            color: #222;
+        }
+        .table thead th {
+            background: #f5f6fa;
+            color: #333;
+            font-weight: 500;
+            border-top: none;
+        }
+        .table-bordered > :not(caption) > * > * {
+            border-color: #e3e6ea;
+        }
+        .btn {
+            border-radius: 0.375rem;
+            font-weight: 500;
+            box-shadow: none;
+        }
+        .btn-success, .btn-warning, .btn-danger, .btn-outline-secondary {
+            background: none;
+            color: inherit;
+            border: 1px solid #dee2e6;
+        }
+        .btn-success {
+            color: #198754;
+            border-color: #198754;
+        }
+        .btn-success:hover, .btn-success:focus {
+            background: #198754;
+            color: #fff;
+        }
+        .btn-warning {
+            color: #b08900;
+            border-color: #ffc107;
+        }
+        .btn-warning:hover, .btn-warning:focus {
+            background: #ffc107;
+            color: #222;
+        }
+        .btn-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-danger:hover, .btn-danger:focus {
+            background: #dc3545;
+            color: #fff;
+        }
+        .btn-outline-secondary {
+            color: #6c757d;
+            border-color: #ced4da;
+        }
+        .btn-outline-secondary:hover, .btn-outline-secondary:focus {
+            background: #e9ecef;
+            color: #222;
+        }
+        .modal-content {
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(60,72,88,0.10);
+        }
+        .modal-header {
+            border-bottom: 1px solid #e3e6ea;
+        }
+        .modal-title {
+            font-weight: 500;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .alert {
+            border-radius: 0.375rem;
+        }
+        .table tbody tr:hover {
+            background: #f6f8fa;
+        }
+        .table td, .table th {
+            vertical-align: middle;
+        }
+        .product-actions .btn {
+            margin-right: 0.25rem;
+        }
+        @media (max-width: 768px) {
+            .main-card {
+                padding: 1rem 0.5rem;
+            }
+        }
         .product-img-thumb {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #eee;
+        }
+        .modal-product-thumb {
             width: 64px;
             height: 64px;
             object-fit: cover;
             border-radius: 6px;
-            background: #eee;
-        }
-        .action-btns .btn {
-            margin-right: 4px;
-        }
-        /* --- Modal thumbnail styling --- */
-        .modal-product-thumb {
-            width: 96px;
-            height: 96px;
-            object-fit: cover;
-            border-radius: 8px;
             background: #eee;
             margin-right: 8px;
         }
         .modal-product-img-list img {
-            width: 64px;
-            height: 64px;
+            width: 40px;
+            height: 40px;
             object-fit: cover;
-            border-radius: 6px;
+            border-radius: 4px;
             margin-right: 6px;
             margin-bottom: 6px;
             background: #eee;
-        }
-        .modal-product-option .selected {
-            font-weight: bold;
-            color: #198754;
-        }
-        .modal-product-label {
-            font-weight: 500;
-            color: black;
-        }
-        .modal-product-meta {
-            font-size: 0.95em;
-            color: #888;
-        }
-        .modal-product-desc-list {
-            margin-bottom: 0;
-        }
-        /* Thêm style cho card trong modal */
-        #addProductModal .card {
-            border-radius: 8px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        }
-        #addProductModal .card-header {
-            border-bottom: 1px solid #e3e3e3;
-            font-size: 1.05em;
-        }
-        #addProductModal .card-body {
-            padding-bottom: 0.5rem;
-        }
-        #addProductModal label.form-label {
-            font-weight: 500;
-        }
-        #addProductModal .variant-block {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            padding: 12px;
-        }
-        #addProductModal .option-block {
-            background: #fff;
-            border: 1px solid #e3e3e3;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            padding: 10px;
-        }
-        #addProductModal .input-group .form-control {
-            min-width: 0;
         }
     </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
 <div class="container">
-    <?php foreach ($alerts as $alert): ?>
-        <div class="alert alert-<?= $alert['type'] ?>"><?= htmlspecialchars($alert['msg']) ?></div>
-    <?php endforeach; ?>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Product List</h4>
-        <div>
-            <button id="btnDeleteSelected" class="btn btn-danger" disabled>
-                <i class="fa fa-trash"></i> Delete Selected
-            </button>
-            <button id="btnAddProduct" class="btn btn-success">
-                <i class="fa fa-plus"></i> Add Product
-            </button>
-        </div>
-    </div>
-    <div class="card shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0">
-                <thead class="table-light">
-                <tr>
-                    <th style="width:32px;">
-                        <input type="checkbox" id="selectAllProducts">
-                    </th>
-                    <th>ID</th>
-                    <th>Product Code</th>
-                    <th>Product Name</th>
-                    <th>Image</th>
-                    <th>Brand</th>
-                    <th>Current Price</th>
-                    <th>Original Price</th>
-                    <th>Short Description</th>
-                    <th style="width: 120px;">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php if (empty($products)): ?>
-                    <tr>
-                        <td colspan="10" class="text-center text-muted">No products found.</td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($products as $product): ?>
-                        <tr>
-                            <td>
-                                <input type="checkbox" class="product-checkbox" data-code="<?= htmlspecialchars($product['code']) ?>">
-                            </td>
-                            <td><?= htmlspecialchars($product['id']) ?></td>
-                            <td><?= htmlspecialchars($product['code']) ?></td>
-                            <td><?= htmlspecialchars($product['name']) ?></td>
-                            <td>
-                                <?php if (!empty($product['imageUrl'])): ?>
-                                    <img src="<?= htmlspecialchars($product['imageUrl']) ?>" alt="Product Image" class="product-img-thumb">
-                                <?php else: ?>
-                                    <img src="https://via.placeholder.com/64x64?text=No+Image" alt="No Image" class="product-img-thumb">
-                                <?php endif; ?>
-                            </td>
-                            <td><?= htmlspecialchars($product['brandName']) ?></td>
-                            <td><?= number_format($product['currentPrice'], 0, ',', '.') ?>₫</td>
-                            <td><?= number_format($product['originalPrice'], 0, ',', '.') ?>₫</td>
-                            <td><?= htmlspecialchars($product['shortDescription']) ?></td>
-                            <td class="action-btns">
-                                <button class="btn btn-sm btn-info btn-view-product" data-id="<?= htmlspecialchars($product['id']) ?>">
-                                    <i class="fa-solid fa-eye"></i> View
-                                </button>
-                                <button class="btn btn-sm btn-warning" disabled>
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit
-                                </button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
-            <div class="card-footer bg-white text-center">
-                <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">
-                    <i class="fa-solid fa-angles-down"></i> Load More
-                </a>
+    <div class="main-card">
+        <!-- Toast Container -->
+        <div aria-live="polite" aria-atomic="true" class="position-relative">
+            <div id="toastContainer" class="toast-container position-absolute bottom-0 end-0 p-3" style="z-index: 1080;">
+                <?php foreach ($alerts as $alert): ?>
+                <div class="toast align-items-center text-bg-<?= $alert['type'] ?> border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3500">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <?= htmlspecialchars($alert['msg']) ?>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+                <?php endforeach; ?>
             </div>
-        <?php endif; ?>
+        </div>
+        <!-- End Toast Container -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">Product List</h4>
+            <div class="d-flex gap-2">
+                <button id="btnDeleteSelected" class="btn btn-danger" disabled>
+                    <i class="fa fa-trash"></i> Delete Selected
+                </button>
+                <button id="btnAddProduct" class="btn btn-success">
+                    <i class="fa fa-plus"></i> Add Product
+                </button>
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width:32px;">
+                            <input type="checkbox" id="selectAllProducts">
+                        </th>
+                        <th>ID</th>
+                        <th>Product Code</th>
+                        <th>Product Name</th>
+                        <th>Image</th>
+                        <th>Brand</th>
+                        <th>Current Price</th>
+                        <th>Original Price</th>
+                        <th>Short Description</th>
+                        <th style="width: 120px;">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (empty($products)): ?>
+                        <tr>
+                            <td colspan="10" class="text-center text-muted">No products found.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($products as $product): ?>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="product-checkbox" data-code="<?= htmlspecialchars($product['code']) ?>">
+                                </td>
+                                <td><?= htmlspecialchars($product['id']) ?></td>
+                                <td><?= htmlspecialchars($product['code']) ?></td>
+                                <td><?= htmlspecialchars($product['name']) ?></td>
+                                <td>
+                                    <?php if (!empty($product['imageUrl'])): ?>
+                                        <img src="<?= htmlspecialchars($product['imageUrl']) ?>" alt="Product Image" class="product-img-thumb">
+                                    <?php else: ?>
+                                        <img src="https://via.placeholder.com/64x64?text=No+Image" alt="No Image" class="product-img-thumb">
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= htmlspecialchars($product['brandName']) ?></td>
+                                <td><?= number_format($product['currentPrice'], 0, ',', '.') ?>₫</td>
+                                <td><?= number_format($product['originalPrice'], 0, ',', '.') ?>₫</td>
+                                <td><?= htmlspecialchars($product['shortDescription']) ?></td>
+                                <td class="action-btns">
+                                    <button class="btn btn-sm btn-info btn-view-product" data-id="<?= htmlspecialchars($product['id']) ?>">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" disabled>
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
+                <div class="card-footer bg-white text-center">
+                    <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-angles-down"></i> Load More
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+        <!-- Remove old alert container -->
+        <!-- <div id="jsAlertContainer" style="margin-top:16px;"></div> -->
     </div>
-    <!-- Alert for JS actions -->
-    <div id="jsAlertContainer" style="margin-top:16px;"></div>
 </div>
 
 <!-- Add Product Modal -->
@@ -244,58 +305,67 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <form id="addProductForm" autocomplete="off">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header bg-primary bg-gradient text-white">
+          <h5 class="modal-title" id="addProductModalLabel">
+            <i class="fa-solid fa-plus-circle me-2"></i>Add New Product
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" style="overflow-y:auto; max-height:70vh;">
+        <div class="modal-body px-4 py-3" style="background: #f8f9fb; overflow-y:auto; max-height:70vh;">
           <div id="addProductAlert"></div>
-          <!-- Main Info -->
-          <div class="card mb-3 border-primary">
-            <div class="card-header bg-primary text-white py-2">
-              <strong>Product Information</strong>
+          
+          <!-- Main Info Section -->
+          <div class="card mb-4 border-primary shadow-sm">
+            <div class="card-header bg-primary bg-opacity-75 text-white py-2">
+              <h6 class="mb-0"><i class="fa-solid fa-info-circle me-2"></i>Basic Product Information</h6>
             </div>
-            <div class="card-body pb-2">
-              <div class="row mb-2">
-                <div class="col-md-6 mb-2">
-                  <label class="form-label">Product Name</label>
-                  <input type="text" class="form-control" name="name" required>
+            <div class="card-body pb-3 pt-3">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold text-primary">Product Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="name" required placeholder="Enter product name">
+                  <div class="form-text">Shown as product title on all pages</div>
                 </div>
-                <div class="col-md-6 mb-2">
-                  <label class="form-label">Product Code</label>
-                  <input type="text" class="form-control" name="code" required>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold text-primary">Product Code <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="code" required placeholder="Enter unique product code">
+                  <div class="form-text">Must be unique identifier</div>
                 </div>
-              </div>
-              <div class="mb-2">
-                <label class="form-label">Main Image</label>
-                <input type="file" class="form-control" name="image" accept="image/*" required>
+                <div class="col-12">
+                  <label class="form-label fw-semibold text-primary">Main Image <span class="text-danger">*</span></label>
+                  <input type="file" class="form-control" name="image" accept="image/*" required>
+                  <div class="form-text">This will be the primary product image shown in listings</div>
+                </div>
               </div>
             </div>
           </div>
-          <!-- Category, Brand, Status -->
-          <div class="card mb-3 border-success">
-            <div class="card-header bg-success text-white py-2">
-              <strong>Classification & Status</strong>
+          
+          <!-- Classification Section -->
+          <div class="card mb-4 border-success shadow-sm">
+            <div class="card-header bg-success bg-opacity-75 text-white py-2">
+              <h6 class="mb-0"><i class="fa-solid fa-tags me-2"></i>Classification & Status</h6>
             </div>
-            <div class="card-body pb-2">
-              <div class="mb-2">
-                <label class="form-label">Categories</label>
-                <div class="row">
-                  <?php foreach ($categoriesList as $cat): ?>
-                    <div class="col-md-4">
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="categoriesCode[]" value="<?= htmlspecialchars($cat['code']) ?>" id="cat_<?= htmlspecialchars($cat['code']) ?>">
-                        <label class="form-check-label" for="cat_<?= htmlspecialchars($cat['code']) ?>">
-                          <?= htmlspecialchars($cat['name']) ?>
-                        </label>
+            <div class="card-body pb-3 pt-3">
+              <div class="mb-3">
+                <label class="form-label fw-semibold text-success">Categories <span class="text-danger">*</span></label>
+                <div class="border rounded p-3 bg-light">
+                  <div class="row">
+                    <?php foreach ($categoriesList as $cat): ?>
+                      <div class="col-md-4 mb-2">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="categoriesCode[]" value="<?= htmlspecialchars($cat['code']) ?>" id="cat_<?= htmlspecialchars($cat['code']) ?>">
+                          <label class="form-check-label" for="cat_<?= htmlspecialchars($cat['code']) ?>">
+                            <?= htmlspecialchars($cat['name']) ?>
+                          </label>
+                        </div>
                       </div>
-                    </div>
-                  <?php endforeach; ?>
+                    <?php endforeach; ?>
+                  </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-md-6 mb-2">
-                  <label class="form-label">Brand</label>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold text-success">Brand <span class="text-danger">*</span></label>
                   <select class="form-select" name="brandCode" required>
                     <option value="">-- Select Brand --</option>
                     <?php foreach ($brandsList as $brand): ?>
@@ -305,8 +375,8 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                     <?php endforeach; ?>
                   </select>
                 </div>
-                <div class="col-md-6 mb-2">
-                  <label class="form-label">Status</label>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold text-success">Status <span class="text-danger">*</span></label>
                   <select class="form-select" name="status" required>
                     <option value="New">New</option>
                     <option value="Active">Active</option>
@@ -316,32 +386,43 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
               </div>
             </div>
           </div>
-          <!-- Gift code -->
-          <div class="card mb-3 border-warning">
-            <div class="card-header bg-warning text-dark py-2">
-              <strong>Gift Codes</strong>
+          
+          <!-- Gift Section -->
+          <div class="card mb-4 border-warning shadow-sm">
+            <div class="card-header bg-warning bg-opacity-75 text-dark py-2">
+              <h6 class="mb-0"><i class="fa-solid fa-gift me-2"></i>Gift Items</h6>
             </div>
-            <div class="card-body pb-2">
-              <label class="form-label">Gift Codes (comma separated, optional)</label>
-              <input type="text" class="form-control" name="giftCodes" placeholder="e.g. gift1,gift2">
+            <div class="card-body pb-3 pt-3">
+              <label class="form-label fw-semibold text-warning">Gift Codes</label>
+              <input type="text" class="form-control" name="giftCodes" placeholder="e.g. GIFT001,GIFT002,GIFT003">
+              <div class="form-text">Enter comma-separated gift codes to include with this product</div>
             </div>
           </div>
-          <!-- VARIANTS SECTION -->
-          <div class="card mb-3 border-info">
-            <div class="card-header bg-info text-white py-2">
-              <strong>Product Variants</strong>
+          
+          <!-- Variants Section -->
+          <div class="card mb-3 border-info shadow-sm">
+            <div class="card-header bg-info bg-opacity-75 text-white py-2">
+              <h6 class="mb-0"><i class="fa-solid fa-layer-group me-2"></i>Product Variants</h6>
             </div>
-            <div class="card-body pb-2">
+            <div class="card-body pb-3 pt-3">
               <div id="variantsSection">
                 <!-- Variant blocks will be inserted here by JS -->
               </div>
-              <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btnAddVariant">+ Add Variant</button>
+              <div class="text-center mt-3">
+                <button type="button" class="btn btn-outline-info" id="btnAddVariant">
+                  <i class="fa-solid fa-plus"></i> Add Variant
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Add Product</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="fa-solid fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Add Product
+          </button>
         </div>
       </form>
     </div>
@@ -466,19 +547,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function createVariantBlock(idx) {
         return `
-        <div class="variant-block border rounded p-2 mb-3" data-variant-idx="${idx}">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="fw-bold">Variant #${idx + 1}</span>
-            <button type="button" class="btn btn-sm btn-outline-danger btnRemoveVariant" ${idx === 0 ? 'style="display:none;"' : ''}>&times;</button>
+        <div class="variant-block border rounded p-3 mb-4 bg-white shadow-sm" data-variant-idx="${idx}">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0 text-info"><i class="fa-solid fa-cubes me-2"></i>Variant #${idx + 1}</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger btnRemoveVariant" ${idx === 0 ? 'style="display:none;"' : ''}>
+              <i class="fa-solid fa-trash"></i>
+            </button>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Variant Title</label>
-            <input type="text" class="form-control" name="variant_optionTitle_${idx}" placeholder="e.g. Color" required>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-info">Variant Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="variant_optionTitle_${idx}" placeholder="e.g. Color, Size, Memory" required>
+            <div class="form-text">The name for this variant group (e.g. "Color", "Size")</div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Options for this variant</label>
+          <div class="variant-options-container">
+            <label class="form-label fw-semibold text-info">Options for this variant</label>
             <div class="variant-options-list" data-variant-idx="${idx}"></div>
-            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddOption" data-variant-idx="${idx}">+ Add Option</button>
+            <div class="text-end mt-2">
+              <button type="button" class="btn btn-sm btn-outline-info btnAddOption" data-variant-idx="${idx}">
+                <i class="fa-solid fa-plus"></i> Add Option
+              </button>
+            </div>
           </div>
         </div>
         `;
@@ -486,38 +574,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function createOptionBlock(variantIdx, optionIdx) {
         return `
-        <div class="option-block border p-2 mb-2" data-option-idx="${optionIdx}">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="fw-semibold">Option #${optionIdx + 1}</span>
-            <button type="button" class="btn btn-sm btn-outline-danger btnRemoveOption" ${optionIdx === 0 ? 'style="display:none;"' : ''}>&times;</button>
+        <div class="option-block border rounded p-3 mb-3 bg-light" data-option-idx="${optionIdx}">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0 text-secondary"><i class="fa-solid fa-tag me-2"></i>Option #${optionIdx + 1}</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger btnRemoveOption" ${optionIdx === 0 ? 'style="display:none;"' : ''}>
+              <i class="fa-solid fa-times"></i>
+            </button>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Option Label</label>
-            <input type="text" class="form-control" name="variant_${variantIdx}_optionLabel_${optionIdx}" placeholder="e.g. Red" required>
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-secondary">Option Label <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="variant_${variantIdx}_optionLabel_${optionIdx}" placeholder="e.g. Red, XL, 512GB" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-secondary">Short Description</label>
+              <input type="text" class="form-control" name="variant_${variantIdx}_shortDescription_${optionIdx}" placeholder="Brief description (optional)">
+            </div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Original Price</label>
-            <input type="number" class="form-control" name="variant_${variantIdx}_originalPrice_${optionIdx}" required>
+          
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-secondary">Original Price <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="number" class="form-control" name="variant_${variantIdx}_originalPrice_${optionIdx}" required>
+                <span class="input-group-text">₫</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-secondary">Current Price <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="number" class="form-control" name="variant_${variantIdx}_currentPrice_${optionIdx}" required>
+                <span class="input-group-text">₫</span>
+              </div>
+            </div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Current Price</label>
-            <input type="number" class="form-control" name="variant_${variantIdx}_currentPrice_${optionIdx}" required>
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Short Description</label>
-            <input type="text" class="form-control" name="variant_${variantIdx}_shortDescription_${optionIdx}">
-          </div>
-          <!-- Multiple Descriptions -->
-          <div class="mb-2">
-            <label class="form-label">Detailed Descriptions (add multiple if needed)</label>
+          
+          <!-- Descriptions Section -->
+          <div class="mt-3 p-2 border rounded bg-white">
+            <label class="form-label fw-semibold text-secondary">
+              <i class="fa-solid fa-list me-1"></i>Detailed Descriptions
+            </label>
             <div class="variantDescriptionsList" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}"></div>
-            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddDescription" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}">+ Add Description</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2 btnAddDescription" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}">
+              <i class="fa-solid fa-plus"></i> Add Description
+            </button>
           </div>
-          <!-- Multiple Images -->
-          <div class="mb-2">
-            <label class="form-label">Option Images (add multiple if needed)</label>
-            <div class="variantImagesList" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}"></div>
-            <button type="button" class="btn btn-sm btn-outline-primary mt-1 btnAddImage" data-variant-idx="${variantIdx}" data-option-idx="${optionIdx}">+ Add Image</button>
+          
+          <!-- Images Section -->
+          <div class="mt-3 p-2 border rounded bg-white">
+            <label class="form-label fw-semibold text-secondary">
+              <i class="fa-solid fa-images me-1"></i>Option Images
+            </label>
+            <input type="file" class="form-control mb-2 variant-option-images-input" 
+              name="variant_${variantIdx}_option_${optionIdx}_images[]" accept="image/*" multiple>
+            <div class="form-text mb-2">Select multiple images for this option</div>
+            <div class="variantOptionImagesPreview d-flex flex-wrap gap-2 mt-2"></div>
+            <div class="variantOptionImagesPriority mt-2"></div>
           </div>
         </div>
         `;
@@ -525,11 +638,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function createDescriptionRow(variantIdx, optionIdx, descIdx = 0, name = '', text = '', priority = 0) {
         return `
-        <div class="input-group mb-1 variant-desc-row" data-desc-idx="${descIdx}">
-            <input type="text" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_name[]" placeholder="Description Name" value="${name}">
-            <input type="text" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_text[]" placeholder="Description Content" value="${text}">
-            <input type="number" class="form-control" name="variant_${variantIdx}_option_${optionIdx}_desc_priority[]" placeholder="Priority" value="${priority}">
-            <button type="button" class="btn btn-outline-danger btn-remove-desc" tabindex="-1">&times;</button>
+        <div class="variant-desc-row border-bottom pb-2 mb-2" data-desc-idx="${descIdx}">
+          <div class="row g-2">
+            <div class="col-md-3">
+              <label class="form-label small">Name</label>
+              <input type="text" class="form-control form-control-sm" 
+                name="variant_${variantIdx}_option_${optionIdx}_desc_name[]" 
+                placeholder="Description Name" value="${name}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small">Content</label>
+              <input type="text" class="form-control form-control-sm" 
+                name="variant_${variantIdx}_option_${optionIdx}_desc_text[]" 
+                placeholder="Description Content" value="${text}">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Priority</label>
+              <input type="number" class="form-control form-control-sm" 
+                name="variant_${variantIdx}_option_${optionIdx}_desc_priority[]" 
+                placeholder="Priority" value="${priority}">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="button" class="btn btn-sm btn-outline-danger btn-remove-desc">
+                <i class="fa-solid fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
         </div>`;
     }
     function createImageRow(variantIdx, optionIdx, imgIdx = 0, priority = 0) {
@@ -685,18 +819,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
 
-                // Images
-                const imageInputs = Array.from(optionBlock.querySelectorAll(`input[name="variant_${vIdx}_option_${oIdx}_image[]"]`));
-                const imagePriorities = Array.from(optionBlock.querySelectorAll(`input[name="variant_${vIdx}_option_${oIdx}_image_priority[]"]`)).map(i => parseInt(i.value, 10) || 0);
-                const imagesBase64 = [];
-                for (let i = 0; i < imageInputs.length; ++i) {
-                    const file = imageInputs[i].files[0];
-                    if (file) {
-                        const base64Content = await fileToBase64(file);
-                        imagesBase64.push({
-                            base64Content,
-                            priority: imagePriorities[i]
-                        });
+                // Option Images (multiple, with priority)
+                const imagesInput = optionBlock.querySelector(`input[name="variant_${vIdx}_option_${oIdx}_images[]"]`);
+                let imagesBase64 = [];
+                if (imagesInput && imagesInput.files.length > 0) {
+                    // Get priorities from the UI (input[type=number] generated below)
+                    const priorityInputs = optionBlock.querySelectorAll('.variantOptionImagesPriority input[type=number]');
+                    for (let i = 0; i < imagesInput.files.length; ++i) {
+                        const file = imagesInput.files[i];
+                        let priority = i;
+                        if (priorityInputs[i]) {
+                            priority = parseInt(priorityInputs[i].value, 10) || i;
+                        }
+                        if (file) {
+                            const base64Content = await fileToBase64(file);
+                            imagesBase64.push({
+                                base64Content,
+                                priority
+                            });
+                        }
                     }
                 }
 
@@ -824,10 +965,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let descList = '';
         if (detail.description && detail.description.length > 0) {
-            descList = '<div class="mb-2"><span class="modal-product-label">Description:</span><ul class="ps-4" style="list-style-type: disc; margin-bottom: 0;">';
+            descList = '<div class="mb-2"><span class="modal-product-label fw-bold">Description:</span><ul class="ps-4" style="list-style-type: disc; margin-bottom: 0;">';
             detail.description.forEach(d => {
                 descList += `<li>
-                    <span class="modal-product-label">${esc(d.name)}:</span> ${esc(d.descriptionText)}
+                    <span class="modal-product-label fw-bold">${esc(d.name)}:</span> ${esc(d.descriptionText)}
                 </li>`;
             });
             descList += '</ul></div>';
@@ -837,7 +978,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (options.length > 0) {
             optionList = '<div class="mb-2">';
             options.forEach(opt => {
-                optionList += `<div class="modal-product-option mb-1"><span class="modal-product-label">${esc(opt.title)}:</span> `;
+                optionList += `<div class="modal-product-option mb-1"><span class="modal-product-label fw-bold">${esc(opt.title)}:</span> `;
                 if (Array.isArray(opt.options)) {
                     optionList += opt.options.map(o =>
                         `<span class="${o.selected ? 'selected' : ''}">${esc(o.label)}</span>`
@@ -854,7 +995,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             giftList = '<div class="mb-2">';
             gifts.forEach((g, idx) => {
-                // Show gift image, images next to each other
                 if (g && g.image) {
                     giftList += `<img src="${esc(g.image)}" alt="${esc(g.name || '')}" title="${esc(g.name || '')}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;margin-right:6px;margin-bottom:4px;background:#eee;">`;
                 }
@@ -862,41 +1002,57 @@ document.addEventListener('DOMContentLoaded', function () {
             giftList += '</div>';
         }
 
-        let priceHtml = `<div>
-            <span class="modal-product-label">Original Price:</span> ${formatPrice(price.originalPrice)}₫<br>
-            <span class="modal-product-label">Current Price:</span> ${formatPrice(price.currentPrice)}₫<br>
-            <span class="modal-product-label">Discount Price:</span> ${formatPrice(price.discountPrice)}₫<br>
-            <span class="modal-product-label">Discount:</span> ${price.discountPercentage ? esc(price.discountPercentage + '%') : '0%'}
+        let priceHtml = `<div class="row g-2">
+            <div class="col-6">
+                <span class="modal-product-label fw-bold">Original Price:</span>
+                <span class="text-secondary">${formatPrice(price.originalPrice)}₫</span>
+            </div>
+            <div class="col-6">
+                <span class="modal-product-label fw-bold">Current Price:</span>
+                <span class="text-success">${formatPrice(price.currentPrice)}₫</span>
+            </div>
+            <div class="col-6">
+                <span class="modal-product-label fw-bold">Discount Price:</span>
+                <span class="text-danger">${formatPrice(price.discountPrice)}₫</span>
+            </div>
+            <div class="col-6">
+                <span class="modal-product-label fw-bold">Discount:</span>
+                <span class="text-warning">${price.discountPercentage ? esc(price.discountPercentage + '%') : '0%'}</span>
+            </div>
         </div>`;
 
         return `
-        <div class="row">
-            <div class="col-md-4 text-center">
-                ${imgThumb}
-                ${imgList}
-            </div>
-            <div class="col-md-8">
-                <div class="mb-2">
-                    <span class="modal-product-label">ID:</span> ${esc(info.id)}<br>
-                    <span class="modal-product-label">Product Code:</span> ${esc(info.code)}<br>
-                    <span class="modal-product-label">Name:</span> ${esc(info.name)}<br>
-                    <span class="modal-product-label">Status:</span> ${esc(info.status)}<br>
-                    <span class="modal-product-label">Categories:</span> ${categories}<br>
-                    <span class="modal-product-label">Brand:</span> ${esc(info.brand)}
-                </div>
-                <div class="mb-2">${priceHtml}</div>
-                <div class="mb-2">
-                    <span class="modal-product-label">Short Description:</span> ${esc(detail.shortDescription)}
-                </div>
-                ${descList}
-                ${optionList}
-                <div class="mb-2">
-                    <span class="modal-product-label">Gifts:</span><br>
-                    ${giftList}
-                </div>
-                <div class="modal-product-meta">
-                    <span class="modal-product-label">Created:</span> ${createdDate}<br>
-                    <span class="modal-product-label">Created by:</span> ${createdBy}
+        <div class="card border-0 shadow-sm mb-0" style="background:#f8f9fb;">
+            <div class="card-body pb-2">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="mb-2">${imgThumb}</div>
+                        ${imgList}
+                    </div>
+                    <div class="col-md-8">
+                        <div class="mb-2">
+                            <span class="modal-product-label fw-bold text-primary">ID:</span> ${esc(info.id)}<br>
+                            <span class="modal-product-label fw-bold text-primary">Product Code:</span> ${esc(info.code)}<br>
+                            <span class="modal-product-label fw-bold text-primary">Name:</span> ${esc(info.name)}<br>
+                            <span class="modal-product-label fw-bold text-primary">Status:</span> ${esc(info.status)}<br>
+                            <span class="modal-product-label fw-bold text-primary">Categories:</span> ${categories}<br>
+                            <span class="modal-product-label fw-bold text-primary">Brand:</span> ${esc(info.brand)}
+                        </div>
+                        <div class="mb-2">${priceHtml}</div>
+                        <div class="mb-2">
+                            <span class="modal-product-label fw-bold text-primary">Short Description:</span> ${esc(detail.shortDescription)}
+                        </div>
+                        ${descList}
+                        ${optionList}
+                        <div class="mb-2">
+                            <span class="modal-product-label fw-bold text-primary">Gifts:</span><br>
+                            ${giftList}
+                        </div>
+                        <div class="modal-product-meta small text-muted">
+                            <span class="modal-product-label fw-bold">Created:</span> ${createdDate}<br>
+                            <span class="modal-product-label fw-bold">Created by:</span> ${createdBy}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -913,6 +1069,63 @@ document.addEventListener('DOMContentLoaded', function () {
         if (isNaN(d.getTime())) return '';
         const pad = n => n < 10 ? '0' + n : n;
         return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${pad(d.getFullYear())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    // Show all toasts on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        toastElList.forEach(function(toastEl) {
+            var toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        });
+    });
+
+    // --- Handle dynamic image preview and priority UI for option images ---
+    variantsSection.addEventListener('change', function(e) {
+        if (e.target && e.target.classList.contains('variant-option-images-input')) {
+            updateOptionImagesPreviewAndPriority(e.target);
+        }
+    });
+
+    // Remove image from input.files (by recreating FileList)
+    function removeImageFromInput(input, removeIdx) {
+        const dt = new DataTransfer();
+        Array.from(input.files).forEach((file, idx) => {
+            if (idx !== removeIdx) dt.items.add(file);
+        });
+        input.files = dt.files;
+        // Update preview and priorities after removal
+        updateOptionImagesPreviewAndPriority(input);
+    }
+
+    // Helper to update preview and priority UI for option images
+    function updateOptionImagesPreviewAndPriority(input) {
+        const previewContainer = input.closest('.option-block').querySelector('.variantOptionImagesPreview');
+        const priorityContainer = input.closest('.option-block').querySelector('.variantOptionImagesPriority');
+        previewContainer.innerHTML = '';
+        priorityContainer.innerHTML = '';
+        if (input.files && input.files.length > 0) {
+            Array.from(input.files).forEach((file, i) => {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    // Show image preview with remove button and priority input
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'position-relative d-inline-block';
+                    wrapper.style.width = '70px';
+                    wrapper.style.height = '90px';
+                    wrapper.innerHTML = `
+                        <img src="${evt.target.result}" class="border rounded" style="width:64px;height:64px;object-fit:cover;">
+                        <input type="number" class="form-control form-control-sm mt-1 text-center" value="${i}" min="0" name="priority_${i}" style="width:64px;" placeholder="Priority">
+                        <button type="button" class="btn btn-sm btn-danger btn-remove-image position-absolute top-0 end-0 p-1" title="Remove" style="font-size:0.8em;line-height:1;">&times;</button>
+                    `;
+                    wrapper.querySelector('.btn-remove-image').onclick = function() {
+                        removeImageFromInput(input, i);
+                    };
+                    previewContainer.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
     }
 });
 </script>

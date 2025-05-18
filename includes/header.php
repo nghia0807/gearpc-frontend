@@ -150,6 +150,88 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
     .user-popover .dropdown-item:hover {
       background: #313131 !important;
     }
+    .navbar-toggler {
+      display: none !important;
+    }
+    .navbar-collapse {
+      display: flex !important;
+      flex-basis: auto !important;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap !important;
+    }
+    .container {
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap !important;
+    }
+    .navbar-brand {
+      margin-right: 1.5rem;
+      flex-shrink: 0;
+      min-width: 50px;
+    }
+    .header-search-flex {
+      flex: 1 1 0%;
+      display: flex;
+      justify-content: center;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .header-search-flex form {
+      width: 100%;
+      max-width: 500px;
+      min-width: 80px;
+    }
+    .input-group {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      transition: width 0.2s;
+    }
+    .form-control {
+      min-width: 0;
+      width: 100%;
+      transition: width 0.2s;
+    }
+    .navbar-nav {
+      margin-bottom: 0 !important;
+      flex-direction: row !important;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: nowrap !important;
+      white-space: nowrap;
+    }
+    .navbar-nav > .nav-item {
+      margin-bottom: 0 !important;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    /* Responsive: shrink search, hide text, never wrap logo/buttons */
+    @media (max-width: 1400px) {
+      .header-search-flex form { max-width: 400px; }
+    }
+    @media (max-width: 1200px) {
+      .header-search-flex form { max-width: 300px; }
+    }
+    @media (max-width: 992px) {
+      .header-search-flex form { max-width: 180px; }
+    }
+    @media (max-width: 800px) {
+      .header-search-flex form { max-width: 80px; }
+      .form-control::placeholder { font-size: 0; }
+      .nav-label { display: none !important; }
+      .navbar-nav .nav-link.header-items {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+    }
+    /* Prevent logo/buttons from wrapping */
+    .container, .navbar-collapse, .navbar-nav {
+      flex-wrap: nowrap !important;
+    }
   </style>
 </head>
 <body>
@@ -160,47 +242,38 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
         <img src="assets/img/logo.png" alt="Site Logo" width="50px" height="50px" />
       </a>
 
-      <!-- Toggler for mobile view -->
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarContent"
-        aria-controls="navbarContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <!-- Remove toggler for mobile -->
+      <!-- <button ...navbar-toggler...> ... </button> -->
 
-      <!-- Navbar content -->
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <!-- Centered search bar -->
-           <form action="search.php" method="get" class="mx-auto" style="max-width: 500px;">
-             <div class="input-group" style="width: 500px;">
-               <input
-               class="form-control"
-               type="search"
-               name="q"
-               placeholder="Search Tech Zone!"
-               aria-label="Search"
-               />
-               <button class="btn btn-search" type="submit">
-                 <i class="bi bi-search text-white"></i>
-               </button>
-              </div>
-            </form>
-
+      <!-- Remove collapse wrapper, keep content always visible -->
+      <div class="navbar-collapse" id="navbarContent" style="display: flex !important;">
+        <!-- Centered search bar, flexes to fill space between logo and right buttons -->
+        <div class="header-search-flex">
+          <form action="search.php" method="get" class="mx-auto">
+            <div class="input-group">
+              <input
+                class="form-control"
+                type="search"
+                name="q"
+                placeholder="Search Tech Zone!"
+                aria-label="Search"
+              />
+              <button class="btn btn-search" type="submit">
+                <i class="bi bi-search text-white"></i>
+              </button>
+            </div>
+          </form>
+        </div>
         <!-- Right side: Cart, Login/Register/User -->
-        <ul class="navbar-nav">
+        <ul class="navbar-nav" style="flex-direction: row !important; align-items: center; flex-wrap: nowrap !important;">
           <li class="nav-item me-3">
             <a class="nav-link header-items" href="index.php?page=order">
-              <i class="bi bi-truck me-1"></i> Orders
+              <i class="bi bi-truck me-1"></i> <span class="nav-label">Orders</span>
             </a>
           </li>
           <li class="nav-item me-3">
             <a class="nav-link header-items" href="index.php?page=cart">
-              <i class="bi bi-cart"></i> Cart
+              <i class="bi bi-cart"></i> <span class="nav-label">Cart</span>
             </a>
           </li>
           <?php if ($isLoggedIn): ?>
@@ -211,18 +284,18 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
                 aria-expanded="false"
                 autocomplete="off"
               >
-                <i class="bi bi-person"></i> <?php echo $userFullName; ?>
+                <i class="bi bi-person"></i> <span class="nav-label"><?php echo $userFullName; ?></span>
               </button>
               <div class="user-popover" id="userPopover" tabindex="-1">
                 <div class="user-popover-arrow"></div>
                 <a class="dropdown-item" href="index.php?page=profile">
                   <i class="bi bi-person-square pe-1"></i>
-                  Profile
+                  <span class="nav-label">Profile</span>
                 </a>
                 <form method="post" style="margin:0;">
                   <button type="submit" name="logout" class="dropdown-item">
                     <i class="bi bi-box-arrow-in-right pe-1"></i>
-                    Sign Out
+                    <span class="nav-label">Sign Out</span>
                   </button>
                 </form>
               </div>
@@ -230,7 +303,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
           <?php else: ?>
             <li class="nav-item">
               <a class="nav-link header-items" href="pages/login.php">
-                <i class="bi bi-person"></i> Đăng nhập
+                <i class="bi bi-person"></i> <span class="nav-label">Login</span>
               </a>
             </li>
           <?php endif; ?>
