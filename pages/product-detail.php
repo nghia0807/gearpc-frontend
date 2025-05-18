@@ -640,13 +640,7 @@ function getProductImages($product)
 </head>
 
 <body>
-    <div class="container">
-        <?php
-        if (isset($_SESSION['message'])) {
-            echo '<div class="alert alert-success">' . $_SESSION['message'] . '</div>';
-            unset($_SESSION['message']);
-        }
-        ?>
+    <div class="container flex flex-column">
         <?php if ($errorMsg): ?>
             <div class="product-container error-container">
                 <div class="error-icon"><i class="bi bi-exclamation-circle"></i></div>
@@ -691,25 +685,25 @@ function getProductImages($product)
                             <?php if (!empty($product['productInfo']['brand'])): ?>
                                 <div class="product-meta-item">
                                     <i class="bi bi-tag"></i>
-                                    <span>Thương hiệu: <?= htmlspecialchars($product['productInfo']['brand']) ?></span>
+                                    <span>Brand: <?= htmlspecialchars($product['productInfo']['brand']) ?></span>
                                 </div>
                             <?php endif; ?>
                             <?php if (!empty($product['productInfo']['category'])): ?>
                                 <div class="product-meta-item">
                                     <i class="bi bi-folder"></i>
-                                    <span>Danh mục:
+                                    <span>Category:
                                         <?= htmlspecialchars(is_array($product['productInfo']['category']) ? implode(', ', $product['productInfo']['category']) : $product['productInfo']['category']) ?></span>
                                 </div>
                             <?php endif; ?>
                             <?php if (!empty($product['productInfo']['status'])): ?>
                                 <div class="product-meta-item">
                                     <i class="bi bi-info-circle"></i>
-                                    <span>Trạng thái: <?= htmlspecialchars($product['productInfo']['status']) ?></span>
+                                    <span>Status: <?= htmlspecialchars($product['productInfo']['status']) ?></span>
                                 </div>
                             <?php endif; ?>
                         </div>
                         <div class="product-code">
-                            Mã sản phẩm: <?= htmlspecialchars($product['productInfo']['code']) ?>
+                            Product code: <?= htmlspecialchars($product['productInfo']['code']) ?>
                         </div>
 
                         <div class="price-container">
@@ -766,7 +760,7 @@ function getProductImages($product)
                         <?php endif; ?>
                         <form action="actions/add-to-cart.php" method="POST">
                             <div class="quantity-selector">
-                                <div class="quantity-label">Số lượng:</div>
+                                <div class="quantity-label">Quantity:</div>
                                 <div class="quantity-controls">
                                     <div class="quantity-btn" id="decreaseQty">-</div>
                                     <input type="number" name="quantity" id="quantity" class="quantity-input" value="1" min="1" max="10">
@@ -777,7 +771,7 @@ function getProductImages($product)
                             <input type="hidden" name="product_id" value="<?= htmlspecialchars($product['productInfo']['id'] ?? '') ?>">
 
                             <button type="submit" class="btn btn-add-cart mb-4" style="color: #ff9620;background-color: #ffffff0d;">
-                                <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
+                                <i class="bi bi-cart-plus"></i> Add to cart
                             </button>
                         </form>
                         <ul class="nav nav-tabs" id="productTabs" role="tablist">
@@ -785,14 +779,14 @@ function getProductImages($product)
                                 <button class="nav-link active" id="specs-tab" data-bs-toggle="tab"
                                     data-bs-target="#specs-tab-pane" type="button" role="tab" aria-controls="specs-tab-pane"
                                     aria-selected="true">
-                                    Thông số kỹ thuật
+                                    Specifications
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="description-tab" data-bs-toggle="tab"
                                     data-bs-target="#description-tab-pane" type="button" role="tab"
                                     aria-controls="description-tab-pane" aria-selected="false">
-                                    Mô tả chi tiết
+                                    Description
                                 </button>
                             </li>
                         </ul>
@@ -838,7 +832,7 @@ function getProductImages($product)
                 </div>
             </div>
             <!-- Related Products -->
-            <div class="product-container">
+            <div class="product-container w-100">
                 <h3 class="mb-4">Similar products</h3>
                 <?php if ($relatedProducts): ?>
                     <div class="related-products">

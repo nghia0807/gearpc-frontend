@@ -49,9 +49,7 @@ $cartItems = $data['data']['items'] ?? [];
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-        }
-
-        .cart-container {
+        }        .cart-container {
             max-width: 1000px;
             margin: auto;
             padding: 20px;
@@ -82,16 +80,20 @@ $cartItems = $data['data']['items'] ?? [];
 
         .clear-cart-btn:hover {
             background-color: #d43f3f;
-        }
-
-        .cart-item {
-            display: flex;
+        }        .cart-item {
+            display: grid;
+            grid-template-columns: 100px 2fr 1fr 1fr 1fr 0.5fr;
             align-items: center;
-            justify-content: space-between;
             padding: 15px 10px;
             border-bottom: 1px solid #eee;
             gap: 15px;
-            flex-wrap: wrap;
+        }
+
+        .cart-header.cart-item {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            border-radius: 6px 6px 0 0;
+            padding: 12px 10px;
         }
 
         .cart-item-image img {
@@ -108,14 +110,12 @@ $cartItems = $data['data']['items'] ?? [];
             font-size: 16px;
             font-weight: 600;
             color: #333;
-            flex: 2;
         }
 
         .cart-item-price,
         .cart-item-total {
             font-size: 14px;
             color: #555;
-            flex: 1;
             text-align: center;
         }
 
@@ -201,19 +201,19 @@ $cartItems = $data['data']['items'] ?? [];
 </head>
 <div class="cart-container">
     <div class="cart-header-title">
-        <h2>🛒 Giỏ hàng của bạn</h2>
+        <h2>Your cart</h2>
         <form method="POST" action="actions/clear-cart.php">
-            <button type="submit" class="clear-cart-btn">Xóa tất cả</button>
+            <button type="submit" class="clear-cart-btn">Delete all</button>
         </form>
     </div>
 
     <div class="cart-header cart-item" style="font-weight: bold; background-color: #f2f2f2;">
-        <div class="cart-item-image">Ảnh</div>
-        <div class="cart-item-name">Tên sản phẩm</div>
-        <div class="cart-item-price">Đơn giá</div>
-        <div class="cart-item-quantity">Số lượng</div>
-        <div class="cart-item-total">Thành tiền</div>
-        <div class="remove-form">Xóa</div>
+        <div class="cart-item-image">Image</div>
+        <div class="cart-item-name">Product name</div>
+        <div class="cart-item-price">Price</div>
+        <div class="cart-item-quantity">Quantity</div>
+        <div class="cart-item-total">Total</div>
+        <div class="remove-form">Delete</div>
     </div>
 
     <?php foreach ($cartItems as $item): ?>

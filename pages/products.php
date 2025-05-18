@@ -352,19 +352,11 @@ if ($categoryCode) {
 
 <body>
     <div class="container py-4">
-        <?php
-        if (isset($_SESSION['message'])) {
-            echo '<div class="alert alert-success">' . $_SESSION['message'] . '</div>';
-            unset($_SESSION['message']);
-        }
-        ?>
         <h1 class="page-title">
             <?php if ($activeCategoryName): ?>
                 <span><?= htmlspecialchars($activeCategoryName) ?></span>
             <?php elseif ($searchQuery): ?>
                 <span>Search Results for: "<?= htmlspecialchars($searchQuery) ?>"</span>
-            <?php else: ?>
-                <span>All Products</span>
             <?php endif; ?>
         </h1>
         <div class="row">
@@ -439,7 +431,7 @@ if ($categoryCode) {
                     </div>
                 <?php else: ?>
                     <!-- Product card -->
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                         <?php foreach ($products as $product): ?>
                             <?php include 'components/product-card.php'; ?>
                         <?php endforeach; ?>

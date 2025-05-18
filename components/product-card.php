@@ -13,8 +13,11 @@ if (!isset($product) || empty($product)) {
         border-radius: 10px;
         overflow: hidden;
         height: 100%;
+        min-height: 520px; /* Add fixed minimum height */
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
     }
 
     .product-card:hover {
@@ -38,6 +41,9 @@ if (!isset($product) || empty($product)) {
 
     .product-info {
         padding: 1rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
     }
 
     .product-brand {
@@ -92,12 +98,15 @@ if (!isset($product) || empty($product)) {
         overflow: hidden;
         text-overflow: ellipsis;
         height: 2.6rem;
+        flex-grow: 1;
     }
 
     .product-action {
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        margin-top: auto;
+        padding: 0 1rem;
     }
 
     .btn-add-cart {
@@ -154,9 +163,9 @@ if (!isset($product) || empty($product)) {
             <!-- Form gửi dữ liệu đến add-to-cart.php -->
             <form method="POST" action="actions/add-to-cart.php" class="w-100">
                 <input type="hidden" name="product_id" value="<?= htmlspecialchars($product['id']) ?>">
-                <button type="submit" class="btn-add-cart mb-4">
+                <button type="submit" class="btn-add-cart mb-3">
                     <i class="bi bi-cart-plus"></i>
-                    <span>Thêm vào giỏ hàng</span>
+                    <span>Add to cart</span>
                 </button>
             </form>
         </div>
