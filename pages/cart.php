@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/session_init.php';
+require_once __DIR__ . '/../components/cart-item.php';
 
 // Get token from session
 $token = $_SESSION['token'] ?? null;
@@ -34,7 +35,8 @@ $data = json_decode($response, true);
 $cartItems = $data['data']['items'] ?? [];
 ?>
 
-<head>    <meta charset="UTF-8">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - GearPC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -420,39 +422,9 @@ $cartItems = $data['data']['items'] ?? [];
             <div class="cart-item-quantity">Quantity</div>
             <div class="cart-item-total">Total</div>
             <div class="remove-form">Delete</div>
-        </div> <?php foreach ($cartItems as $item): ?>
-            <div class="cart-item" data-id="<?= htmlspecialchars($item['itemId']) ?>"
-                data-price="<?= htmlspecialchars($item['totalPrice']) ?>">
-                <div class="cart-item-checkbox">
-                    <input type="checkbox" class="custom-checkbox item-checkbox"
-                        data-id="<?= htmlspecialchars($item['itemId']) ?>">
-                </div>
-                <div class="cart-item-image">
-                    <a href="index.php?page=product-detail&id=<?= htmlspecialchars($item['itemId']) ?>">
-                        <img src="<?= htmlspecialchars($item['imageUrl']) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
-                    </a>
-                </div>
-                <div class="cart-item-name">
-                    <a href="index.php?page=product-detail&id=<?= htmlspecialchars($item['itemId']) ?>"
-                        style="text-decoration: none; color: inherit;">
-                        <?= htmlspecialchars($item['name']) ?>
-                    </a>
-                </div>
-                <div class="cart-item-price"><?= number_format($item['price'], 0, ',', '.') ?> ₫</div>
-                <div class="cart-item-quantity">
-                    <form action="actions/update-cart.php" method="POST" class="quantity-form">
-                        <input type="hidden" name="item_id" value="<?= htmlspecialchars($item['itemId']) ?>">
-                        <button type="submit" name="action" value="decrease" class="quantity-btn">-</button>
-                        <input type="number" name="quantity" value="<?= htmlspecialchars($item['quantity']) ?>" min="1"
-                            readonly>
-                        <button type="submit" name="action" value="increase" class="quantity-btn">+</button>
-                    </form>
-                </div>                <div class="cart-item-total"><?= number_format($item['totalPrice'], 0, ',', '.') ?> ₫</div>                <div class="remove-form">
-                    <button type="button" class="remove-btn remove-single-item" title="Remove product" data-id="<?= htmlspecialchars($item['itemId']) ?>">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
-                </div>
-            </div>
+        </div>
+        <?php foreach ($cartItems as $item): ?>
+            <?php renderCartItem($item); ?>
         <?php endforeach; ?>
 
         <div class="cart-summary">
@@ -536,7 +508,7 @@ $cartItems = $data['data']['items'] ?? [];
 
         // Single item delete buttons
         document.querySelectorAll('.remove-single-item').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 const itemId = this.dataset.id;
                 if (confirm('Are you sure you want to remove this item?')) {
                     deleteSelectedItems([itemId]); // Reuse the same function with an array of one item
@@ -559,7 +531,8 @@ $cartItems = $data['data']['items'] ?? [];
         }
 
         // Checkout selected items
-        if (checkoutBtn) {            checkoutBtn.addEventListener('click', function () {
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', function () {
                 const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked'))
                     .map(checkbox => checkbox.dataset.id);
 
@@ -570,7 +543,7 @@ $cartItems = $data['data']['items'] ?? [];
                 window.location.href = 'index.php?page=checkout';
             });
         }
-        
+
         // Function to delete selected items via AJAX
         function deleteSelectedItems(itemIds) {
             // Format data according to API requirements
@@ -578,7 +551,7 @@ $cartItems = $data['data']['items'] ?? [];
                 itemId: id,
                 itemType: 'Product'
             }));
-            
+
             fetch('actions/remove-selected-items.php', {
                 method: 'POST',
                 headers: {

@@ -3,8 +3,8 @@ session_name('user_session');
 session_start();
 
 // Determine if it's an AJAX request
-$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-          strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
 // Set response header if it's an Ajax request
 if ($isAjax) {
@@ -85,7 +85,7 @@ if ($successCount > 0) {
     if ($errorCount > 0) {
         $message .= " $errorCount products could not be removed.";
     }
-    
+
     if ($isAjax) {
         echo json_encode(['success' => true, 'message' => $message]);
         exit;

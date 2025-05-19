@@ -101,6 +101,7 @@ function getProductImages($product)
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -343,27 +344,6 @@ function getProductImages($product)
             flex-wrap: wrap;
             gap: 0.75rem;
             margin-bottom: 2rem;
-        }
-
-        .btn-add-cart {
-            background-color: #ffa33a;
-            border-color: #ffa33a;
-            color: #000;
-            font-weight: 600;
-            padding: 0.75rem 1.25rem;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-        }
-
-        .btn-add-cart:hover {
-            background-color: #ff9620;
-            border-color: #ff9620;
-            color: #000;
-        }
-
-        .btn-add-cart i {
-            margin-right: 0.5rem;
         }
 
         .btn-wishlist {
@@ -637,6 +617,29 @@ function getProductImages($product)
         .text-muted {
             color: #ffffff !important;
         }
+
+        .btn-add-cart,
+        .btn-buy-now {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40%;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-add-cart:hover {
+            border-color: #ffa33a !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-buy-now:hover {
+            background-color: #218838 !important;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 
@@ -749,14 +752,15 @@ function getProductImages($product)
                                 <div class="option-selector">
                                     <div class="option-label"><?= htmlspecialchars($optionGroup['title']) ?>:</div>
                                     <div class="option-values">
-                                        <?php foreach ($optionGroup['options'] as $option): ?>                                            <div class="option-value <?= !empty($option['selected']) ? 'selected' : '' ?>"
+                                        <?php foreach ($optionGroup['options'] as $option): ?>
+                                            <div class="option-value <?= !empty($option['selected']) ? 'selected' : '' ?>"
                                                 data-option-id="<?= htmlspecialchars($option['id'] ?? '') ?>">
                                                 <?= htmlspecialchars($option['label'] ?? 'Not specified') ?>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>                        <?php endif; ?>
+                            <?php endforeach; ?>     <?php endif; ?>
                         <div class="quantity-selector">
                             <div class="quantity-label">Quantity:</div>
                             <div class="quantity-controls">
@@ -765,11 +769,16 @@ function getProductImages($product)
                                 <div class="quantity-btn" id="increaseQty">+</div>
                             </div>
                         </div>
-
-                        <button type="button" id="addToCartBtn" class="btn btn-add-cart mb-4" style="color: #ff9620;background-color: #ffffff0d;">
-                            <i class="bi bi-cart-plus"></i> Add to cart
-                        </button>
-
+                        <div class="w-100 flex flex-column gap-4">
+                            <button type="button" id="buyNowBtn" class="btn btn-buy-now mb-4"
+                                style="color: #ffffff; background-color: #28a745;">
+                                <i class="bi bi-bag-check"></i> Buy now
+                            </button>
+                            <button type="button" id="addToCartBtn" class="btn btn-add-cart mb-4"
+                                style="color: #ff9620;background-color: #ffffff0d;">
+                                <i class="bi bi-cart-plus"></i> Add to cart
+                            </button>
+                        </div>
                         <ul class="nav nav-tabs" id="productTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="specs-tab" data-bs-toggle="tab"
@@ -876,16 +885,18 @@ function getProductImages($product)
         <?php endif; ?>
     </div>
     <!-- Toast container -->
-    <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080; margin-bottom: 1.5rem; margin-right: 1.5rem; width: max-content; min-width: 300px; max-width: 90vw;"></div>
+    <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"
+        style="z-index: 1080; margin-bottom: 1.5rem; margin-right: 1.5rem; width: max-content; min-width: 300px; max-width: 90vw;">
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Image gallery
             const thumbs = document.querySelectorAll('#imageNav img');
             const mainImage = document.getElementById('mainImage');
             thumbs.forEach(thumb => {
-                thumb.addEventListener('click', function() {
+                thumb.addEventListener('click', function () {
                     thumbs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
                     mainImage.src = this.src;
@@ -901,15 +912,15 @@ function getProductImages($product)
                 let v = parseInt(quantityInput.value);
                 if (v < 10) quantityInput.value = v + 1;
             };
-            quantityInput.addEventListener('change', function() {
+            quantityInput.addEventListener('change', function () {
                 let value = parseInt(this.value);
                 if (isNaN(value) || value < 1) this.value = 1;
                 else if (value > 10) this.value = 10;
             });
-            
+
             // Product options selection
             document.querySelectorAll('.option-value').forEach(option => {
-                option.addEventListener('click', function() {
+                option.addEventListener('click', function () {
                     if (this.classList.contains('selected')) return;
                     const optionsGroup = this.closest('.option-values');
                     optionsGroup.querySelectorAll('.option-value').forEach(opt => opt.classList.remove('selected'));
@@ -957,53 +968,53 @@ function getProductImages($product)
             });
             // --- Variant Combination: reload page with correct id ---
             <?php if (!empty($variantCombinations)): ?>
-            window.variantCombinations = <?= json_encode($variantCombinations, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+                window.variantCombinations = <?= json_encode($variantCombinations, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
 
-            // Helper: get selected options as {title: value}
-            function getSelectedOptions() {
-                const selected = {};
-                document.querySelectorAll('.option-selector').forEach(selector => {
-                    const title = selector.querySelector('.option-label').textContent.trim().replace(':', '');
-                    const selectedOption = selector.querySelector('.option-value.selected');
-                    if (selectedOption) {
-                        selected[title] = selectedOption.textContent.trim();
-                    }
-                });
-                return selected;
-            }
-
-            // Find matching combination by selectedOptions
-            function findCombination(selectedOptions) {
-                return window.variantCombinations.find(combo => {
-                    for (const key in combo.selectedOptions) {
-                        if (combo.selectedOptions[key] !== (selectedOptions[key] || '')) {
-                            return false;
+                // Helper: get selected options as {title: value}
+                function getSelectedOptions() {
+                    const selected = {};
+                    document.querySelectorAll('.option-selector').forEach(selector => {
+                        const title = selector.querySelector('.option-label').textContent.trim().replace(':', '');
+                        const selectedOption = selector.querySelector('.option-value.selected');
+                        if (selectedOption) {
+                            selected[title] = selectedOption.textContent.trim();
                         }
-                    }
-                    return true;
-                });
-            }
+                    });
+                    return selected;
+                }
 
-            // Listen for option changes
-            document.querySelectorAll('.option-value').forEach(option => {
-                option.addEventListener('click', function() {
-                    setTimeout(function() {
-                        const selectedOptions = getSelectedOptions();
-                        const combo = findCombination(selectedOptions);
-                        if (combo && combo.id && combo.id !== '<?= htmlspecialchars($product['productInfo']['id']) ?>') {
-                            // Reload page with new id
-                            const url = new URL(window.location.href);
-                            url.searchParams.set('id', combo.id);
-                            window.location.href = url.toString();
+                // Find matching combination by selectedOptions
+                function findCombination(selectedOptions) {
+                    return window.variantCombinations.find(combo => {
+                        for (const key in combo.selectedOptions) {
+                            if (combo.selectedOptions[key] !== (selectedOptions[key] || '')) {
+                                return false;
+                            }
                         }
-                    }, 100);
+                        return true;
+                    });
+                }
+
+                // Listen for option changes
+                document.querySelectorAll('.option-value').forEach(option => {
+                    option.addEventListener('click', function () {
+                        setTimeout(function () {
+                            const selectedOptions = getSelectedOptions();
+                            const combo = findCombination(selectedOptions);
+                            if (combo && combo.id && combo.id !== '<?= htmlspecialchars($product['productInfo']['id']) ?>') {
+                                // Reload page with new id
+                                const url = new URL(window.location.href);
+                                url.searchParams.set('id', combo.id);
+                                window.location.href = url.toString();
+                            }
+                        }, 100);
+                    });
                 });
-            });
             <?php endif; ?>
             // Add to cart with AJAX
-            document.getElementById('addToCartBtn').onclick = function() {
+            document.getElementById('addToCartBtn').onclick = function () {
                 const quantity = parseInt(quantityInput.value) || 1;
-                  // Send AJAX request to add-to-cart.php
+                // Send AJAX request to add-to-cart.php
                 fetch('actions/add-to-cart.php', {
                     method: 'POST',
                     headers: {
@@ -1016,20 +1027,31 @@ function getProductImages($product)
                         quantity: quantity
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    // Display toast message
-                    showToast(data.message, data.success ? 'success' : 'danger');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('An error occurred while processing your request.', 'danger');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        // Display toast message
+                        showToast(data.message, data.success ? 'success' : 'danger');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred while processing your request.', 'danger');
+                    });
             };
-              // Function to display toast
+            // Buy now button
+            document.getElementById('buyNowBtn').addEventListener('click', function () {
+                const quantity = document.getElementById('quantity').value;
+                const productId = '<?= htmlspecialchars($product['productInfo']['id']) ?>';
+
+                // Store selected product and quantity in session storage
+                sessionStorage.setItem('checkout_items', JSON.stringify([{ productId, quantity }]));
+
+                // Redirect to checkout page
+                window.location.href = 'index.php?page=checkout';
+            });
+            // Function to display toast
             function showToast(message, type = 'info') {
                 const toastContainer = document.getElementById('toastContainer');
-                
+
                 // Create toast element
                 const toastEl = document.createElement('div');
                 toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
@@ -1037,7 +1059,7 @@ function getProductImages($product)
                 toastEl.setAttribute('aria-live', 'assertive');
                 toastEl.setAttribute('aria-atomic', 'true');
                 toastEl.setAttribute('data-bs-delay', '3500');
-                
+
                 // Toast content
                 toastEl.innerHTML = `
                     <div class="d-flex">
@@ -1045,14 +1067,14 @@ function getProductImages($product)
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
                 `;
-                
+
                 // Add to container
                 toastContainer.appendChild(toastEl);
-                
+
                 // Initialize bootstrap toast
                 const toast = new bootstrap.Toast(toastEl);
                 toast.show();
-                
+
                 // Remove toast after it's hidden
                 toastEl.addEventListener('hidden.bs.toast', function () {
                     toastEl.remove();

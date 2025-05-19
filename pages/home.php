@@ -1,6 +1,6 @@
 <?php
 // Fetch categories using PHP cURL
-$pageIndex = isset($_GET['pageIndex']) ? (int)$_GET['pageIndex'] : 0;
+$pageIndex = isset($_GET['pageIndex']) ? (int) $_GET['pageIndex'] : 0;
 $pageSize = 10;
 $apiUrl = "http://localhost:5000/api/categories/get?pageIndex={$pageIndex}&pageSize={$pageSize}";
 
@@ -21,10 +21,16 @@ try {
             $totalCount = $jsonData['data']['totalCount'] ?? 0;
             // Custom order for categories
             $customOrder = [
-                'Laptops', 'PCs', 'Main, CPU, VGA', 'Monitors', 'Keyboards',
-                'Mouse + Mouse Pad', 'Earphones', 'Sounds'
+                'Laptops',
+                'PCs',
+                'Main, CPU, VGA',
+                'Monitors',
+                'Keyboards',
+                'Mouse + Mouse Pad',
+                'Earphones',
+                'Sounds'
             ];
-            usort($categories, function($a, $b) use ($customOrder) {
+            usort($categories, function ($a, $b) use ($customOrder) {
                 $posA = array_search($a['name'], $customOrder);
                 $posB = array_search($b['name'], $customOrder);
                 $posA = $posA === false ? PHP_INT_MAX : $posA;
@@ -51,6 +57,7 @@ $icons = [
     'Keyboards' => 'bi bi-keyboard',
 ];
 ?>
+
 <head>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
@@ -58,18 +65,38 @@ $icons = [
     <title>Home</title>
     <style>
         body {
-            display: flex; flex-direction: column; min-height: 100vh; margin: 0;
-            background-color: #121212 !important; color: #fff !important;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #121212 !important;
+            color: #fff !important;
         }
-        .content { flex: 1; }
+
+        .content {
+            flex: 1;
+        }
+
         .sidebar-menu {
-            background-color: #414141; min-height: auto;
-            box-shadow: none; border-radius: 10px;
+            background-color: #414141;
+            min-height: auto;
+            box-shadow: none;
+            border-radius: 10px;
         }
-        .sidebar-menu a { color: white; transition: background-color 0.2s; }
-        .sidebar-menu a:hover { background-color: #303030 !important; color: white; }
+
+        .sidebar-menu a {
+            color: white;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: #303030 !important;
+            color: white;
+        }
+
         .list-group-item {
-            border: none !important; border-radius: 10px !important;
+            border: none !important;
+            border-radius: 10px !important;
             background-color: #414141 !important;
         }
     </style>
@@ -84,10 +111,12 @@ $icons = [
                     <div class="list-group">
                         <?php foreach ($categories as $cat): ?>
                             <?php
-                            if (!is_array($cat) || !isset($cat['id']) || !isset($cat['name'])) continue;
+                            if (!is_array($cat) || !isset($cat['id']) || !isset($cat['name']))
+                                continue;
                             $iconClass = $icons[$cat['name']] ?? 'fas fa-folder';
                             ?>
-                            <a href="index.php?page=category&name=<?= urlencode($cat['name']) ?>" class="list-group-item list-group-item-action">
+                            <a href="index.php?page=category&name=<?= urlencode($cat['name']) ?>"
+                                class="list-group-item list-group-item-action">
                                 <i class="<?= $iconClass ?>"></i> <?= htmlspecialchars($cat['name']) ?>
                             </a>
                         <?php endforeach; ?>

@@ -3,8 +3,8 @@ session_name('user_session');
 session_start();
 
 // Determine if it's an AJAX request
-$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-          strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
 // Receive data via POST method
 $inputData = file_get_contents('php://input');
@@ -16,8 +16,8 @@ if ($isAjax) {
 }
 
 // Check time between additions
-if (isset($_SESSION['last_add_time']) && time() - $_SESSION['last_add_time'] < 3) {
-    $message = "⏳ Please wait a few seconds before adding more.";
+if (isset($_SESSION['last_add_time']) && time() - $_SESSION['last_add_time'] < 1) {
+    $message = "Please wait a few seconds before adding more.";
     if ($isAjax) {
         echo json_encode(['success' => false, 'message' => $message]);
         exit;

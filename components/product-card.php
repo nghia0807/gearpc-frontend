@@ -13,15 +13,12 @@ if (!isset($product) || empty($product)) {
         border-radius: 10px;
         overflow: hidden;
         height: 100%;
-        min-height: 520px; /* Add fixed minimum height */
+        min-height: 520px;
+        /* Add fixed minimum height */
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         display: flex;
         flex-direction: column;
-    }
-
-    .product-card:hover {
-        transform: translateY(-5px);
     }
 
     .product-img-container {
@@ -125,6 +122,26 @@ if (!isset($product) || empty($product)) {
     }
 
     .btn-add-cart:hover {
+        background-color: #000000;
+        color: #e88f2e;
+    }
+
+    .btn-buy-now {
+        background-color: #ffa33a;
+        color: #1e1e1e;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        width: calc(100% - 2rem);
+        margin: 0 auto;
+        display: block;
+        text-align: center;
+    }
+
+    .btn-buy-now:hover {
         background-color: #e88f2e;
         color: #000000;
     }
@@ -158,17 +175,26 @@ if (!isset($product) || empty($product)) {
                     <?= htmlspecialchars($product['shortDescription'] ?? '') ?>
                 </div>
             </div>
-        </a>        <div class="product-action">
-            <div class="w-100">
-                <button type="button" class="btn-add-cart mb-3" onclick="addToCartAsync('<?= htmlspecialchars($product['id']) ?>')">
+        </a>
+        <div class="product-action">
+            <div class="w-100 d-flex justify-content-between gap-2">
+                <button type="button" class="btn-add-cart mb-3"
+                    onclick="addToCartAsync('<?= htmlspecialchars($product['id']) ?>')">
                     <i class="bi bi-cart-plus"></i>
                     <span>Add to cart</span>
+                </button>
+                <button type="button" class="btn-buy-now mb-3"
+                    onclick="buyNowAsync('<?= htmlspecialchars($product['id']) ?>')">
+                    <i class="bi bi-bag-check"></i>
+                    <span>Buy now</span>
                 </button>
             </div>
         </div>
     </div>
 </div>
-<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080; margin-bottom: 1.5rem; margin-right: 1.5rem; width: max-content; min-width: 300px; max-width: 90vw;"></div>
+<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"
+    style="z-index: 1080; margin-bottom: 1.5rem; margin-right: 1.5rem; width: max-content; min-width: 300px; max-width: 90vw;">
+</div>
 
 <script>
     function addToCartAsync(productId) {
@@ -184,37 +210,46 @@ if (!isset($product) || empty($product)) {
                 quantity: 1
             })
         })
-        .then(response => response.json())
-        .then(data => {
-            showToast(data.message, data.success ? 'success' : 'danger');        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('An error occurred while processing your request.', 'danger');
-        });
+            .then(response => response.json())
+            .then(data => {
+                showToast(data.message, data.success ? 'success' : 'danger');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred while processing your request.', 'danger');
+            });
+    }
+
+    function buyNowAsync(productId) {
+        // Store selected product in session storage
+        sessionStorage.setItem('checkout_items', JSON.stringify([{ productId, quantity: 1 }]));
+
+        // Redirect to checkout page
+        window.location.href = 'index.php?page=checkout';
     }
 
     function showToast(message, type = 'info') {
         const toastContainer = document.getElementById('toastContainer');
-        
+
         const toastEl = document.createElement('div');
         toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
         toastEl.setAttribute('role', 'alert');
         toastEl.setAttribute('aria-live', 'assertive');
         toastEl.setAttribute('aria-atomic', 'true');
         toastEl.setAttribute('data-bs-delay', '3500');
-        
+
         toastEl.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">${message}</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         `;
-        
+
         toastContainer.appendChild(toastEl);
-        
+
         const toast = new bootstrap.Toast(toastEl);
         toast.show();
-        
+
         toastEl.addEventListener('hidden.bs.toast', function () {
             toastEl.remove();
         });

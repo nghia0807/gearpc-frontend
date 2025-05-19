@@ -40,6 +40,7 @@ $pageContent = preg_replace('/<head>.*?<\/head>/is', '', $pageContent);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,6 +51,7 @@ $pageContent = preg_replace('/<head>.*?<\/head>/is', '', $pageContent);
     <!-- Page-specific styles -->
     <?php echo $inlineStyles; ?>
 </head>
+
 <body>
     <?php include 'includes/header.php'; ?>
     <?php include 'includes/navbar.php'; ?>
@@ -59,4 +61,5 @@ $pageContent = preg_replace('/<head>.*?<\/head>/is', '', $pageContent);
     <?php include 'includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
