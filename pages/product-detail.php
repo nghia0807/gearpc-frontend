@@ -756,24 +756,20 @@ function getProductImages($product)
                                         <?php endforeach; ?>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        <form action="actions/add-to-cart.php" method="POST">
-                            <div class="quantity-selector">
-                                <div class="quantity-label">Quantity:</div>
-                                <div class="quantity-controls">
-                                    <div class="quantity-btn" id="decreaseQty">-</div>
-                                    <input type="number" name="quantity" id="quantity" class="quantity-input" value="1" min="1" max="10">
-                                    <div class="quantity-btn" id="increaseQty">+</div>
-                                </div>
+                            <?php endforeach; ?>                        <?php endif; ?>
+                        <div class="quantity-selector">
+                            <div class="quantity-label">Quantity:</div>
+                            <div class="quantity-controls">
+                                <div class="quantity-btn" id="decreaseQty">-</div>
+                                <input type="number" id="quantity" class="quantity-input" value="1" min="1" max="10">
+                                <div class="quantity-btn" id="increaseQty">+</div>
                             </div>
+                        </div>
 
-                            <input type="hidden" name="product_id" value="<?= htmlspecialchars($product['productInfo']['id'] ?? '') ?>">
+                        <button type="button" id="addToCartBtn" class="btn btn-add-cart mb-4" style="color: #ff9620;background-color: #ffffff0d;">
+                            <i class="bi bi-cart-plus"></i> Add to cart
+                        </button>
 
-                            <button type="submit" class="btn btn-add-cart mb-4" style="color: #ff9620;background-color: #ffffff0d;">
-                                <i class="bi bi-cart-plus"></i> Add to cart
-                            </button>
-                        </form>
                         <ul class="nav nav-tabs" id="productTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="specs-tab" data-bs-toggle="tab"
@@ -879,6 +875,9 @@ function getProductImages($product)
             </div>
         <?php endif; ?>
     </div>
+    <!-- Toast container -->
+    <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080; margin-bottom: 1.5rem; margin-right: 1.5rem; width: max-content; min-width: 300px; max-width: 90vw;"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -907,6 +906,7 @@ function getProductImages($product)
                 if (isNaN(value) || value < 1) this.value = 1;
                 else if (value > 10) this.value = 10;
             });
+            
             // Product options selection
             document.querySelectorAll('.option-value').forEach(option => {
                 option.addEventListener('click', function() {
@@ -1000,31 +1000,66 @@ function getProductImages($product)
                 });
             });
             <?php endif; ?>
-            // Add to cart
+            // Add to cart with AJAX
             document.getElementById('addToCartBtn').onclick = function() {
                 const quantity = parseInt(quantityInput.value) || 1;
-                const selectedOptions = [];
-                document.querySelectorAll('.option-selector').forEach(selector => {
-                    const title = selector.querySelector('.option-label').textContent.trim();
-                    const selectedOption = selector.querySelector('.option-value.selected');
-                    if (selectedOption) {
-                        selectedOptions.push({
-                            title: title.replace(':', ''),
-                            optionId: selectedOption.dataset.optionId,
-                            optionLabel: selectedOption.textContent.trim()
-                        });
-                    }
-                });
-                alert('Product added to cart!');
-                // Send data to server if needed
-                console.log('Added to cart:', {
-                    productId: '<?= htmlspecialchars($product['productInfo']['id'] ?? '') ?>',
-                    productName: '<?= htmlspecialchars($product['productInfo']['name'] ?? '') ?>',
-                    quantity: quantity,
-                    selectedOptions: selectedOptions,
-                    price: <?= isset($product['price']['currentPrice']) ? $product['price']['currentPrice'] : 0 ?>
+                
+                // Gửi request AJAX đến add-to-cart.php
+                fetch('actions/add-to-cart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        itemId: '<?= htmlspecialchars($product['productInfo']['id'] ?? '') ?>',
+                        itemType: 'Product',
+                        quantity: quantity
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hiển thị toast message
+                    showToast(data.message, data.success ? 'success' : 'danger');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Có lỗi xảy ra khi xử lý yêu cầu.', 'danger');
                 });
             };
+            
+            // Hàm hiển thị toast
+            function showToast(message, type = 'info') {
+                const toastContainer = document.getElementById('toastContainer');
+                
+                // Tạo toast element
+                const toastEl = document.createElement('div');
+                toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
+                toastEl.setAttribute('role', 'alert');
+                toastEl.setAttribute('aria-live', 'assertive');
+                toastEl.setAttribute('aria-atomic', 'true');
+                toastEl.setAttribute('data-bs-delay', '3500');
+                
+                // Nội dung toast
+                toastEl.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                `;
+                
+                // Thêm vào container
+                toastContainer.appendChild(toastEl);
+                
+                // Khởi tạo toast bootstrap
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+                
+                // Xóa toast sau khi ẩn
+                toastEl.addEventListener('hidden.bs.toast', function () {
+                    toastEl.remove();
+                });
+            }
         });
     </script>
 </body>
