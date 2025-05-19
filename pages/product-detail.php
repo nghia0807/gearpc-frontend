@@ -116,6 +116,7 @@ function getProductImages($product)
 
         .product-container {
             background-color: #1e1e1e;
+            color: #ffffff;
             border-radius: 10px;
             padding: 2rem;
             margin: 2rem 0;
@@ -748,10 +749,9 @@ function getProductImages($product)
                                 <div class="option-selector">
                                     <div class="option-label"><?= htmlspecialchars($optionGroup['title']) ?>:</div>
                                     <div class="option-values">
-                                        <?php foreach ($optionGroup['options'] as $option): ?>
-                                            <div class="option-value <?= !empty($option['selected']) ? 'selected' : '' ?>"
+                                        <?php foreach ($optionGroup['options'] as $option): ?>                                            <div class="option-value <?= !empty($option['selected']) ? 'selected' : '' ?>"
                                                 data-option-id="<?= htmlspecialchars($option['id'] ?? '') ?>">
-                                                <?= htmlspecialchars($option['label'] ?? 'Không xác định') ?>
+                                                <?= htmlspecialchars($option['label'] ?? 'Not specified') ?>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
@@ -1003,8 +1003,7 @@ function getProductImages($product)
             // Add to cart with AJAX
             document.getElementById('addToCartBtn').onclick = function() {
                 const quantity = parseInt(quantityInput.value) || 1;
-                
-                // Gửi request AJAX đến add-to-cart.php
+                  // Send AJAX request to add-to-cart.php
                 fetch('actions/add-to-cart.php', {
                     method: 'POST',
                     headers: {
@@ -1019,20 +1018,19 @@ function getProductImages($product)
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Hiển thị toast message
+                    // Display toast message
                     showToast(data.message, data.success ? 'success' : 'danger');
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showToast('Có lỗi xảy ra khi xử lý yêu cầu.', 'danger');
+                    showToast('An error occurred while processing your request.', 'danger');
                 });
             };
-            
-            // Hàm hiển thị toast
+              // Function to display toast
             function showToast(message, type = 'info') {
                 const toastContainer = document.getElementById('toastContainer');
                 
-                // Tạo toast element
+                // Create toast element
                 const toastEl = document.createElement('div');
                 toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
                 toastEl.setAttribute('role', 'alert');
@@ -1040,7 +1038,7 @@ function getProductImages($product)
                 toastEl.setAttribute('aria-atomic', 'true');
                 toastEl.setAttribute('data-bs-delay', '3500');
                 
-                // Nội dung toast
+                // Toast content
                 toastEl.innerHTML = `
                     <div class="d-flex">
                         <div class="toast-body">${message}</div>
@@ -1048,14 +1046,14 @@ function getProductImages($product)
                     </div>
                 `;
                 
-                // Thêm vào container
+                // Add to container
                 toastContainer.appendChild(toastEl);
                 
-                // Khởi tạo toast bootstrap
+                // Initialize bootstrap toast
                 const toast = new bootstrap.Toast(toastEl);
                 toast.show();
                 
-                // Xóa toast sau khi ẩn
+                // Remove toast after it's hidden
                 toastEl.addEventListener('hidden.bs.toast', function () {
                     toastEl.remove();
                 });

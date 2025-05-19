@@ -1,7 +1,7 @@
 <?php
 /**
  * Component: Product Card
- * @param array $product - Thông tin sản phẩm
+ * @param array $product
  */
 if (!isset($product) || empty($product)) {
     return;
@@ -159,7 +159,6 @@ if (!isset($product) || empty($product)) {
                 </div>
             </div>
         </a>        <div class="product-action">
-            <!-- Button với event handler Javascript -->
             <div class="w-100">
                 <button type="button" class="btn-add-cart mb-3" onclick="addToCartAsync('<?= htmlspecialchars($product['id']) ?>')">
                     <i class="bi bi-cart-plus"></i>
@@ -169,11 +168,9 @@ if (!isset($product) || empty($product)) {
         </div>
     </div>
 </div>
-<!-- Toast container nếu chưa tồn tại -->
 <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080; margin-bottom: 1.5rem; margin-right: 1.5rem; width: max-content; min-width: 300px; max-width: 90vw;"></div>
 
 <script>
-    // Hàm thêm vào giỏ hàng sử dụng AJAX
     function addToCartAsync(productId) {
         fetch('actions/add-to-cart.php', {
             method: 'POST',
@@ -189,20 +186,16 @@ if (!isset($product) || empty($product)) {
         })
         .then(response => response.json())
         .then(data => {
-            // Hiển thị toast message
-            showToast(data.message, data.success ? 'success' : 'danger');
-        })
+            showToast(data.message, data.success ? 'success' : 'danger');        })
         .catch(error => {
             console.error('Error:', error);
-            showToast('Có lỗi xảy ra khi xử lý yêu cầu.', 'danger');
+            showToast('An error occurred while processing your request.', 'danger');
         });
     }
 
-    // Hàm hiển thị toast
     function showToast(message, type = 'info') {
         const toastContainer = document.getElementById('toastContainer');
         
-        // Tạo toast element
         const toastEl = document.createElement('div');
         toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
         toastEl.setAttribute('role', 'alert');
@@ -210,7 +203,6 @@ if (!isset($product) || empty($product)) {
         toastEl.setAttribute('aria-atomic', 'true');
         toastEl.setAttribute('data-bs-delay', '3500');
         
-        // Nội dung toast
         toastEl.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">${message}</div>
@@ -218,14 +210,11 @@ if (!isset($product) || empty($product)) {
             </div>
         `;
         
-        // Thêm vào container
         toastContainer.appendChild(toastEl);
         
-        // Khởi tạo toast bootstrap
         const toast = new bootstrap.Toast(toastEl);
         toast.show();
         
-        // Xóa toast sau khi ẩn
         toastEl.addEventListener('hidden.bs.toast', function () {
             toastEl.remove();
         });

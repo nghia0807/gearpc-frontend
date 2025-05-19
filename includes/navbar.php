@@ -113,7 +113,6 @@
             <a class="nav-link pe-0" href="index.php?page=products&sort=bestseller" style="color: yellow !important; font-size: 14px; font-weight: bold;">
               Best Seller
             </a>
-            <span class="fire-icon">🔥</span>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#" >PC Builder</a>
