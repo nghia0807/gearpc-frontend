@@ -231,7 +231,9 @@ $cartItems = $data['data']['items'] ?? [];
 
         .remove-btn:hover {
             background-color: #d43f3f;
-        }        /* Responsive */
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .cart-container {
                 padding: 15px;
@@ -263,11 +265,12 @@ $cartItems = $data['data']['items'] ?? [];
                 border-radius: 8px;
                 margin-bottom: 10px;
                 background-color: #fff;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             }
 
             .cart-header.cart-item {
-                display: none; /* Hide the header on mobile */
+                display: none;
+                /* Hide the header on mobile */
             }
 
             .cart-item-price,
@@ -295,7 +298,7 @@ $cartItems = $data['data']['items'] ?? [];
                 min-width: 60px;
                 color: #ff9620;
             }
-            
+
             .cart-item-quantity::before {
                 content: "Quantity: ";
                 font-weight: 500;
@@ -311,7 +314,7 @@ $cartItems = $data['data']['items'] ?? [];
             .cart-item-image {
                 grid-row: span 4;
             }
-            
+
             .cart-item-name {
                 grid-column: 3;
                 margin-bottom: 12px;
@@ -335,7 +338,7 @@ $cartItems = $data['data']['items'] ?? [];
                 justify-content: space-between;
                 font-size: 15px;
             }
-            
+
             .cart-total {
                 font-size: 18px;
             }
@@ -347,16 +350,16 @@ $cartItems = $data['data']['items'] ?? [];
                 height: 48px;
                 font-size: 16px;
             }
-            
+
             .quantity-form {
                 height: 36px;
             }
-            
+
             .remove-form {
                 justify-content: flex-end;
                 margin-top: 5px;
             }
-            
+
             .remove-btn {
                 width: 36px;
                 height: 36px;
@@ -367,7 +370,7 @@ $cartItems = $data['data']['items'] ?? [];
                 background-color: #ffeeee;
                 color: #ff4d4d;
             }
-            
+
             .remove-btn i {
                 font-size: 16px;
             }
@@ -381,7 +384,7 @@ $cartItems = $data['data']['items'] ?? [];
                 border-radius: 0;
                 box-shadow: none;
             }
-            
+
             .cart-item {
                 grid-template-columns: 30px 70px 1fr;
                 gap: 8px;
@@ -397,12 +400,12 @@ $cartItems = $data['data']['items'] ?? [];
                 justify-content: flex-start;
                 height: 32px;
             }
-            
+
             .quantity-btn {
                 padding: 4px 10px;
                 font-size: 14px;
             }
-            
+
             .quantity-form input[type="number"] {
                 width: 40px;
                 font-size: 13px;
@@ -411,42 +414,42 @@ $cartItems = $data['data']['items'] ?? [];
             .cart-item-name {
                 font-size: 14px;
             }
-            
+
             .cart-item-price,
             .cart-item-total {
                 font-size: 13px;
             }
-            
+
             .cart-item-price::before,
             .cart-item-total::before,
             .cart-item-quantity::before {
                 min-width: 50px;
                 font-size: 13px;
             }
-            
+
             .cart-header-title h2 {
                 font-size: 18px;
             }
-            
+
             .btn {
                 padding: 6px 12px;
                 font-size: 13px;
             }
-            
+
             .checkout-btn {
                 height: 44px;
                 font-size: 15px;
             }
-            
+
             .cart-empty {
                 padding: 30px 0;
             }
-            
+
             .cart-empty i {
                 font-size: 50px;
                 margin-bottom: 15px;
             }
-            
+
             .cart-empty h3 {
                 font-size: 18px;
             }
@@ -516,7 +519,7 @@ $cartItems = $data['data']['items'] ?? [];
 <div class="cart-container">
     <div class="cart-header-title">
         <h2>Your cart</h2>
-        <div class="cart-actions">            <button type="button" id="deleteSelected" class="btn btn-danger" disabled>
+        <div class="cart-actions"> <button type="button" id="deleteSelected" class="btn btn-danger" disabled>
                 <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Delete selected</span>
             </button>
         </div>
@@ -550,7 +553,7 @@ $cartItems = $data['data']['items'] ?? [];
                 Selected: <span id="selectedCount">0</span> items
             </div>
             <div class="cart-summary-text">
-                Total: <span id="selectedTotal" class="cart-total">0 ₫</span>
+                Total: <span id="selectedTotal" class="cart-total">$0</span>
             </div>
             <button type="button" id="checkoutBtn" class="checkout-btn" disabled>
                 Proceed to Checkout
@@ -579,12 +582,11 @@ $cartItems = $data['data']['items'] ?? [];
             const selectedCount = selectedCheckboxes.length;
 
             // Update count
-            selectedCountSpan.textContent = selectedCount;
-
-            // Update total price
+            selectedCountSpan.textContent = selectedCount;            // Update total price
             let totalPrice = 0;
             selectedCheckboxes.forEach(checkbox => {
                 const itemRow = checkbox.closest('.cart-item');
+                // Get the item price from data attribute which should be in numeric format
                 const itemPrice = parseFloat(itemRow.dataset.price || 0);
                 totalPrice += itemPrice;
             });
@@ -597,15 +599,9 @@ $cartItems = $data['data']['items'] ?? [];
 
             // Update select all checkbox
             selectAllCheckbox.checked = selectedCount > 0 && selectedCount === itemCheckboxes.length;
-        }
-
-        // Helper function to format currency
+        }        // Helper function to format currency
         function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN', {
-                style: 'currency',
-                currency: 'VND',
-                maximumFractionDigits: 0
-            }).format(amount).replace('₫', '').trim() + ' ₫';
+            return '$' + amount.toFixed(2);
         }
 
         // Select All checkbox
