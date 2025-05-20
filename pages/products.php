@@ -135,6 +135,7 @@ if ($categoryCode) {
         }
 
         .filters-container {
+            width: 100%;
             background-color: #1e1e1e;
             color: #ffffff;
             border-radius: 10px;
@@ -283,6 +284,7 @@ if ($categoryCode) {
 
         .no-products {
             background-color: #1e1e1e;
+            color: #000000;
             border-radius: 10px;
             padding: 3rem 1rem;
             text-align: center;
@@ -343,7 +345,7 @@ if ($categoryCode) {
 
 <body>
     <div class="container py-4">
-        <div class="row">
+        <div class="row w-100">
             <div class="col-12 mb-4">
                 <div class="filters-container">
                     <div class="row">
