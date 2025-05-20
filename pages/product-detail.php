@@ -504,10 +504,32 @@ function getProductImages($product)
         }
 
         /* Related Products */
+        .related-products-slider {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            padding: 0 15px;
+            /* Add padding for slider buttons */
+        }
+
         .related-products {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            display: flex;
             gap: 1.5rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            /* Firefox */
+            -webkit-overflow-scrolling: touch;
+            padding: 1rem 0;
+            scroll-snap-type: x mandatory;
+            /* Enable scroll snapping for smoother scrolling */
+            margin: 0 20px;
+            /* Add margin for slider buttons */
+        }
+
+        .related-products::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Edge */
         }
 
         .related-product-card {
@@ -518,6 +540,46 @@ function getProductImages($product)
             height: 100%;
             display: flex;
             flex-direction: column;
+            min-width: 250px;
+            max-width: 320px;
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.25rem;
+            cursor: pointer;
+            z-index: 10;
+            border: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .slider-btn.prev {
+            left: 5px;
+        }
+
+        .slider-btn.next {
+            right: 5px;
+        }
+
+        .slider-btn:active {
+            transform: translateY(-50%) scale(0.95);
         }
 
         .related-product-card:hover {
@@ -609,8 +671,59 @@ function getProductImages($product)
                 width: 40%;
             }
 
-            .related-products {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            .related-product-card {
+                min-width: 180px;
+                padding: 0.75rem;
+            }
+
+            .related-product-image {
+                height: 120px;
+            }
+
+            .slider-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .related-product-title {
+                font-size: 0.9rem;
+            }
+
+            .related-product-current-price {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .related-product-card {
+                min-width: 160px;
+                padding: 0.5rem;
+            }
+
+            .related-product-image {
+                height: 100px;
+                margin-bottom: 0.75rem;
+            }
+
+            .related-product-title {
+                font-size: 0.85rem;
+                -webkit-line-clamp: 1;
+            }
+
+            .related-product-brand {
+                font-size: 0.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .related-product-current-price {
+                font-size: 0.9rem;
+            }
+
+            .slider-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
             }
         }
 
@@ -839,45 +952,53 @@ function getProductImages($product)
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- Related Products -->
+            </div> <!-- Related Products Slider -->
             <div class="product-container w-100">
                 <h3 class="mb-4">Similar products</h3>
                 <?php if ($relatedProducts): ?>
-                    <div class="related-products">
-                        <?php foreach ($relatedProducts as $relatedProduct): ?>
-                            <div class="related-product-card">
-                                <a href="index.php?page=product-detail&id=<?= htmlspecialchars($relatedProduct['id']) ?>"
-                                    class="text-decoration-none">
-                                    <div class="related-product-image">
-                                        <img src="<?= htmlspecialchars($relatedProduct['imageUrl']) ?>"
-                                            alt="<?= htmlspecialchars($relatedProduct['name']) ?>"
-                                            onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
-                                    </div>
-                                    <h5 class="related-product-title"><?= htmlspecialchars($relatedProduct['name']) ?></h5>
-                                    <?php if (!empty($relatedProduct['brandName'])): ?>
-                                        <div class="related-product-brand">
-                                            <i class="bi bi-tag-fill me-1"></i> <?= htmlspecialchars($relatedProduct['brandName']) ?>
+                    <div class="related-products-slider">
+                        <button class="slider-btn prev" id="prevBtn">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <div class="related-products" id="relatedProductsSlider">
+                            <?php foreach ($relatedProducts as $relatedProduct): ?>
+                                <div class="related-product-card">
+                                    <a href="index.php?page=product-detail&id=<?= htmlspecialchars($relatedProduct['id']) ?>"
+                                        class="text-decoration-none">
+                                        <div class="related-product-image">
+                                            <img src="<?= htmlspecialchars($relatedProduct['imageUrl']) ?>"
+                                                alt="<?= htmlspecialchars($relatedProduct['name']) ?>"
+                                                onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
                                         </div>
-                                    <?php endif; ?>
-                                    <?php if (!empty($relatedProduct['shortDescription'])): ?>
-                                        <p class="mb-2 small text-truncate" style="color: #ffffff;">
-                                            <?= htmlspecialchars($relatedProduct['shortDescription']) ?>
-                                        </p>
-                                    <?php endif; ?>
-                                    <div class="related-product-price">
-                                        <span class="related-product-current-price">
-                                            <?= formatCurrency($relatedProduct['currentPrice']) ?>
-                                        </span>
-                                        <?php if (isset($relatedProduct['originalPrice']) && $relatedProduct['originalPrice'] > $relatedProduct['currentPrice']): ?>
-                                            <span class="related-product-original-price">
-                                                <?= formatCurrency($relatedProduct['originalPrice']) ?>
-                                            </span>
+                                        <h5 class="related-product-title"><?= htmlspecialchars($relatedProduct['name']) ?></h5>
+                                        <?php if (!empty($relatedProduct['brandName'])): ?>
+                                            <div class="related-product-brand">
+                                                <i class="bi bi-tag-fill me-1"></i>
+                                                <?= htmlspecialchars($relatedProduct['brandName']) ?>
+                                            </div>
                                         <?php endif; ?>
-                                    </div>
-                                </a>
-                            </div>
-                        <?php endforeach; ?>
+                                        <?php if (!empty($relatedProduct['shortDescription'])): ?>
+                                            <p class="mb-2 small text-truncate" style="color: #ffffff;">
+                                                <?= htmlspecialchars($relatedProduct['shortDescription']) ?>
+                                            </p>
+                                        <?php endif; ?>
+                                        <div class="related-product-price">
+                                            <span class="related-product-current-price">
+                                                <?= formatCurrency($relatedProduct['currentPrice']) ?>
+                                            </span>
+                                            <?php if (isset($relatedProduct['originalPrice']) && $relatedProduct['originalPrice'] > $relatedProduct['currentPrice']): ?>
+                                                <span class="related-product-original-price">
+                                                    <?= formatCurrency($relatedProduct['originalPrice']) ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button class="slider-btn next" id="nextBtn">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
                     </div>
                 <?php else: ?>
                     <div class="text-center py-4">
@@ -1083,6 +1204,73 @@ function getProductImages($product)
                 toastEl.addEventListener('hidden.bs.toast', function () {
                     toastEl.remove();
                 });
+            }
+
+            // Similar Products Slider Functionality
+            const slider = document.getElementById('relatedProductsSlider');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (slider && prevBtn && nextBtn) {
+                // Calculate scroll distance (width of one product card + gap)
+                const scrollDistance = () => {
+                    const cardWidth = slider.querySelector('.related-product-card')?.offsetWidth || 250;
+                    const gap = 24; // 1.5rem in pixels
+                    return cardWidth + gap;
+                };
+
+                // Scroll to previous products
+                prevBtn.addEventListener('click', () => {
+                    slider.scrollLeft -= scrollDistance();
+                });
+
+                // Scroll to next products
+                nextBtn.addEventListener('click', () => {
+                    slider.scrollLeft += scrollDistance();
+                });
+
+                // Hide/show navigation buttons based on scroll position
+                const updateButtonVisibility = () => {
+                    prevBtn.style.opacity = slider.scrollLeft <= 10 ? '0.5' : '1';
+                    const isAtEnd = slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10;
+                    nextBtn.style.opacity = isAtEnd ? '0.5' : '1';
+                };
+
+                // Update button visibility initially and on scroll
+                updateButtonVisibility();
+                slider.addEventListener('scroll', updateButtonVisibility);
+
+                // Touch swipe functionality
+                let touchStartX = 0;
+                let touchEndX = 0;
+
+                slider.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                slider.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                }, { passive: true });
+
+                function handleSwipe() {
+                    const swipeDistance = touchStartX - touchEndX;
+                    const threshold = 50; // Minimum distance to be considered a swipe
+
+                    if (swipeDistance > threshold) {
+                        // Swipe left (next)
+                        slider.scrollLeft += scrollDistance();
+                    } else if (swipeDistance < -threshold) {
+                        // Swipe right (previous)
+                        slider.scrollLeft -= scrollDistance();
+                    }
+                }
+
+                // Resize observer to update button visibility when window is resized
+                const resizeObserver = new ResizeObserver(() => {
+                    updateButtonVisibility();
+                });
+                resizeObserver.observe(slider);
             }
         });
     </script>

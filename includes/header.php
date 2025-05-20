@@ -369,12 +369,12 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
         <div class="header-search-flex">
           <form action="index.php" method="get" class="mx-auto position-relative">
             <div class="input-group">
-              <input class="form-control" type="search" name="q" id="searchInput" 
-                     placeholder="Search Tech Zone!" aria-label="Search" 
-                     autocomplete="off" />
+              <input class="form-control" type="search" name="q" id="searchInput" placeholder="Search Tech Zone!"
+                aria-label="Search" autocomplete="off" />
               <button class="btn btn-search" type="submit">
                 <i class="bi bi-search text-white"></i>
-                <div class="spinner-border spinner-border-sm text-light search-spinner" role="status" style="display:none">
+                <div class="spinner-border spinner-border-sm text-light search-spinner" role="status"
+                  style="display:none">
                   <span class="visually-hidden">Loading...</span>
                 </div>
               </button>
@@ -401,7 +401,8 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
             </a>
           </li>
           <li class="nav-item me-3">
-            <a class="nav-link header-items" href="index.php?page=cart">
+            <a class="nav-link header-items"
+              href="<?php echo $isLoggedIn ? 'index.php?page=cart' : 'pages/not-logged-in.php'; ?>">
               <i class="bi bi-cart"></i> <span class="nav-label">Cart</span>
             </a>
           </li>
@@ -486,30 +487,30 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
     })();
 
     // Enhanced Search Feature
-    (function() {
+    (function () {
       const searchInput = document.getElementById('searchInput');
       const searchSuggestions = document.getElementById('searchSuggestions');
       const suggestedProductsList = document.getElementById('suggestedProductsList');
       const recentSearchesList = document.getElementById('recentSearchesList');
       const searchSpinner = document.querySelector('.search-spinner');
-      
+
       if (!searchInput || !searchSuggestions) return;
-      
+
       let debounceTimer;
       let abortController = null;
       let selectedIndex = -1;
       let allSuggestionItems = [];
-      
+
       // Load recent searches from localStorage
       function loadRecentSearches() {
         const searches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
         recentSearchesList.innerHTML = '';
-        
+
         if (searches.length === 0) {
           recentSearchesList.innerHTML = '<div class="px-3 py-2 text-muted">No recent searches</div>';
           return;
         }
-        
+
         searches.slice(0, 5).forEach(term => {
           const div = document.createElement('div');
           div.className = 'suggestion-item';
@@ -528,21 +529,21 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
           recentSearchesList.appendChild(div);
         });
       }
-      
+
       // Add search term to history
       function addToRecentSearches(term) {
         if (!term.trim()) return;
-        
+
         const searches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
         // Remove if exists and add to beginning
         const filteredSearches = searches.filter(s => s.toLowerCase() !== term.toLowerCase());
         filteredSearches.unshift(term);
-        
+
         // Keep only latest 10 searches
         const updatedSearches = filteredSearches.slice(0, 10);
         localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
       }
-      
+
       // Fetch product suggestions with improved error handling
       async function fetchSuggestions(query) {
         if (!query.trim()) {
@@ -552,22 +553,22 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
           searchSuggestions.classList.add('show');
           return;
         }
-        
+
         // Show spinner while loading
         searchSpinner.style.display = 'inline-block';
         document.getElementById('suggestedProducts').style.display = 'block';
-        
+
         // Cancel previous request if any
         if (abortController) {
           abortController.abort();
         }
-        
+
         // Create new abort controller for this request
         abortController = new AbortController();
-        
+
         try {
           const apiUrl = `http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}&pageSize=5`;
-          
+
           const response = await fetch(apiUrl, {
             signal: abortController.signal,
             headers: {
@@ -581,11 +582,11 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
             }
             throw error;
           });
-          
+
           if (!response || !response.ok) {
             throw new Error('Network response was not ok');
           }
-          
+
           const result = await response.json();
           if (result.success && result.data) {
             renderProductSuggestions(result.data.data || []);
@@ -601,48 +602,48 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
           abortController = null;
         }
       }
-      
+
       // Render product suggestions with improved display
       function renderProductSuggestions(products) {
         suggestedProductsList.innerHTML = '';
-        
+
         if (!products || products.length === 0) {
           suggestedProductsList.innerHTML = '<div class="px-3 py-2 text-muted">No products found</div>';
           searchSuggestions.classList.add('show');
           return;
         }
-        
+
         products.forEach(product => {
           const div = document.createElement('div');
           div.className = 'suggestion-item';
-          
+
           // Format price with VND currency formatting
-          const price = product.currentPrice ? 
-            new Intl.NumberFormat('vi-VN', { 
-              style: 'currency', 
+          const price = product.currentPrice ?
+            new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
               currency: 'VND',
               minimumFractionDigits: 0,
-              maximumFractionDigits: 0 
-            }).format(product.currentPrice).replace('₫', '').trim() + ' ₫' : 
+              maximumFractionDigits: 0
+            }).format(product.currentPrice).replace('₫', '').trim() + ' ₫' :
             'Liên hệ';
-          
+
           // Highlight matching terms in product name
           let highlightedName = product.name;
           const searchTerms = searchInput.value.trim().split(/\s+/).filter(term => term.length > 1);
-          
+
           if (searchTerms.length > 0) {
-            const escapedTerms = searchTerms.map(term => 
+            const escapedTerms = searchTerms.map(term =>
               term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
             );
             const pattern = new RegExp(`(${escapedTerms.join('|')})`, 'gi');
             highlightedName = product.name.replace(pattern, '<b>$1</b>');
           }
-          
+
           // Get category name or brand name, with fallbacks
           const category = product.categoryName || product.category || 'Sản phẩm';
           const brand = product.brandName || product.brand || '';
           const meta = brand ? `${category} • ${brand}` : category;
-          
+
           div.innerHTML = `
             <img src="${product.imageUrl || product.image || 'assets/img/placeholder.png'}" 
                  alt="${product.name}" 
@@ -652,31 +653,31 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
               <div class="suggestion-item-meta">${meta} • ${price}</div>
             </div>
           `;
-          
+
           div.addEventListener('click', () => {
             // Add search term to history
             addToRecentSearches(searchInput.value.trim());
             // Navigate to product detail page
             window.location.href = `index.php?page=product-detail&id=${product.id}`;
           });
-          
+
           suggestedProductsList.appendChild(div);
         });
-        
+
         searchSuggestions.classList.add('show');
         selectedIndex = -1;
         updateAllSuggestionItems();
       }
-      
+
       // Update all suggestion items for keyboard navigation
       function updateAllSuggestionItems() {
         allSuggestionItems = Array.from(searchSuggestions.querySelectorAll('.suggestion-item'));
       }
-      
+
       // Handle keyboard navigation
       function handleKeyNavigation(e) {
         if (!searchSuggestions.classList.contains('show')) return;
-        
+
         // Arrow down
         if (e.key === 'ArrowDown') {
           e.preventDefault();
@@ -709,7 +710,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
           searchInput.blur();
         }
       }
-      
+
       function updateSelection() {
         allSuggestionItems.forEach((item, index) => {
           if (index === selectedIndex) {
@@ -720,37 +721,37 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
           }
         });
       }
-      
+
       // Update search form to direct to products page
       const searchForm = document.querySelector('.header-search-flex form');
       if (searchForm) {
         searchForm.setAttribute('action', 'index.php');
-        
+
         // Add hidden input for page parameter
         const pageInput = document.createElement('input');
         pageInput.type = 'hidden';
         pageInput.name = 'page';
         pageInput.value = 'products';
         searchForm.appendChild(pageInput);
-        
+
         // Add form submit handler to save search term
-        searchForm.addEventListener('submit', function(e) {
+        searchForm.addEventListener('submit', function (e) {
           const term = searchInput.value.trim();
           if (term) {
             addToRecentSearches(term);
           }
         });
       }
-      
+
       // Event listeners for search interaction
-      searchInput.addEventListener('input', function() {
+      searchInput.addEventListener('input', function () {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           fetchSuggestions(this.value);
         }, 300);
       });
-      
-      searchInput.addEventListener('focus', function() {
+
+      searchInput.addEventListener('focus', function () {
         if (this.value.trim()) {
           fetchSuggestions(this.value);
         } else {
@@ -760,16 +761,16 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
           updateAllSuggestionItems();
         }
       });
-      
+
       searchInput.addEventListener('keydown', handleKeyNavigation);
-      
+
       // Close suggestions when clicking outside
-      document.addEventListener('click', function(e) {
+      document.addEventListener('click', function (e) {
         if (!searchSuggestions.contains(e.target) && e.target !== searchInput) {
           searchSuggestions.classList.remove('show');
         }
       });
-      
+
       // Initial load of recent searches
       loadRecentSearches();
     })();

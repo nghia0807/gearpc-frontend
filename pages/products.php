@@ -135,6 +135,7 @@ if ($categoryCode) {
         }
 
         .filters-container {
+            width: 100%;
             background-color: #1e1e1e;
             color: #ffffff;
             border-radius: 10px;
@@ -283,6 +284,7 @@ if ($categoryCode) {
 
         .no-products {
             background-color: #1e1e1e;
+            color: #ffffff;
             border-radius: 10px;
             padding: 3rem 1rem;
             text-align: center;
@@ -343,7 +345,7 @@ if ($categoryCode) {
 
 <body>
     <div class="container py-4">
-        <div class="row">
+        <div class="row w-100">
             <div class="col-12 mb-4">
                 <div class="filters-container">
                     <div class="row">
@@ -403,16 +405,15 @@ if ($categoryCode) {
                     <!-- View More Button (replaces pagination) -->
                     <?php if ($totalProducts > $pageSize): ?>
                         <div class="text-center mt-5 mb-4">
-                            <button id="view-more-btn" class="btn px-4 py-2" 
-                                    data-current-page="<?= $pageIndex ?>" 
-                                    data-total-pages="<?= ceil($totalProducts / $pageSize) ?>"
-                                    data-category="<?= htmlspecialchars($categoryCode) ?>"
-                                    data-brand="<?= htmlspecialchars($brandCode) ?>"
-                                    data-search="<?= htmlspecialchars($searchQuery) ?>">
-                                <i class="bi bi-plus-circle me-1"></i> 
+                            <button id="view-more-btn" class="btn px-4 py-2" data-current-page="<?= $pageIndex ?>"
+                                data-total-pages="<?= ceil($totalProducts / $pageSize) ?>"
+                                data-category="<?= htmlspecialchars($categoryCode) ?>"
+                                data-brand="<?= htmlspecialchars($brandCode) ?>"
+                                data-search="<?= htmlspecialchars($searchQuery) ?>">
+                                <i class="bi bi-plus-circle me-1"></i>
                                 <span>View more products</span>
                             </button>
-                            
+
                             <div id="loading-indicator" class="d-none mt-4">
                                 <div class="spinner-border text-light" role="status">
                                     <span class="visually-hidden">Loading...</span>
@@ -426,37 +427,37 @@ if ($categoryCode) {
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Define the jumpToPage function globally -->
     <script>
-        window.jumpToPage = function(e) {
+        window.jumpToPage = function (e) {
             e.preventDefault();
             const input = document.getElementById('jumpToPage');
             if (!input) return false;
-            
+
             const page = parseInt(input.value) - 1;
             <?php if (isset($totalPages)): ?>
-            const maxPage = <?= $totalPages - 1 ?>;
-            
-            if (isNaN(page) || page < 0 || page > maxPage) {
-                alert(`Please enter a valid page number between 1 and ${maxPage + 1}`);
-                return false;
-            }
-            
-            const paginationUrl = "<?= $paginationUrl ?? 'index.php?page=products&' ?>";
-            window.location.href = `${paginationUrl}pageIndex=${page}`;
+                const maxPage = <?= $totalPages - 1 ?>;
+
+                if (isNaN(page) || page < 0 || page > maxPage) {
+                    alert(`Please enter a valid page number between 1 and ${maxPage + 1}`);
+                    return false;
+                }
+
+                const paginationUrl = "<?= $paginationUrl ?? 'index.php?page=products&' ?>";
+                window.location.href = `${paginationUrl}pageIndex=${page}`;
             <?php else: ?>
-            if (isNaN(page) || page < 0) {
-                alert("Please enter a valid page number");
-                return false;
-            }
-            window.location.href = `index.php?page=products&pageIndex=${page}`;
+                if (isNaN(page) || page < 0) {
+                    alert("Please enter a valid page number");
+                    return false;
+                }
+                window.location.href = `index.php?page=products&pageIndex=${page}`;
             <?php endif; ?>
             return false;
         }
     </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const viewMoreBtn = document.getElementById('view-more-btn');
             if (viewMoreBtn) {
                 viewMoreBtn.addEventListener('click', loadMoreProducts);
@@ -467,21 +468,21 @@ if ($categoryCode) {
             const btn = document.getElementById('view-more-btn');
             const loadingIndicator = document.getElementById('loading-indicator');
             const productsContainer = document.getElementById('products-container');
-            
+
             // Get current state
             const currentPage = parseInt(btn.dataset.currentPage) + 1;
             const totalPages = parseInt(btn.dataset.totalPages);
-            
+
             // Show loading indicator
             loadingIndicator.classList.remove('d-none');
             btn.disabled = true;
-            
+
             // Build API URL with the same filters as current page
             let apiUrl = `http://localhost:5000/api/products?pageIndex=${currentPage}&pageSize=12`;
             if (btn.dataset.category) apiUrl += `&categoryCode=${encodeURIComponent(btn.dataset.category)}`;
             if (btn.dataset.brand) apiUrl += `&brandCode=${encodeURIComponent(btn.dataset.brand)}`;
             if (btn.dataset.search) apiUrl += `&productName=${encodeURIComponent(btn.dataset.search)}`;
-            
+
             // Fetch additional products
             fetch(apiUrl)
                 .then(response => response.json())
@@ -489,7 +490,7 @@ if ($categoryCode) {
                     if (data.success && data.data.data.length > 0) {
                         // Update button state
                         btn.dataset.currentPage = currentPage;
-                        
+
                         // Format currency function
                         const formatCurrency = (amount) => {
                             return new Intl.NumberFormat('vi-VN', {
@@ -499,20 +500,20 @@ if ($categoryCode) {
                                 maximumFractionDigits: 0
                             }).format(amount).replace('₫', '') + ' ₫';
                         };
-                        
+
                         // Calculate discount percentage
                         const calculateDiscount = (original, current) => {
                             if (original <= 0 || current <= 0 || original <= current) return 0;
                             return Math.round(((original - current) / original) * 100);
                         };
-                        
+
                         // Process each product
                         data.data.data.forEach(product => {
                             // Create product card HTML
                             const productCard = createProductCard(product, formatCurrency, calculateDiscount);
                             productsContainer.insertAdjacentHTML('beforeend', productCard);
                         });
-                        
+
                         // Hide button if we've reached the end
                         if (currentPage >= totalPages - 1) {
                             btn.classList.add('d-none');
@@ -534,9 +535,9 @@ if ($categoryCode) {
         }
 
         function createProductCard(product, formatCurrency, calculateDiscount) {
-            const discount = product.originalPrice > product.currentPrice ? 
+            const discount = product.originalPrice > product.currentPrice ?
                 calculateDiscount(product.originalPrice, product.currentPrice) : 0;
-                
+
             return `
             <div class="col">
                 <div class="product-card">
@@ -554,8 +555,8 @@ if ($categoryCode) {
                             </h5>
                             <div class="d-flex align-items-center">
                                 <span class="product-price-current">${formatCurrency(product.currentPrice)}</span>
-                                ${product.originalPrice > product.currentPrice ? 
-                                    `<span class="product-price-original">${formatCurrency(product.originalPrice)}</span>
+                                ${product.originalPrice > product.currentPrice ?
+                    `<span class="product-price-original">${formatCurrency(product.originalPrice)}</span>
                                      ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}` : ''}
                             </div>
                             <div class="product-description">
@@ -583,4 +584,5 @@ if ($categoryCode) {
         }
     </script>
 </body>
+
 </html>

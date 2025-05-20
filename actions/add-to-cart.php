@@ -32,11 +32,11 @@ if (isset($_SESSION['last_add_time']) && time() - $_SESSION['last_add_time'] < 1
 if (!isset($_SESSION['token'])) {
     $message = "You are not logged in.";
     if ($isAjax) {
-        echo json_encode(['success' => false, 'message' => $message]);
+        echo json_encode(['success' => false, 'message' => $message, 'redirect' => '..pages/not-logged-in.php']);
         exit;
     } else {
         $_SESSION['message'] = $message;
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        
         exit;
     }
 }
