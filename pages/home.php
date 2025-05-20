@@ -104,7 +104,7 @@ $icons = [
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <nav class="sidebar-menu col-md-3 col-12 p-3 mt-3">
+            <nav class="sidebar-menu col-md-2 col-12 p-3 mt-3">
                 <?php if ($errorMsg): ?>
                     <div class="alert alert-danger"><?= htmlspecialchars($errorMsg) ?></div>
                 <?php elseif ($categories): ?>

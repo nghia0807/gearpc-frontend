@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
         );
     }
     session_destroy();
-    header('Location: pages/login.php');
+    header('Location: index.php');
     exit();
 }
 ?>
