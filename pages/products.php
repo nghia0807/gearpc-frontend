@@ -78,7 +78,7 @@ if (!empty($categoriesResponse['success']) && isset($categoriesResponse['data'][
 // Helper: Format currency
 function formatCurrency($amount)
 {
-    return number_format($amount, 0, ',', '.') . ' ₫';
+    return '$' . number_format($amount, 2);
 }
 
 // Helper: Calculate discount percentage
