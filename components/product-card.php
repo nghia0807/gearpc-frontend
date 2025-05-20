@@ -6,6 +6,7 @@
 if (!isset($product) || empty($product)) {
     return;
 }
+
 ?>
 <style>
     .product-card {
@@ -165,10 +166,6 @@ if (!isset($product) || empty($product)) {
                     <span class="product-price-current"><?= formatCurrency($product['currentPrice']) ?></span>
                     <?php if (!empty($product['originalPrice']) && $product['originalPrice'] > $product['currentPrice']): ?>
                         <span class="product-price-original"><?= formatCurrency($product['originalPrice']) ?></span>
-                        <?php $discount = calculateDiscount($product['originalPrice'], $product['currentPrice']); ?>
-                        <?php if ($discount > 0): ?>
-                            <span class="discount-badge">-<?= $discount ?>%</span>
-                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
                 <div class="product-description">

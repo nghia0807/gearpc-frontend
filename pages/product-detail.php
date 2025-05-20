@@ -82,7 +82,7 @@ if (!empty($product['productInfo']['code'])) {
 // Helper: Format currency
 function formatCurrency($amount)
 {
-    return number_format($amount, 0, ',', '.') . ' ₫';
+    return '$' . number_format($amount, 2);
 }
 
 // Helper: Get product images (main + detail)

@@ -12,6 +12,8 @@ $allowedPages = [
     'cart' => 'pages/cart.php',
     'products' => 'pages/products.php',
     'product-detail' => 'pages/product-detail.php',
+    'news' => 'pages/news.php',
+
     // Add more pages here as needed
 ];
 
