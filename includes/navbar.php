@@ -122,12 +122,11 @@
               style="color: yellow !important; font-size: 14px; font-weight: bold;">
               Best Seller
             </a>
-          </li>
-          <li class="nav-item">
+          </li>          <li class="nav-item">
             <a class="nav-link" href="#">PC Builder</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">News</a>
+            <a class="nav-link" href="index.php?page=news">News</a>
           </li>
         </ul>
         <ul class="navbar-nav ms-auto mb-0">
