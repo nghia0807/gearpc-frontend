@@ -303,55 +303,84 @@ $totalPages = ceil($totalCount / $pageSize);
             <!-- Replace the "Load More" button with pagination -->
             <?php if ($totalCount > 0): ?>
                 <div class="card-footer bg-white py-3">
-                    <nav aria-label="Gift pagination">
-                        <ul class="pagination justify-content-center mb-0">
-                            <!-- Previous page button -->
+                    <nav aria-label="Gift pagination" class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <ul class="pagination mb-0">
+                            <!-- First page button -->
                             <li class="page-item <?= ($pageIndex <= 0) ? 'disabled' : '' ?>">
-                                <a class="page-link" href="?page=<?= max(0, $pageIndex - 1) ?>" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
+                                <a class="page-link" href="?page=0" aria-label="First">
+                                    <i class="fas fa-angle-double-left"></i>
                                 </a>
                             </li>
                             
-                            <!-- First page -->
-                            <?php if ($pageIndex > 2): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=0">1</a>
-                                </li>
-                                <?php if ($pageIndex > 3): ?>
-                                    <li class="page-item disabled">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                <?php endif; ?>
-                            <?php endif; ?>
+                            <!-- Previous page button -->
+                            <li class="page-item <?= ($pageIndex <= 0) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= max(0, $pageIndex - 1) ?>" aria-label="Previous">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
                             
-                            <!-- Surrounding pages -->
-                            <?php for ($i = max(0, $pageIndex - 1); $i <= min($pageIndex + 1, $totalPages - 1); $i++): ?>
+                            <!-- Page numbers -->
+                            <?php 
+                            $startPage = max(0, min($pageIndex - 2, $totalPages - 5));
+                            $endPage = min($startPage + 4, $totalPages - 1);
+                            if ($endPage - $startPage < 4) {
+                                $startPage = max(0, $endPage - 4);
+                            }
+                            ?>
+                            
+                            <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
                                 <li class="page-item <?= ($i == $pageIndex) ? 'active' : '' ?>">
                                     <a class="page-link" href="?page=<?= $i ?>"><?= $i + 1 ?></a>
                                 </li>
                             <?php endfor; ?>
                             
-                            <!-- Last pages -->
-                            <?php if ($pageIndex < $totalPages - 3): ?>
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                            <?php endif; ?>
-                            <?php if ($pageIndex < $totalPages - 2 && $totalPages > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?= $totalPages - 1 ?>"><?= $totalPages ?></a>
-                                </li>
-                            <?php endif; ?>
-                            
                             <!-- Next page button -->
                             <li class="page-item <?= ($pageIndex >= $totalPages - 1) ? 'disabled' : '' ?>">
                                 <a class="page-link" href="?page=<?= min($totalPages - 1, $pageIndex + 1) ?>" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            
+                            <!-- Last page button -->
+                            <li class="page-item <?= ($pageIndex >= $totalPages - 1) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= $totalPages - 1 ?>" aria-label="Last">
+                                    <i class="fas fa-angle-double-right"></i>
                                 </a>
                             </li>
                         </ul>
+
+                        <!-- Page jump form -->
+                        <form class="d-flex align-items-center gap-2" onsubmit="return window.jumpToPage(event)">
+                            <div class="input-group" style="width: auto;">
+                                <input type="number" class="form-control" id="jumpToPage" 
+                                    min="1" max="<?= $totalPages ?>" 
+                                    placeholder="Page..." 
+                                    style="width: 80px;">
+                                <button class="btn btn-outline-secondary" type="submit">Go</button>
+                            </div>
+                            <span class="text-muted">of <?= $totalPages ?></span>
+                        </form>
                     </nav>
                 </div>
+                
+                <!-- Define the jumpToPage function globally -->
+                <script>
+                    // Make sure jumpToPage is defined in the global scope
+                    window.jumpToPage = function(e) {
+                        e.preventDefault();
+                        const input = document.getElementById('jumpToPage');
+                        const page = parseInt(input.value) - 1;
+                        const maxPage = <?= $totalPages - 1 ?>;
+                        
+                        if (isNaN(page) || page < 0 || page > maxPage) {
+                            alert(`Please enter a valid page number between 1 and ${maxPage + 1}`);
+                            return false;
+                        }
+                        
+                        window.location.href = `?page=${page}`;
+                        return false;
+                    };
+                </script>
             <?php endif; ?>
         </div>
     </div>
