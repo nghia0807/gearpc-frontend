@@ -6,7 +6,7 @@ require_once __DIR__ . '/../components/cart-item.php';
 $token = $_SESSION['token'] ?? null;
 
 if (!$token) {
-    echo "You are not logged in.";
+    header('Location: not-logged-in.php');
     exit;
 }
 
