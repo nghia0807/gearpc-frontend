@@ -115,7 +115,7 @@ $icons = [
                                 continue;
                             $iconClass = $icons[$cat['name']] ?? 'fas fa-folder';
                             ?>
-                            <a href="index.php?page=category&name=<?= urlencode($cat['name']) ?>"
+                            <a href="index.php?page=products&category=<?= urlencode($cat['code'] ?? $cat['name']) ?>"
                                 class="list-group-item list-group-item-action">
                                 <i class="<?= $iconClass ?>"></i> <?= htmlspecialchars($cat['name']) ?>
                             </a>

@@ -343,13 +343,6 @@ if ($categoryCode) {
 
 <body>
     <div class="container py-4">
-        <h1 class="page-title">
-            <?php if ($activeCategoryName): ?>
-                <span><?= htmlspecialchars($activeCategoryName) ?></span>
-            <?php elseif ($searchQuery): ?>
-                <span>Search Results for: "<?= htmlspecialchars($searchQuery) ?>"</span>
-            <?php endif; ?>
-        </h1>
         <div class="row">
             <div class="col-12 mb-4">
                 <div class="filters-container">

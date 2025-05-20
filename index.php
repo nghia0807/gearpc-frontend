@@ -50,6 +50,24 @@ $pageContent = preg_replace('/<head>.*?<\/head>/is', '', $pageContent);
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Sticky footer styles -->
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .main-content {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+        }
+    </style>
     <!-- Page-specific styles -->
     <?php echo $inlineStyles; ?>
 </head>
