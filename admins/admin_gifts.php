@@ -96,6 +96,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_gift'])) {
     }
 }
 
+// Handle delete gift POST (single or multiple)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_gift'])) {
+    $codes = [];
+    if (!empty($_POST['delete_code'])) {
+        // Single delete
+        $codes[] = trim($_POST['delete_code']);
+    } elseif (!empty($_POST['delete_codes'])) {
+        // Multiple delete (from JS)
+        $codes = json_decode($_POST['delete_codes'], true);
+        if (!is_array($codes)) $codes = [];
+    }
+    if (!empty($codes)) {
+        $ch = curl_init('http://localhost:5000/api/gifts/delete');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: Bearer $token",
+            "Content-Type: application/json"
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($codes));
+        $response = curl_exec($ch);
+        $err = curl_error($ch);
+        curl_close($ch);
+        $resDelete = $err ? ['success' => false, 'message' => $err] : json_decode($response, true);
+
+        if (!empty($resDelete['success'])) {
+            $alerts[] = ['type' => 'success', 'msg' => 'Gift deleted successfully.'];
+        } else {
+            $alerts[] = ['type' => 'danger', 'msg' => $resDelete['message'] ?? 'Unable to delete gift.'];
+        }
+    }
+}
+
 function apiRequest($url, $token) {
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -338,11 +371,66 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
             color: #6c757d;
             font-size: 0.9rem;
         }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(13, 110, 253, 0.2);
+            border-top: 5px solid #0d6efd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
 <div class="container">
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <p class="text-primary mb-0 fw-bold">Loading...</p>
+        </div>
+    </div>
+    
     <div class="main-card">
         <?php renderToasts(null, 1080, 3500); ?>
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
@@ -392,16 +480,19 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                                 <?php endif; ?>
                             </td>
                             <td class="text-center">
-                                <button 
-                                    class="btn btn-sm action-btn edit editGiftBtn"
-                                    data-id="<?= htmlspecialchars($gift['id']) ?>"
-                                    data-code="<?= htmlspecialchars($gift['code']) ?>"
-                                    data-name="<?= htmlspecialchars($gift['name']) ?>"
-                                    data-image="<?= htmlspecialchars($gift['image']) ?>"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editGiftModal"
-                                    ><i class="fa fa-pen"></i> Edit
-                                </button>
+                                <div class="d-flex justify-content-center gap-1">
+                                    <button 
+                                        class="btn btn-sm action-btn edit editGiftBtn"
+                                        data-id="<?= htmlspecialchars($gift['id']) ?>"
+                                        data-code="<?= htmlspecialchars($gift['code']) ?>"
+                                        data-name="<?= htmlspecialchars($gift['name']) ?>"
+                                        data-image="<?= htmlspecialchars($gift['image']) ?>"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editGiftModal"
+                                        title="Edit Gift"
+                                        ><i class="fa fa-pen"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -514,6 +605,17 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Loading overlay functionality
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    function showLoading() {
+        loadingOverlay.classList.add('active');
+    }
+    
+    function hideLoading() {
+        loadingOverlay.classList.remove('active');
+    }
+
     // --- Edit modal logic ---
     document.querySelectorAll('.editGiftBtn').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -566,7 +668,26 @@ document.addEventListener('DOMContentLoaded', function () {
             .map(cb => cb.getAttribute('data-code'));
         if (codes.length === 0) return;
         if (!confirm('Are you sure you want to delete the selected gifts?')) return;
-        deleteGiftsByCodes(codes);
+        
+        // Show loading before submitting
+        showLoading();
+        
+        // Submit via hidden form (POST)
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.style.display = 'none';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'delete_codes';
+        input.value = JSON.stringify(codes);
+        form.appendChild(input);
+        const input2 = document.createElement('input');
+        input2.type = 'hidden';
+        input2.name = 'delete_gift';
+        input2.value = '1';
+        form.appendChild(input2);
+        document.body.appendChild(form);
+        form.submit();
     });
 
     // --- Single delete logic ---
@@ -575,34 +696,37 @@ document.addEventListener('DOMContentLoaded', function () {
             const code = this.getAttribute('data-code');
             if (!code) return;
             if (!confirm('Are you sure you want to delete this gift?')) return;
-            deleteGiftsByCodes([code]);
+            
+            // Show loading before submitting
+            showLoading();
+            
+            // Submit via hidden form (POST)
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.style.display = 'none';
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'delete_code';
+            input.value = code;
+            form.appendChild(input);
+            const input2 = document.createElement('input');
+            input2.type = 'hidden';
+            input2.name = 'delete_gift';
+            input2.value = '1';
+            form.appendChild(input2);
+            document.body.appendChild(form);
+            form.submit();
         });
     });
-
-    function deleteGiftsByCodes(codes) {
-        btnDeleteSelectedGifts.disabled = true;
-        fetch('http://localhost:5000/api/gifts/delete', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer <?= htmlspecialchars($token) ?>'
-            },
-            body: JSON.stringify(codes)
-        })
-        .then(async resp => {
-            let data;
-            try { data = await resp.json(); } catch { data = {}; }
-            if (!resp.ok || !data.success) {
-                throw new Error(data.message || 'Xóa quà tặng thất bại');
-            }
-            alert(data.message || 'Xóa quà tặng thành công!');
-            setTimeout(() => { window.location.reload(); }, 1000);
-        })
-        .catch(err => {
-            alert(err.message || 'Lỗi xóa quà tặng');
-            btnDeleteSelectedGifts.disabled = false;
+    
+    // Add form submission handlers for loading indicator
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function() {
+            // Don't show loading for forms that aren't submitting to API
+            if (this.getAttribute('data-no-loading') === 'true') return;
+            showLoading();
         });
-    }
+    });
 
     // Show all toasts on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -612,6 +736,9 @@ document.addEventListener('DOMContentLoaded', function () {
             toast.show();
         });
     });
+    
+    // Hide loading overlay when page is fully loaded
+    window.addEventListener('load', hideLoading);
 });
 </script>
 <?php initializeToasts(); ?>

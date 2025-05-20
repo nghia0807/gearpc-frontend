@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_brand'])) {
     $name = trim($_POST['name'] ?? '');
     $imageBase64 = trim($_POST['imageBase64'] ?? '');
     if ($code === '' || $name === '') {
-        $alerts[] = ['type' => 'danger', 'msg' => 'Mã và tên thương hiệu không được để trống.'];
+        $alerts[] = ['type' => 'danger', 'msg' => 'Brand code and name cannot be empty.'];
     } else {
         $res = apiRequest('POST', "$apiBase/add", $token, [
             'code' => $code,
@@ -59,9 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_brand'])) {
             'imageBase64' => $imageBase64
         ]);
         if (!empty($res['success'])) {
-            $alerts[] = ['type' => 'success', 'msg' => 'Thêm thương hiệu thành công.'];
+            $alerts[] = ['type' => 'success', 'msg' => 'Brand added successfully.'];
         } else {
-            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Không thể thêm thương hiệu.'];
+            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to add brand.'];
         }
     }
 }
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_brand'])) {
     $name = trim($_POST['edit_name'] ?? '');
     $imageBase64 = trim($_POST['edit_imageBase64'] ?? '');
     if ($id === '' || $name === '') {
-        $alerts[] = ['type' => 'danger', 'msg' => 'Tên thương hiệu không được để trống.'];
+        $alerts[] = ['type' => 'danger', 'msg' => 'Brand name cannot be empty.'];
     } else {
         $res = apiRequest('PUT', "$apiBase/update", $token, [
             'id' => $id,
@@ -80,9 +80,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_brand'])) {
             'imageBase64' => $imageBase64
         ]);
         if (!empty($res['success'])) {
-            $alerts[] = ['type' => 'success', 'msg' => 'Cập nhật thương hiệu thành công.'];
+            $alerts[] = ['type' => 'success', 'msg' => 'Brand updated successfully.'];
         } else {
-            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Không thể cập nhật thương hiệu.'];
+            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to update brand.'];
         }
     }
 }
@@ -101,9 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_brand'])) {
     if (!empty($codes)) {
         $res = apiRequest('DELETE', "$apiBase/delete", $token, $codes);
         if (!empty($res['success'])) {
-            $alerts[] = ['type' => 'success', 'msg' => 'Xóa thương hiệu thành công.'];
+            $alerts[] = ['type' => 'success', 'msg' => 'Brand deleted successfully.'];
         } else {
-            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Không thể xóa thương hiệu.'];
+            $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to delete brand.'];
         }
     }
 }
@@ -114,7 +114,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
     $brands = $res['data']['data'];
     $totalCount = $res['data']['totalCount'];
 } else {
-    $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Không thể tải thương hiệu.'];
+    $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to load brands.'];
 }
 
 // Helper: image placeholder
@@ -352,11 +352,66 @@ function brandImage($img) {
             color: #6c757d;
             font-size: 0.9rem;
         }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(13, 110, 253, 0.2);
+            border-top: 5px solid #0d6efd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
 <div class="container">
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <p class="text-primary mb-0 fw-bold">Loading...</p>
+        </div>
+    </div>
+
     <div class="main-card">
         <?php renderToasts(null, 1080, 3500); ?>
         
@@ -411,7 +466,7 @@ function brandImage($img) {
                                     data-code="<?= htmlspecialchars($brand['code']) ?>"
                                     data-name="<?= htmlspecialchars($brand['name']) ?>"
                                     data-image="<?= htmlspecialchars($brand['image']) ?>"
-                                    ><i class="fa fa-pen"></i> Edit
+                                    ><i class="fa fa-pen"></i>
                             </button>
                         </td>
                         </tr>
@@ -529,6 +584,20 @@ function brandImage($img) {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+// Loading overlay functionality
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+function showLoading() {
+    loadingOverlay.classList.add('active');
+}
+
+function hideLoading() {
+    loadingOverlay.classList.remove('active');
+}
+
+// Hide loading overlay when page is fully loaded
+window.addEventListener('load', hideLoading);
+
 // Add Brand: convert image to base64
 document.getElementById('image').addEventListener('change', function(e) {
     const file = e.target.files[0];
@@ -613,6 +682,10 @@ btnDeleteSelectedBrands.addEventListener('click', function() {
         .map(cb => cb.getAttribute('data-code'));
     if (codes.length === 0) return;
     if (!confirm('Are you sure you want to delete the selected brands?')) return;
+    
+    // Show loading before submitting
+    showLoading();
+    
     // Submit via hidden form (POST)
     const form = document.createElement('form');
     form.method = 'POST';
@@ -631,7 +704,14 @@ btnDeleteSelectedBrands.addEventListener('click', function() {
     form.submit();
 });
 
-// Remove the original toast initialization code since we're now using the component's version
+// Add form submission handlers for loading indicator
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function() {
+        // Don't show loading for forms that aren't submitting to API
+        if (this.getAttribute('data-no-loading') === 'true') return;
+        showLoading();
+    });
+});
 </script>
 <?php initializeToasts(); ?>
 </body>

@@ -14,6 +14,16 @@ $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];
 
+// Process toast parameters from URL if present
+if (isset($_GET['toast_type']) && isset($_GET['toast_msg'])) {
+    $type = $_GET['toast_type'];
+    $msg = $_GET['toast_msg'];
+    // Only allow valid toast types
+    if (in_array($type, ['success', 'danger', 'warning', 'info'])) {
+        $alerts[] = ['type' => $type, 'msg' => $msg];
+    }
+}
+
 // Toast component
 include '../components/toasts.php';
 
@@ -63,6 +73,7 @@ function fetchAll($url, $token) {
 }
 $brandsList = fetchAll('http://localhost:5000/api/brands/get', $token);
 $categoriesList = fetchAll('http://localhost:5000/api/categories/get', $token);
+$giftsList = fetchAll('http://localhost:5000/api/gifts/get', $token);
 
 // --- Fetch products for current page ---
 $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $totalCount);
@@ -421,9 +432,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                                     <button type="button" class="btn btn-sm action-btn view btn-view-product" data-id="<?= htmlspecialchars($product['id']) ?>" title="View Details">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
-                                    <button type="button" class="btn btn-sm action-btn edit" disabled title="Edit Product">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
+                                    <!-- Remove the edit button here -->
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -537,9 +546,31 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
               <h6 class="mb-0"><i class="fa-solid fa-gift me-2"></i>Gift Items</h6>
             </div>
             <div class="card-body pb-3 pt-3">
-              <label class="form-label fw-semibold text-warning">Gift Codes</label>
-              <input type="text" class="form-control" name="giftCodes" placeholder="e.g. GIFT001,GIFT002,GIFT003">
-              <div class="form-text">Enter comma-separated gift codes to include with this product</div>
+              <label class="form-label fw-semibold text-warning">Select Gifts</label>
+              <div class="border rounded p-3 bg-light">
+                <div class="row">
+                  <?php if (empty($giftsList)): ?>
+                    <div class="col-12">
+                      <div class="text-muted">No gifts available</div>
+                    </div>
+                  <?php else: ?>
+                    <?php foreach ($giftsList as $gift): ?>
+                      <div class="col-md-4 mb-2">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="giftCodes[]" value="<?= htmlspecialchars($gift['code']) ?>" id="gift_<?= htmlspecialchars($gift['code']) ?>">
+                          <label class="form-check-label" for="gift_<?= htmlspecialchars($gift['code']) ?>">
+                            <?= htmlspecialchars($gift['name']) ?>
+                            <?php if (!empty($gift['imageUrl'])): ?>
+                              <img src="<?= htmlspecialchars($gift['imageUrl']) ?>" alt="<?= htmlspecialchars($gift['name']) ?>" style="width:24px;height:24px;object-fit:cover;border-radius:3px;margin-left:5px;">
+                            <?php endif; ?>
+                          </label>
+                        </div>
+                      </div>
+                    <?php endforeach; ?>
+                  <?php endif; ?>
+                </div>
+              </div>
+              <div class="form-text">Select gifts to include with this product</div>
             </div>
           </div>
           
@@ -585,6 +616,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
         <div id="viewProductModalContent" class="text-muted">
           Loading product information...
         </div>
+        <div id="viewProductAlert" class="mt-3"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -593,8 +625,53 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
   </div>
 </div>
 
+<!-- Gift Edit Modal -->
+<div class="modal fade" id="editGiftsModal" tabindex="-1" aria-labelledby="editGiftsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning bg-opacity-75 text-dark">
+        <h5 class="modal-title" id="editGiftsModalLabel">
+          <i class="fa-solid fa-gift me-2"></i>Edit Product Gifts
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="editGiftsAlert"></div>
+        <form id="editGiftsForm">
+          <input type="hidden" id="editGiftsProductCode">
+          <div class="border rounded p-3 bg-light">
+            <div class="row" id="editGiftsCheckboxes">
+              <!-- Checkboxes will be inserted here -->
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" id="saveGiftsBtn">
+          <i class="fa-solid fa-save me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+// Helper function to convert file to base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            reject(new Error("No file provided"));
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-view-product').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -623,18 +700,20 @@ document.addEventListener('DOMContentLoaded', function () {
     checkboxes.forEach(cb => {
         cb.addEventListener('change', function() {
             updateDeleteSelectedBtn();
-            if (!this.checked && selectAll.checked) selectAll.checked = false;
+            if (!this.checked && selectAll && selectAll.checked) selectAll.checked = false;
         });
     });
 
-    btnDeleteSelected.addEventListener('click', function() {
-        const codes = Array.from(checkboxes)
-            .filter(cb => cb.checked)
-            .map(cb => cb.getAttribute('data-code'));
-        if (codes.length === 0) return;
-        if (!confirm('Are you sure you want to delete the selected products?')) return;
-        deleteProductsByCodes(codes);
-    });
+    if (btnDeleteSelected) {
+        btnDeleteSelected.addEventListener('click', function() {
+            const codes = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.getAttribute('data-code'));
+            if (codes.length === 0) return;
+            if (!confirm('Are you sure you want to delete the selected products?')) return;
+            deleteProductsByCodes(codes);
+        });
+    }
 
     // --- Single delete logic ---
     document.querySelectorAll('.btn-delete-product').forEach(function(btn) {
@@ -646,13 +725,31 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    function showJsAlert(type, msg) {
-        jsAlertContainer.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-        setTimeout(() => { jsAlertContainer.innerHTML = ''; }, 3500);
+    // Replace showJsAlert function with function that redirects with toast parameters
+    function showToastAndReload(type, msg) {
+        // Encode the toast parameters in the URL
+        const redirectUrl = new URL(window.location.href);
+        redirectUrl.searchParams.set('toast_type', type);
+        redirectUrl.searchParams.set('toast_msg', msg);
+        
+        // Preserve existing page parameter if present
+        if (window.location.search.includes('page=')) {
+            const pageMatch = window.location.search.match(/page=(\d+)/);
+            if (pageMatch && pageMatch[1]) {
+                redirectUrl.searchParams.set('page', pageMatch[1]);
+            }
+        }
+        
+        // Redirect to show the toast
+        window.location.href = redirectUrl.toString();
     }
 
     function deleteProductsByCodes(codes) {
+        // Store the original button state
+        const originalBtnText = btnDeleteSelected.innerHTML;
         btnDeleteSelected.disabled = true;
+        btnDeleteSelected.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Deleting...';
+        
         fetch('http://localhost:5000/api/products/delete', {
             method: 'DELETE',
             headers: {
@@ -665,15 +762,15 @@ document.addEventListener('DOMContentLoaded', function () {
             let data;
             try { data = await resp.json(); } catch { data = {}; }
             if (!resp.ok || !data.success) {
-                throw new Error(data.message || 'Xóa sản phẩm thất bại');
+                throw new Error(data.message || 'Product deletion failed');
             }
-            showJsAlert('success', data.message || 'Xóa sản phẩm thành công!');
-            // Reload page after short delay
-            setTimeout(() => { window.location.reload(); }, 1200);
+            showToastAndReload('success', data.message || 'Product(s) deleted successfully');
         })
         .catch(err => {
-            showJsAlert('danger', err.message || 'Lỗi xóa sản phẩm');
+            // Restore button state on error
             btnDeleteSelected.disabled = false;
+            btnDeleteSelected.innerHTML = originalBtnText;
+            showToastAndReload('danger', err.message || 'Unable to delete product(s)');
         });
     }
 
@@ -910,6 +1007,13 @@ document.addEventListener('DOMContentLoaded', function () {
     addProductForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         addProductAlert.innerHTML = '';
+        
+        // Get the submit button and set loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding...';
+        
         // ...existing code for main fields...
         const form = e.target;
         const name = form.name.value.trim();
@@ -917,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const status = form.status.value;
         const brandCode = form.brandCode.value;
         const categoriesCode = Array.from(form.querySelectorAll('input[name="categoriesCode[]"]:checked')).map(cb => cb.value);
-        const giftCodes = form.giftCodes.value.split(',').map(s => s.trim()).filter(Boolean);
+        const giftCodes = Array.from(form.querySelectorAll('input[name="giftCodes[]"]:checked')).map(cb => cb.value);
 
         // Main image
         const imageFile = form.image.files[0];
@@ -1023,34 +1127,63 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Failed to parse JSON:', err, text);
             }
             if (!resp.ok || !data.success) {
-                throw new Error(data.message || 'Thêm sản phẩm thất bại');
+                // Restore button state on error
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                throw new Error(data.message || 'Failed to add product');
             }
-            addProductAlert.innerHTML = '<div class="alert alert-success">Thêm sản phẩm thành công!</div>';
-            setTimeout(() => { addProductModal.hide(); window.location.reload(); }, 1200);
+            // Show toast and reload page
+            showToastAndReload('success', 'Product added successfully');
         } catch (err) {
-            addProductAlert.innerHTML = `<div class="alert alert-danger">${err.message || 'Lỗi thêm sản phẩm'}</div>`;
+            // Restore button state on error if not already handled
+            if (submitBtn.disabled) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+            showToastAndReload('danger', err.message || 'Unable to add product');
         }
     });
 
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(',')[1] || '');
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
+    // --- Single delete logic ---
+    document.querySelectorAll('.btn-delete-product').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const code = this.getAttribute('data-code');
+            if (!code) return;
+            if (!confirm('Are you sure you want to delete this product?')) return;
+            deleteProductsByCodes([code]);
         });
+    });
+
+    function showToastAndReload(type, msg) {
+        // Encode the toast parameters in the URL
+        const redirectUrl = new URL(window.location.href);
+        redirectUrl.searchParams.set('toast_type', type);
+        redirectUrl.searchParams.set('toast_msg', msg);
+        
+        // Preserve existing page parameter if present
+        if (window.location.search.includes('page=')) {
+            const pageMatch = window.location.search.match(/page=(\d+)/);
+            if (pageMatch && pageMatch[1]) {
+                redirectUrl.searchParams.set('page', pageMatch[1]);
+            }
+        }
+        
+        // Redirect to show the toast
+        window.location.href = redirectUrl.toString();
     }
 
     function showProductDetail(productId) {
         const modal = new bootstrap.Modal(document.getElementById('viewProductModal'));
         const contentDiv = document.getElementById('viewProductModalContent');
+        const alertDiv = document.getElementById('viewProductAlert');
+        alertDiv.innerHTML = '';
         contentDiv.innerHTML = '<div class="text-muted">Loading product information...</div>';
         modal.show();
 
         fetch('http://localhost:5000/api/products/' + encodeURIComponent(productId), {
             method: 'GET',
             headers: {
-                'Authorization': 'Bearer <?= htmlspecialchars($token) ?>',
+                'Authorization': `Bearer <?= htmlspecialchars($token) ?>`,
                 'Accept': 'application/json'
             },
             credentials: 'same-origin'
@@ -1065,6 +1198,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             contentDiv.innerHTML = renderProductDetail(data.data);
+            // Setup inline editing handlers after rendering the content
+            setupInlineEditHandlers(data.data);
         })
         .catch(err => {
             contentDiv.innerHTML = '<div class="alert alert-danger">Server connection error, please try again.</div>';
@@ -1126,6 +1261,10 @@ document.addEventListener('DOMContentLoaded', function () {
             optionList += '</div>';
         }
 
+        // Extract gift codes for edit functionality
+        const giftCodes = gifts.map(g => g.code || '').filter(Boolean);
+        let giftCodesJson = JSON.stringify(giftCodes);
+
         let giftList = '';
         if (!gifts || gifts.length === 0) {
             giftList = '<div class="text-muted">No gifts</div>';
@@ -1140,21 +1279,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         let priceHtml = `<div class="row g-2">
-            <div class="col-6">
+            <div class="col-md-6">
                 <span class="modal-product-label fw-bold">Original Price:</span>
-                <span class="text-secondary">${formatPrice(price.originalPrice)}₫</span>
+                <span class="text-secondary">${formatPrice(price.originalPrice)}</span><span class="text-secondary">₫</span>
             </div>
-            <div class="col-6">
+            <div class="col-md-6">
                 <span class="modal-product-label fw-bold">Current Price:</span>
-                <span class="text-success">${formatPrice(price.currentPrice)}₫</span>
-            </div>
-            <div class="col-6">
-                <span class="modal-product-label fw-bold">Discount Price:</span>
-                <span class="text-danger">${formatPrice(price.discountPrice)}₫</span>
-            </div>
-            <div class="col-6">
-                <span class="modal-product-label fw-bold">Discount:</span>
-                <span class="text-warning">${price.discountPercentage ? esc(price.discountPercentage + '%') : '0%'}</span>
+                <span class="text-success">${formatPrice(price.currentPrice)}</span><span class="text-success">₫</span>
             </div>
         </div>`;
 
@@ -1170,20 +1301,67 @@ document.addEventListener('DOMContentLoaded', function () {
                         <div class="mb-2">
                             <span class="modal-product-label fw-bold text-primary">ID:</span> ${esc(info.id)}<br>
                             <span class="modal-product-label fw-bold text-primary">Product Code:</span> ${esc(info.code)}<br>
-                            <span class="modal-product-label fw-bold text-primary">Name:</span> ${esc(info.name)}<br>
+                            <span class="modal-product-label fw-bold text-primary">Name:</span> 
+                            <span id="productName-display">${esc(info.name)}</span>
+                            <button class="btn btn-sm edit-btn p-1" data-field="productName" data-value="${esc(info.name)}" data-code="${esc(info.code)}" title="Edit Product Name">
+                                <i class="fa-solid fa-pen text-warning"></i>
+                            </button><br>
                             <span class="modal-product-label fw-bold text-primary">Status:</span> ${esc(info.status)}<br>
                             <span class="modal-product-label fw-bold text-primary">Categories:</span> ${categories}<br>
-                            <span class="modal-product-label fw-bold text-primary">Brand:</span> ${esc(info.brand)}
+                            <span class="modal-product-label fw-bold text-primary">Brand:</span> 
+                            <span id="productBrand-display">${esc(info.brand)}</span>
+                            <button class="btn btn-sm edit-btn p-1" data-field="productBrand" data-value="${esc(info.brandCode || '')}" data-code="${esc(info.code)}" title="Edit Product Brand">
+                                <i class="fa-solid fa-pen text-warning"></i>
+                            </button>
                         </div>
                         <div class="mb-2">${priceHtml}</div>
                         <div class="mb-2">
-                            <span class="modal-product-label fw-bold text-primary">Short Description:</span> ${esc(detail.shortDescription)}
+                            <span class="modal-product-label fw-bold text-primary">Short Description:</span> 
+                            ${esc(detail.shortDescription || '')}
                         </div>
                         ${descList}
                         ${optionList}
                         <div class="mb-2">
-                            <span class="modal-product-label fw-bold text-primary">Gifts:</span><br>
-                            ${giftList}
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="modal-product-label fw-bold text-primary">Gifts:</span>
+                                <button class="btn btn-sm btn-edit-gifts p-1" data-code="${esc(info.code)}" data-gift-codes='${giftCodesJson}' title="Edit Gifts">
+                                    <i class="fa-solid fa-pen text-warning"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success d-none btn-save-gifts" data-code="${esc(info.code)}">
+                                    <i class="fa-solid fa-check"></i> Save
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary d-none btn-cancel-gifts">
+                                    <i class="fa-solid fa-times"></i> Cancel
+                                </button>
+                            </div>
+                            <div id="giftsViewMode">
+                                ${giftList}
+                            </div>
+                            <div id="giftsEditMode" class="d-none">
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="row" id="editGiftsCheckboxes">
+                                        <?php foreach ($giftsList as $gift): ?>
+                                        <div class="col-md-4 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input gift-checkbox" type="checkbox" 
+                                                    name="giftCodes[]" 
+                                                    value="<?= htmlspecialchars($gift['code']) ?>" 
+                                                    id="edit_gift_<?= htmlspecialchars($gift['code']) ?>">
+                                                <label class="form-check-label" for="edit_gift_<?= htmlspecialchars($gift['code']) ?>">
+                                                    <?= htmlspecialchars($gift['name']) ?>
+                                                    <?php if (!empty($gift['imageUrl'])): ?>
+                                                        <img src="<?= htmlspecialchars($gift['imageUrl']) ?>" 
+                                                             alt="<?= htmlspecialchars($gift['name']) ?>" 
+                                                             style="width:24px;height:24px;object-fit:cover;border-radius:3px;margin-left:5px;">
+                                                    <?php endif; ?>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="giftsAlert" class="mt-2"></div>
                         </div>
                         <div class="modal-product-meta small text-muted">
                             <span class="modal-product-label fw-bold">Created:</span> ${createdDate}<br>
@@ -1194,6 +1372,345 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         </div>
         `;
+    }
+
+    function setupInlineEditHandlers(productData) {
+        const info = productData.productInfo || {};
+        
+        // Add event listeners for edit buttons
+        document.querySelector('.btn-edit-gifts')?.addEventListener('click', function() {
+            const code = this.getAttribute('data-code');
+            const giftCodes = JSON.parse(this.getAttribute('data-gift-codes') || '[]');
+            showGiftsEditForm(code, giftCodes);
+        });
+        
+        // Add event listeners for other edit buttons (if any)
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const field = this.getAttribute('data-field');
+                const value = this.getAttribute('data-value');
+                const code = this.getAttribute('data-code') || info.code;
+                
+                if (field === 'productName') {
+                    showInlineEditForm(field, 'text', value, code);
+                } else if (field === 'productBrand') {
+                    showBrandEditForm(field, value, code);
+                }
+            });
+        });
+    }
+
+    function showInlineEditForm(field, type, value, code) {
+        const displayElement = document.getElementById(`${field}-display`);
+        const editButton = document.querySelector(`.edit-btn[data-field="${field}"]`);
+        if (!displayElement) return;
+        
+        // Hide edit button
+        if (editButton) editButton.classList.add('d-none');
+        
+        // Create edit form
+        const inputHtml = `<input type="text" class="form-control form-control-sm" id="${field}-input" value="${value}">`;
+
+        // Create form with save and cancel buttons
+        const formHtml = `
+            <div class="inline-edit-form">
+                ${inputHtml}
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-success save-inline-edit" data-field="${field}" data-code="${code}">
+                        <i class="fa-solid fa-check"></i> Save
+                    </button>
+                    <button class="btn btn-sm btn-secondary cancel-inline-edit" data-field="${field}">
+                        <i class="fa-solid fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Store original content and replace with form
+        displayElement.dataset.originalContent = displayElement.innerHTML;
+        displayElement.innerHTML = formHtml;
+        
+        // Focus the input
+        const input = document.getElementById(`${field}-input`);
+        if (input) input.focus();
+        
+        // Add event listeners for save and cancel buttons
+        document.querySelector(`.save-inline-edit[data-field="${field}"]`)?.addEventListener('click', function() {
+            const newValue = input.value;
+            saveInlineEdit(field, newValue, code);
+        });
+        
+        document.querySelector(`.cancel-inline-edit[data-field="${field}"]`)?.addEventListener('click', function() {
+            cancelInlineEdit(field);
+        });
+    }
+
+    function saveInlineEdit(field, value, code) {
+        const displayElement = document.getElementById(`${field}-display`);
+        const alertDiv = document.getElementById('viewProductAlert');
+        alertDiv.innerHTML = '';
+        
+        // Only support productName field editing
+        if (field !== 'productName') {
+            showToastAndReload('danger', 'Only product name can be edited');
+            cancelInlineEdit(field);
+            return;
+        }
+        
+        const endpoint = `http://localhost:5000/api/products/updateProductName?productCode=${encodeURIComponent(code)}`;
+        const body = { name: value };
+        
+        // Show loading state
+        displayElement.innerHTML = `<span class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> Updating...</span>`;
+        
+        fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer <?= htmlspecialchars($token) ?>'
+            },
+            body: JSON.stringify(body)
+        })
+        .then(async response => {
+            const text = await response.text();
+            let data = {};
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch (err) {
+                console.error('Failed to parse JSON:', err, text);
+                throw new Error('Invalid server response');
+            }
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || `Failed to update product name`);
+            }
+            
+            // Show success message via toast
+            showToastAndReload('success', 'Product name updated successfully!');
+        })
+        .catch(err => {
+            showToastAndReload('danger', err.message || 'Error updating product name');
+            cancelInlineEdit(field);
+        });
+    }
+
+    function cancelInlineEdit(field) {
+        const displayElement = document.getElementById(`${field}-display`);
+        const editButton = document.querySelector(`.edit-btn[data-field="${field}"]`);
+        if (displayElement && displayElement.dataset.originalContent) {
+            displayElement.innerHTML = displayElement.dataset.originalContent;
+            // Show edit button again
+            if (editButton) editButton.classList.remove('d-none');
+        }
+    }
+
+    function showBrandEditForm(field, currentBrandCode, productCode) {
+        const displayElement = document.getElementById(`${field}-display`);
+        const editButton = document.querySelector(`.edit-btn[data-field="${field}"]`);
+        if (!displayElement) return;
+        
+        // Hide edit button
+        if (editButton) editButton.classList.add('d-none');
+        
+        // Create brand selection dropdown using the existing brandsList
+        let brandOptions = '';
+        <?php foreach ($brandsList as $brand): ?>
+        brandOptions += `<option value="<?= htmlspecialchars($brand['code']) ?>" ${currentBrandCode === '<?= htmlspecialchars($brand['code']) ?>' ? 'selected' : ''}>
+            <?= htmlspecialchars($brand['name']) ?>
+        </option>`;
+        <?php endforeach; ?>
+        
+        const formHtml = `
+            <div class="inline-edit-form">
+                <select class="form-select form-select-sm" id="${field}-input">
+                    <option value="">-- Select Brand --</option>
+                    ${brandOptions}
+                </select>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-success save-inline-edit" data-field="${field}" data-code="${productCode}">
+                        <i class="fa-solid fa-check"></i> Save
+                    </button>
+                    <button class="btn btn-sm btn-secondary cancel-inline-edit" data-field="${field}">
+                        <i class="fa-solid fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        displayElement.dataset.originalContent = displayElement.innerHTML;
+        displayElement.innerHTML = formHtml;
+        
+        const input = document.getElementById(`${field}-input`);
+        if (input) input.focus();
+        
+        document.querySelector(`.save-inline-edit[data-field="${field}"]`)?.addEventListener('click', function() {
+            const newValue = input.value;
+            saveBrandEdit(field, newValue, productCode);
+        });
+        
+        document.querySelector(`.cancel-inline-edit[data-field="${field}"]`)?.addEventListener('click', function() {
+            cancelInlineEdit(field);
+        });
+    }
+
+    function saveBrandEdit(field, brandCode, productCode) {
+        const displayElement = document.getElementById(`${field}-display`);
+        const alertDiv = document.getElementById('viewProductAlert');
+        alertDiv.innerHTML = '';
+        
+        if (!brandCode) {
+            alertDiv.innerHTML = '<div class="alert alert-danger">Please select a brand</div>';
+            return;
+        }
+        
+        displayElement.innerHTML = `<span class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> Updating...</span>`;
+        
+        fetch(`http://localhost:5000/api/products/updateProductBrand?productCode=${encodeURIComponent(productCode)}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer <?= htmlspecialchars($token) ?>'
+            },
+            body: JSON.stringify({ brandCode: brandCode })
+        })
+        .then(async response => {
+            const text = await response.text();
+            let data = {};
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                console.error('Failed to parse JSON:', err, text);
+                throw new Error('Invalid server response');
+            }
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Failed to update product brand');
+            }
+            
+            showToastAndReload('success', 'Product brand updated successfully!');
+        })
+        .catch(err => {
+            showToastAndReload('danger', err.message || 'Error updating product brand');
+            cancelInlineEdit(field);
+        });
+    }
+
+    function showGiftsEditForm(productCode, currentGiftCodes = []) {
+        // Hide edit button
+        const editButton = document.querySelector('.btn-edit-gifts');
+        if (editButton) editButton.classList.add('d-none');
+        
+        // Toggle visibility
+        document.querySelector('#giftsViewMode').classList.add('d-none');
+        document.querySelector('#giftsEditMode').classList.remove('d-none');
+        document.querySelector('.btn-save-gifts').classList.remove('d-none');
+        document.querySelector('.btn-cancel-gifts').classList.remove('d-none');
+        
+        // Clear previous alerts
+        document.getElementById('giftsAlert').innerHTML = '';
+        
+        // Check current gift codes
+        document.querySelectorAll('.gift-checkbox').forEach(cb => {
+            cb.checked = currentGiftCodes.includes(cb.value);
+        });
+
+        // Handle cancel
+        document.querySelector('.btn-cancel-gifts').onclick = function() {
+            document.querySelector('#giftsViewMode').classList.remove('d-none');
+            document.querySelector('#giftsEditMode').classList.add('d-none');
+            // Show edit button again
+            const editButton = document.querySelector('.btn-edit-gifts');
+            if (editButton) editButton.classList.remove('d-none');
+            document.querySelector('.btn-save-gifts').classList.add('d-none');
+            document.querySelector('.btn-cancel-gifts').classList.add('d-none');
+            document.getElementById('giftsAlert').innerHTML = '';
+        };
+
+        // Handle save
+        document.querySelector('.btn-save-gifts').onclick = function() {
+            saveProductGifts(productCode);
+        };
+    }
+
+    function saveProductGifts(productCode) {
+        const alertContainer = document.getElementById('giftsAlert');
+        const checkedGifts = Array.from(document.querySelectorAll('.gift-checkbox:checked')).map(cb => cb.value);
+        const saveBtn = document.querySelector('.btn-save-gifts');
+        const cancelBtn = document.querySelector('.btn-cancel-gifts');
+        const viewMode = document.querySelector('#giftsViewMode');
+        const editMode = document.querySelector('#giftsEditMode');
+        
+        // Disable buttons during submission
+        saveBtn.disabled = true;
+        cancelBtn.disabled = true;
+        
+        // Hide buttons and edit form, show view mode with updating message
+        saveBtn.classList.add('d-none');
+        cancelBtn.classList.add('d-none');
+        editMode.classList.add('d-none');
+        viewMode.classList.remove('d-none');
+        viewMode.innerHTML = `<span class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> Updating...</span>`;
+        
+        // Send the PUT request to update gifts
+        fetch(`http://localhost:5000/api/products/updateProductGift?productCode=${encodeURIComponent(productCode)}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer <?= htmlspecialchars($token) ?>'
+            },
+            body: JSON.stringify({ giftCodes: checkedGifts })
+        })
+        .then(async response => {
+            const text = await response.text();
+            let data = {};
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch (err) {
+                console.error('Failed to parse JSON:', err, text);
+                throw new Error('Invalid server response');
+            }
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Failed to update product gifts');
+            }
+            
+            // Show success and reload page
+            showToastAndReload('success', 'Product gifts updated successfully!');
+        })
+        .catch(err => {
+            // Re-enable buttons and show error
+            saveBtn.disabled = false;
+            cancelBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Save Changes';
+            alertContainer.innerHTML = `<div class="alert alert-danger">${err.message || 'Error updating product gifts'}</div>`;
+        });
+    }
+
+    // Update setupInlineEditHandlers to use the new button
+    function setupInlineEditHandlers(productData) {
+        const info = productData.productInfo || {};
+        
+        // Add event listeners for edit buttons
+        document.querySelector('.btn-edit-gifts')?.addEventListener('click', function() {
+            const code = this.getAttribute('data-code');
+            const giftCodes = JSON.parse(this.getAttribute('data-gift-codes') || '[]');
+            showGiftsEditForm(code, giftCodes);
+        });
+        
+        // Add event listeners for other edit buttons (if any)
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const field = this.getAttribute('data-field');
+                const value = this.getAttribute('data-value');
+                const code = this.getAttribute('data-code') || info.code;
+                
+                if (field === 'productName') {
+                    showInlineEditForm(field, 'text', value, code);
+                } else if (field === 'productBrand') {
+                    showBrandEditForm(field, value, code);
+                }
+            });
+        });
     }
 
     function formatPrice(val) {
@@ -1255,6 +1772,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <input type="number" class="form-control form-control-sm mt-1 text-center" value="${i}" min="0" name="priority_${i}" style="width:64px;" placeholder="Priority">
                         <button type="button" class="btn btn-sm btn-danger btn-remove-image position-absolute top-0 end-0 p-1" title="Remove" style="font-size:0.8em;line-height:1;">&times;</button>
                     `;
+
                     wrapper.querySelector('.btn-remove-image').onclick = function() {
                         removeImageFromInput(input, i);
                     };
@@ -1263,6 +1781,102 @@ document.addEventListener('DOMContentLoaded', function () {
                 reader.readAsDataURL(file);
             });
         }
+    }
+
+    // --- Edit product name logic ---
+    document.querySelectorAll('.btn-edit-product').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const productCode = this.getAttribute('data-code');
+            const productName = this.getAttribute('data-name');
+            
+            // Populate the edit form
+            const codeField = document.getElementById('editProductCode');
+            const nameField = document.getElementById('editProductName');
+            const alertContainer = document.getElementById('editProductNameAlert');
+            
+            if (codeField && nameField) {
+                codeField.value = productCode;
+                nameField.value = productName;
+            }
+            
+            // Clear any previous alerts
+            if (alertContainer) {
+                alertContainer.innerHTML = '';
+            }
+            
+            // Show the modal
+            const editModal = document.getElementById('editProductNameModal');
+            if (editModal) {
+                const bsModal = new bootstrap.Modal(editModal);
+                bsModal.show();
+            }
+        });
+    });
+
+    // Handle form submission for product name edit
+    const editProductNameForm = document.getElementById('editProductNameForm');
+    if (editProductNameForm) {
+        editProductNameForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const productCode = document.getElementById('editProductCode')?.value;
+            const productName = document.getElementById('editProductName')?.value;
+            const alertContainer = document.getElementById('editProductNameAlert');
+            
+            // Validate
+            if (!productCode || !productName?.trim()) {
+                if (alertContainer) {
+                    alertContainer.innerHTML = '<div class="alert alert-danger">Product code and name are required</div>';
+                }
+                return;
+            }
+            
+            // Make API request to update product name
+            fetch(`http://localhost:5000/api/products/updateProductName?productCode=${encodeURIComponent(productCode)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer <?= htmlspecialchars($token) ?>'
+                },
+                body: JSON.stringify({ name: productName })
+            })
+            .then(async response => {
+                const text = await response.text();
+                let data = {};
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    console.error('Failed to parse JSON:', err, text);
+                    throw new Error('Invalid server response');
+                }
+                
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Failed to update product name');
+                }
+                
+                // Show success message
+                alertContainer.innerHTML = '<div class="alert alert-success">Product name updated successfully!</div>';
+                
+                // Update the name in the table
+                const productRow = document.querySelector(`input.product-checkbox[data-code="${productCode}"]`).closest('tr');
+                if (productRow) {
+                    const nameCell = productRow.querySelector('.product-name');
+                    if (nameCell) {
+                        nameCell.textContent = productName;
+                    }
+                }
+                
+                // Close modal after short delay
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('editProductNameModal')).hide();
+                    // Reload to show updated data
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(err => {
+                alertContainer.innerHTML = `<div class="alert alert-danger">${err.message || 'Error updating product name'}</div>`;
+            });
+        });
     }
 });
 </script>

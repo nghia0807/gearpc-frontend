@@ -308,11 +308,66 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
             border: none;
             overflow: hidden;
         }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(13, 110, 253, 0.2);
+            border-top: 5px solid #0d6efd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
 <div class="container">
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <p class="text-primary mb-0 fw-bold">Loading...</p>
+        </div>
+    </div>
+    
     <div class="main-card">
         <?php renderToasts(null, 1080, 3500); ?>
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -353,7 +408,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                                 <button class="btn btn-sm action-btn edit editBtn"
                                     data-id="<?= htmlspecialchars($cat['id']) ?>"
                                     data-name="<?= htmlspecialchars($cat['name']) ?>"
-                                    ><i class="fa fa-pen"></i> Edit
+                                    ><i class="fa fa-pen"></i>
                                 </button>
                             </td>
                         </tr>
@@ -471,60 +526,99 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.querySelectorAll('.editBtn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.getElementById('edit_id').value = this.dataset.id;
-        document.getElementById('edit_name').value = this.dataset.name;
-        var editModal = new bootstrap.Modal(document.getElementById('editModal'));
-        editModal.show();
+document.addEventListener('DOMContentLoaded', function() {
+    // Loading overlay functionality
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    function showLoading() {
+        loadingOverlay.classList.add('active');
+    }
+    
+    function hideLoading() {
+        loadingOverlay.classList.remove('active');
+    }
+    
+    // Edit button functionality
+    document.querySelectorAll('.editBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('edit_id').value = this.dataset.id;
+            document.getElementById('edit_name').value = this.dataset.name;
+            var editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            editModal.show();
+        });
     });
-});
 
-// --- Multiple delete logic for categories ---
-const selectAllCategories = document.getElementById('selectAllCategories');
-const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
-const btnDeleteSelectedCategories = document.getElementById('btnDeleteSelectedCategories');
+    // --- Multiple delete logic for categories ---
+    const selectAllCategories = document.getElementById('selectAllCategories');
+    const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+    const btnDeleteSelectedCategories = document.getElementById('btnDeleteSelectedCategories');
 
-function updateDeleteSelectedBtn() {
-    const anyChecked = Array.from(categoryCheckboxes).some(cb => cb.checked);
-    btnDeleteSelectedCategories.disabled = !anyChecked;
-}
+    function updateDeleteSelectedBtn() {
+        const anyChecked = Array.from(categoryCheckboxes).some(cb => cb.checked);
+        btnDeleteSelectedCategories.disabled = !anyChecked;
+    }
 
-if (selectAllCategories) {
-    selectAllCategories.addEventListener('change', function() {
-        categoryCheckboxes.forEach(cb => cb.checked = selectAllCategories.checked);
-        updateDeleteSelectedBtn();
+    if (selectAllCategories) {
+        selectAllCategories.addEventListener('change', function() {
+            categoryCheckboxes.forEach(cb => cb.checked = selectAllCategories.checked);
+            updateDeleteSelectedBtn();
+        });
+    }
+    categoryCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            updateDeleteSelectedBtn();
+            if (!this.checked && selectAllCategories.checked) selectAllCategories.checked = false;
+        });
     });
-}
-categoryCheckboxes.forEach(cb => {
-    cb.addEventListener('change', function() {
-        updateDeleteSelectedBtn();
-        if (!this.checked && selectAllCategories.checked) selectAllCategories.checked = false;
-    });
-});
 
-btnDeleteSelectedCategories.addEventListener('click', function() {
-    const codes = Array.from(categoryCheckboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.getAttribute('data-code'));
-    if (codes.length === 0) return;
-    if (!confirm('Are you sure you want to delete the selected categories?')) return;
-    // Submit via hidden form (POST)
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.style.display = 'none';
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'delete_codes';
-    input.value = JSON.stringify(codes);
-    form.appendChild(input);
-    const input2 = document.createElement('input');
-    input2.type = 'hidden';
-    input2.name = 'delete_category';
-    input2.value = '1';
-    form.appendChild(input2);
-    document.body.appendChild(form);
-    form.submit();
+    btnDeleteSelectedCategories.addEventListener('click', function() {
+        const codes = Array.from(categoryCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.getAttribute('data-code'));
+        if (codes.length === 0) return;
+        if (!confirm('Are you sure you want to delete the selected categories?')) return;
+        
+        // Show loading before submitting
+        showLoading();
+        
+        // Submit via hidden form (POST)
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.style.display = 'none';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'delete_codes';
+        input.value = JSON.stringify(codes);
+        form.appendChild(input);
+        const input2 = document.createElement('input');
+        input2.type = 'hidden';
+        input2.name = 'delete_category';
+        input2.value = '1';
+        form.appendChild(input2);
+        document.body.appendChild(form);
+        form.submit();
+    });
+    
+    // Add form submission handlers for loading indicator
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function() {
+            // Don't show loading for forms that aren't submitting to API
+            if (this.getAttribute('data-no-loading') === 'true') return;
+            showLoading();
+        });
+    });
+    
+    // Show all toasts on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        toastElList.forEach(function(toastEl) {
+            var toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        });
+    });
+    
+    // Hide loading overlay when page is fully loaded
+    window.addEventListener('load', hideLoading);
 });
 </script>
 <?php initializeToasts(); ?>
