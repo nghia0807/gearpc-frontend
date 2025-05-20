@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/session_init.php';
 require_once __DIR__ . '/../components/cart-item.php';
+require_once __DIR__ . '/../components/confirm-modal.php';
 
 // Get token from session
 $token = $_SESSION['token'] ?? null;
@@ -73,20 +74,6 @@ $cartItems = $data['data']['items'] ?? [];
             margin-bottom: 20px;
             border-bottom: 2px solid #ff9620;
             padding-bottom: 10px;
-        }
-
-        .clear-cart-btn {
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .clear-cart-btn:hover {
-            background-color: #d43f3f;
         }
 
         .cart-actions {
@@ -519,19 +506,27 @@ $cartItems = $data['data']['items'] ?? [];
 <div class="cart-container">
     <div class="cart-header-title">
         <h2>Your cart</h2>
-        <div class="cart-actions"> <button type="button" id="deleteSelected" class="btn btn-danger" disabled>
+        <div class="cart-actions">
+            <button type="button" id="deleteSelected" class="btn btn-danger" disabled>
                 <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Delete selected</span>
             </button>
         </div>
-    </div>
-
-    <?php if (empty($cartItems)): ?>
+    </div> <?php if (empty($cartItems)): ?>
         <div class="cart-empty">
             <i class="bi bi-cart-x"></i>
             <h3>Your cart is empty</h3>
             <p>Looks like you haven't added anything to your cart yet.</p>
             <a href="index.php?page=products" class="btn btn-primary">Continue Shopping</a>
         </div>
+        <script>
+            // Hide cart actions when cart is empty
+            document.addEventListener('DOMContentLoaded', function () {
+                const cartActions = document.querySelector('.cart-actions');
+                if (cartActions) {
+                    cartActions.style.display = 'none';
+                }
+            });
+        </script>
     <?php else: ?>
         <div class="cart-header cart-item">
             <div class="cart-item-checkbox">
@@ -618,18 +613,18 @@ $cartItems = $data['data']['items'] ?? [];
         }        // Individual checkboxes
         itemCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', updateSelectionUI);
-        });
-
-        // Single item delete buttons
+        });        // Single item delete buttons
         document.querySelectorAll('.remove-single-item').forEach(button => {
             button.addEventListener('click', function () {
                 const itemId = this.dataset.id;
-                if (confirm('Are you sure you want to remove this item?')) {
-                    deleteSelectedItems([itemId]); // Reuse the same function with an array of one item
-                }
+                // Use custom confirmation modal instead of default browser confirm
+                showConfirmModal('Are you sure you want to remove this item from your cart?', function (confirmed) {
+                    if (confirmed) {
+                        deleteSelectedItems([itemId]); // Reuse the same function with an array of one item
+                    }
+                }, 'Remove Item');
             });
         });
-
         // Delete selected items
         if (deleteSelectedBtn) {
             deleteSelectedBtn.addEventListener('click', function () {
@@ -638,9 +633,17 @@ $cartItems = $data['data']['items'] ?? [];
 
                 if (selectedIds.length === 0) return;
 
-                if (confirm('Are you sure you want to remove the selected items?')) {
-                    deleteSelectedItems(selectedIds);
-                }
+                // Use custom confirmation modal with appropriate message based on selection count
+                const itemCount = selectedIds.length;
+                const message = itemCount === 1
+                    ? 'Are you sure you want to remove this item from your cart?'
+                    : `Are you sure you want to remove these ${itemCount} items from your cart?`;
+
+                showConfirmModal(message, function (confirmed) {
+                    if (confirmed) {
+                        deleteSelectedItems(selectedIds);
+                    }
+                }, 'Remove Items');
             });
         }
 
@@ -736,5 +739,17 @@ $cartItems = $data['data']['items'] ?? [];
         }
     });
 </script>
+<!-- Render confirm modal component -->
+<?php
+renderConfirmModal(
+    'deleteConfirmModal',
+    'Confirm Removal',
+    'Remove',
+    'Cancel',
+    'btn-danger',
+    'btn-secondary'
+);
+?>
+
 <!-- Link Bootstrap JS at the end of the document -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
