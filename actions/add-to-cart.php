@@ -2,23 +2,69 @@
 session_name('user_session');
 session_start();
 
-if (isset($_SESSION['last_add_time']) && time() - $_SESSION['last_add_time'] < 3) {
-    $_SESSION['message'] = "⏳ Vui lòng đợi vài giây trước khi thêm tiếp.";
-    header('Location: ' . $_SERVER['HTTP_REFERER']);
-    exit;
+// Determine if it's an AJAX request
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
+// Receive data via POST method
+$inputData = file_get_contents('php://input');
+$postData = json_decode($inputData, true);
+
+// Set response header if it's an Ajax request
+if ($isAjax) {
+    header('Content-Type: application/json');
 }
 
-if (!isset($_SESSION['token']) || !isset($_POST['product_id'])) {
-    $_SESSION['message'] = "Bạn chưa đăng nhập hoặc thiếu sản phẩm.";
-    header('Location: ' . $_SERVER['HTTP_REFERER']);
-    exit;
+// Check time between additions
+if (isset($_SESSION['last_add_time']) && time() - $_SESSION['last_add_time'] < 1) {
+    $message = "Please wait a few seconds before adding more.";
+    if ($isAjax) {
+        echo json_encode(['success' => false, 'message' => $message]);
+        exit;
+    } else {
+        $_SESSION['message'] = $message;
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        exit;
+    }
+}
+
+// Check login and product data
+if (!isset($_SESSION['token'])) {
+    $message = "You are not logged in.";
+    if ($isAjax) {
+        echo json_encode(['success' => false, 'message' => $message]);
+        exit;
+    } else {
+        $_SESSION['message'] = $message;
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        exit;
+    }
+}
+
+// Get product ID from POST form or JSON body
+$productId = null;
+$quantity = 1;
+
+if ($isAjax && isset($postData['itemId'])) {
+    $productId = htmlspecialchars($postData['itemId'], ENT_QUOTES, 'UTF-8');
+    $quantity = isset($postData['quantity']) ? intval($postData['quantity']) : 1;
+} elseif (isset($_POST['product_id'])) {
+    $productId = htmlspecialchars($_POST['product_id'], ENT_QUOTES, 'UTF-8');
+    $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
+} else {
+    $message = "Missing product information.";
+    if ($isAjax) {
+        echo json_encode(['success' => false, 'message' => $message]);
+        exit;
+    } else {
+        $_SESSION['message'] = $message;
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        exit;
+    }
 }
 
 $_SESSION['last_add_time'] = time();
-
 $token = $_SESSION['token'];
-$productId = htmlspecialchars($_POST['product_id'], ENT_QUOTES, 'UTF-8');
-$quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
 
 $apiUrl = 'http://localhost:5000/api/carts/add';
 
@@ -46,12 +92,21 @@ $curlErr = curl_error($ch);
 curl_close($ch);
 
 if ($curlErr) {
-    $_SESSION['message'] = "Lỗi khi gọi API: $curlErr";
+    $message = "Error when calling API: $curlErr";
+    $success = false;
 } elseif ($httpCode === 200) {
-    $_SESSION['message'] = "Đã thêm sản phẩm vào giỏ hàng!";
+    $message = "Product added to cart!";
+    $success = true;
 } else {
-    $_SESSION['message'] = "Thêm sản phẩm thất bại. Mã lỗi: $httpCode";
+    $message = "Failed to add product. Error code: $httpCode";
+    $success = false;
 }
 
-header('Location: ' . $_SERVER['HTTP_REFERER']);
-exit;
+if ($isAjax) {
+    echo json_encode(['success' => $success, 'message' => $message]);
+    exit;
+} else {
+    $_SESSION['message'] = $message;
+    header('Location: ' . $_SERVER['HTTP_REFERER']);
+    exit;
+}

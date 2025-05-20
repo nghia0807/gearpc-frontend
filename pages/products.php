@@ -136,6 +136,7 @@ if ($categoryCode) {
 
         .filters-container {
             background-color: #1e1e1e;
+            color: #ffffff;
             border-radius: 10px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
@@ -172,11 +173,13 @@ if ($categoryCode) {
 
         .brand-item:hover {
             background-color: #2d2d2d;
+            color: #ff9620;
             transform: translateY(-3px);
         }
 
         .brand-item.active {
-            background-color: #6694ea;
+            background-color: #ff9620;
+            color: black;
         }
 
         .brand-img-container {
@@ -291,46 +294,10 @@ if ($categoryCode) {
             margin-bottom: 1rem;
         }
 
-        .search-form {
-            margin-bottom: 1.5rem;
-        }
-
-        .search-input {
-            background-color: #2d2d2d;
-            color: #ffffff;
-            border: 1px solid #444;
-            border-radius: 8px 0 0 8px;
-            padding: 0.75rem 1rem;
-        }
-
-        .search-input:focus {
-            border-color: #6694ea;
-            box-shadow: none;
-            background-color: #2d2d2d;
-            color: #ffffff;
-        }
-
-        .search-btn {
-            background-color: #6694ea;
-            color: #ffffff;
-            border: 1px solid #6694ea;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .search-btn:hover {
-            background-color: #5273c0;
-            color: #ffffff;
-            border-color: #5273c0;
-        }
-
-        .all-brands {
-            background-color: #2d2d2d;
-            border: 2px solid #444;
-        }
-
         .all-brands.active {
-            background-color: #6694ea;
-            border-color: #6694ea;
+            background-color: #ff9620;
+            border-color: #ff9620;
+            color: black;
         }
 
         @media (max-width: 768px) {
@@ -363,27 +330,6 @@ if ($categoryCode) {
             <div class="col-12 mb-4">
                 <div class="filters-container">
                     <div class="row">
-                        <!-- Search Box -->
-                        <div class="col-md-12 mb-4">
-                            <div class="filter-section">
-                                <h5 class="filter-heading">Search Products</h5>
-                                <form action="" method="get" class="search-form">
-                                    <?php if ($categoryCode): ?>
-                                        <input type="hidden" name="category" value="<?= htmlspecialchars($categoryCode) ?>">
-                                    <?php endif; ?>
-                                    <?php if ($brandCode): ?>
-                                        <input type="hidden" name="brand" value="<?= htmlspecialchars($brandCode) ?>">
-                                    <?php endif; ?>
-                                    <div class="input-group">
-                                        <input type="text" name="q" class="form-control search-input"
-                                            placeholder="Search..." value="<?= htmlspecialchars($searchQuery) ?>">
-                                        <button type="submit" class="btn search-btn">
-                                            <i class="bi bi-search"></i>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
                         <!-- Brands Filter -->
                         <div class="col-md-12">
                             <div class="filter-section">

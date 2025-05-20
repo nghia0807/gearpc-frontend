@@ -24,14 +24,14 @@ if (!isset($alerts) || !is_array($alerts)) {
  * @param int $zIndex Z-index for the toast container
  * @param int $delay Delay before toast disappears (in milliseconds)
  */
-function renderToasts($position = 'bottom-0 end-0', $zIndex = 1080, $delay = 3500) {
+function renderToasts($position = 'bottom-0 end-0', $zIndex = 1080, $delay = 3500)
+{
     global $alerts;
 
-    if (empty($alerts)) return;
-
-    // Bottom right, tránh che khuất (thêm margin và bỏ translate-middle-x)
+    if (empty($alerts))
+        return;    // Bottom right
     echo '<!-- Toast Container -->';
-    echo '<div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index: ' . $zIndex . '; width: auto; min-width: 0; margin-bottom: 3rem; margin-right: 22rem;">';
+    echo '<div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index: ' . $zIndex . '; width: auto; min-width: 0; margin-bottom: 1.5rem; margin-right: 1.5rem;">';
     echo '<div id="toastContainer" class="toast-container" style="width: max-content; min-width: 300px; max-width: 90vw;">';
 
     foreach ($alerts as $alert) {
@@ -55,7 +55,8 @@ function renderToasts($position = 'bottom-0 end-0', $zIndex = 1080, $delay = 350
  * Adds the JavaScript to initialize all toasts
  * Call this function before the closing </body> tag
  */
-function initializeToasts() {
+function initializeToasts()
+{
     echo '<script>';
     echo 'document.addEventListener("DOMContentLoaded", function() {';
     echo '    var toastElList = [].slice.call(document.querySelectorAll(".toast"));';
@@ -73,7 +74,8 @@ function initializeToasts() {
  * @param string $type Alert type (success, danger, warning, info)
  * @param string $msg Alert message
  */
-function addAlert($type, $msg) {
+function addAlert($type, $msg)
+{
     global $alerts;
     $alerts[] = ['type' => $type, 'msg' => $msg];
 }
