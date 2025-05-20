@@ -5,8 +5,8 @@ require_once __DIR__ . '/../includes/session_init.php';
 $categoryCode = isset($_GET['category']) ? trim($_GET['category']) : '';
 $brandCode = isset($_GET['brand']) ? trim($_GET['brand']) : '';
 $searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
-$pageIndex = isset($_GET['page']) ? max(0, intval($_GET['page'])) : 0;
-$pageSize = 12;
+$pageIndex = isset($_GET['pageIndex']) ? max(0, intval($_GET['pageIndex'])) : 0;
+$pageSize = 12; // Set fixed page size to 12 products (3 columns x 4 rows)
 
 // API Endpoints
 $productsApiUrl = "http://localhost:5000/api/products?pageIndex={$pageIndex}&pageSize={$pageSize}";
@@ -300,6 +300,30 @@ if ($categoryCode) {
             color: black;
         }
 
+        /* View More Button */
+        #view-more-btn {
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        #view-more-btn:hover {
+            color: #1e1e1e;
+            transform: translateY(-2px);
+        }
+
+        #view-more-btn:active {
+            transform: translateY(0);
+        }
+
+        #view-more-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        #loading-indicator {
+            color: #1e1e1e;
+        }
+
         @media (max-width: 768px) {
             .filters-container {
                 margin-bottom: 1rem;
@@ -335,7 +359,7 @@ if ($categoryCode) {
                             <div class="filter-section">
                                 <h5 class="filter-heading">Brands</h5>
                                 <div class="brand-grid">
-                                    <a href="<?= 'products.php' . ($categoryCode ? '?category=' . urlencode($categoryCode) : '') . ($searchQuery ? ($categoryCode ? '&q=' : '?q=') . urlencode($searchQuery) : '') ?>"
+                                    <a href="<?= 'index.php?page=products' . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') ?>"
                                         class="brand-item all-brands <?= !$brandCode ? 'active' : '' ?>">
                                         <div class="brand-img-container">
                                             <i class="bi bi-grid-3x3-gap" style="font-size:24px;color:#666;"></i>
@@ -345,7 +369,7 @@ if ($categoryCode) {
                                     <?php foreach ($brands as $brand): ?>
                                         <?php if (empty($brand['code']) || empty($brand['name']))
                                             continue; ?>
-                                        <a href="<?= 'products.php?brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') ?>"
+                                        <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') ?>"
                                             class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
                                             <div class="brand-img-container">
                                                 <?php if (!empty($brand['imageUrl'])): ?>
@@ -377,49 +401,31 @@ if ($categoryCode) {
                     </div>
                 <?php else: ?>
                     <!-- Product card -->
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="products-container">
                         <?php foreach ($products as $product): ?>
                             <?php include 'components/product-card.php'; ?>
                         <?php endforeach; ?>
                     </div>
-                    <!-- Pagination -->
+
+                    <!-- View More Button (replaces pagination) -->
                     <?php if ($totalProducts > $pageSize): ?>
-                        <div class="pagination-container">
-                            <nav aria-label="Product pagination">
-                                <ul class="pagination justify-content-center">
-                                    <?php
-                                    $totalPages = ceil($totalProducts / $pageSize);
-                                    $maxPagesToShow = 5;
-                                    $startPage = max(0, min($pageIndex - floor($maxPagesToShow / 2), $totalPages - $maxPagesToShow));
-                                    $endPage = min($startPage + $maxPagesToShow, $totalPages);
-                                    $paginationUrl = 'products.php?page=';
-                                    if ($categoryCode)
-                                        $paginationUrl .= '&category=' . urlencode($categoryCode);
-                                    if ($brandCode)
-                                        $paginationUrl .= '&brand=' . urlencode($brandCode);
-                                    if ($searchQuery)
-                                        $paginationUrl .= '&q=' . urlencode($searchQuery);
-                                    ?>
-                                    <li class="page-item <?= $pageIndex <= 0 ? 'disabled' : '' ?>">
-                                        <a class="page-link" href="<?= $paginationUrl . ($pageIndex - 1) ?>"
-                                            aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <?php for ($i = $startPage; $i < $endPage; $i++): ?>
-                                        <li class="page-item <?= $i === $pageIndex ? 'active' : '' ?>">
-                                            <a class="page-link" href="<?= $paginationUrl . $i ?>">
-                                                <?= $i + 1 ?>
-                                            </a>
-                                        </li>
-                                    <?php endfor; ?>
-                                    <li class="page-item <?= $pageIndex >= $totalPages - 1 ? 'disabled' : '' ?>">
-                                        <a class="page-link" href="<?= $paginationUrl . ($pageIndex + 1) ?>" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
+                        <div class="text-center mt-5 mb-4">
+                            <button id="view-more-btn" class="btn px-4 py-2" 
+                                    data-current-page="<?= $pageIndex ?>" 
+                                    data-total-pages="<?= ceil($totalProducts / $pageSize) ?>"
+                                    data-category="<?= htmlspecialchars($categoryCode) ?>"
+                                    data-brand="<?= htmlspecialchars($brandCode) ?>"
+                                    data-search="<?= htmlspecialchars($searchQuery) ?>">
+                                <i class="bi bi-plus-circle me-1"></i> 
+                                <span>View more products</span>
+                            </button>
+                            
+                            <div id="loading-indicator" class="d-none mt-4">
+                                <div class="spinner-border text-light" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div class="mt-2">Loading more products...</div>
+                            </div>
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>
@@ -427,6 +433,161 @@ if ($categoryCode) {
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    
+    <!-- Define the jumpToPage function globally -->
+    <script>
+        window.jumpToPage = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('jumpToPage');
+            if (!input) return false;
+            
+            const page = parseInt(input.value) - 1;
+            <?php if (isset($totalPages)): ?>
+            const maxPage = <?= $totalPages - 1 ?>;
+            
+            if (isNaN(page) || page < 0 || page > maxPage) {
+                alert(`Please enter a valid page number between 1 and ${maxPage + 1}`);
+                return false;
+            }
+            
+            const paginationUrl = "<?= $paginationUrl ?? 'index.php?page=products&' ?>";
+            window.location.href = `${paginationUrl}pageIndex=${page}`;
+            <?php else: ?>
+            if (isNaN(page) || page < 0) {
+                alert("Please enter a valid page number");
+                return false;
+            }
+            window.location.href = `index.php?page=products&pageIndex=${page}`;
+            <?php endif; ?>
+            return false;
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewMoreBtn = document.getElementById('view-more-btn');
+            if (viewMoreBtn) {
+                viewMoreBtn.addEventListener('click', loadMoreProducts);
+            }
+        });
 
+        function loadMoreProducts() {
+            const btn = document.getElementById('view-more-btn');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const productsContainer = document.getElementById('products-container');
+            
+            // Get current state
+            const currentPage = parseInt(btn.dataset.currentPage) + 1;
+            const totalPages = parseInt(btn.dataset.totalPages);
+            
+            // Show loading indicator
+            loadingIndicator.classList.remove('d-none');
+            btn.disabled = true;
+            
+            // Build API URL with the same filters as current page
+            let apiUrl = `http://localhost:5000/api/products?pageIndex=${currentPage}&pageSize=12`;
+            if (btn.dataset.category) apiUrl += `&categoryCode=${encodeURIComponent(btn.dataset.category)}`;
+            if (btn.dataset.brand) apiUrl += `&brandCode=${encodeURIComponent(btn.dataset.brand)}`;
+            if (btn.dataset.search) apiUrl += `&productName=${encodeURIComponent(btn.dataset.search)}`;
+            
+            // Fetch additional products
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data.data.length > 0) {
+                        // Update button state
+                        btn.dataset.currentPage = currentPage;
+                        
+                        // Format currency function
+                        const formatCurrency = (amount) => {
+                            return new Intl.NumberFormat('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            }).format(amount).replace('₫', '') + ' ₫';
+                        };
+                        
+                        // Calculate discount percentage
+                        const calculateDiscount = (original, current) => {
+                            if (original <= 0 || current <= 0 || original <= current) return 0;
+                            return Math.round(((original - current) / original) * 100);
+                        };
+                        
+                        // Process each product
+                        data.data.data.forEach(product => {
+                            // Create product card HTML
+                            const productCard = createProductCard(product, formatCurrency, calculateDiscount);
+                            productsContainer.insertAdjacentHTML('beforeend', productCard);
+                        });
+                        
+                        // Hide button if we've reached the end
+                        if (currentPage >= totalPages - 1) {
+                            btn.classList.add('d-none');
+                        }
+                    } else {
+                        // No more products
+                        btn.classList.add('d-none');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading more products:', error);
+                    alert('Error loading more products. Please try again.');
+                })
+                .finally(() => {
+                    // Hide loading indicator
+                    loadingIndicator.classList.add('d-none');
+                    btn.disabled = false;
+                });
+        }
+
+        function createProductCard(product, formatCurrency, calculateDiscount) {
+            const discount = product.originalPrice > product.currentPrice ? 
+                calculateDiscount(product.originalPrice, product.currentPrice) : 0;
+                
+            return `
+            <div class="col">
+                <div class="product-card">
+                    <a href="index.php?page=product-detail&id=${product.id}" class="text-decoration-none">
+                        <div class="product-img-container">
+                            <img src="${product.imageUrl || ''}" alt="${product.name}" class="product-img"
+                                onerror="this.src='https://via.placeholder.com/300x180?text=No+Image'">
+                        </div>
+                        <div class="product-info">
+                            <div class="product-brand">
+                                ${product.brandName || 'Unknown Brand'}
+                            </div>
+                            <h5 class="product-title">
+                                ${product.name}
+                            </h5>
+                            <div class="d-flex align-items-center">
+                                <span class="product-price-current">${formatCurrency(product.currentPrice)}</span>
+                                ${product.originalPrice > product.currentPrice ? 
+                                    `<span class="product-price-original">${formatCurrency(product.originalPrice)}</span>
+                                     ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}` : ''}
+                            </div>
+                            <div class="product-description">
+                                ${product.shortDescription || ''}
+                            </div>
+                        </div>
+                    </a>
+                    <div class="product-action">
+                        <div class="w-100 d-flex justify-content-between gap-2">
+                            <button type="button" class="btn-add-cart mb-3"
+                                onclick="addToCartAsync('${product.id}')">
+                                <i class="bi bi-cart-plus"></i>
+                                <span>Add to cart</span>
+                            </button>
+                            <button type="button" class="btn-buy-now mb-3"
+                                onclick="buyNowAsync('${product.id}')">
+                                <i class="bi bi-bag-check"></i>
+                                <span>Buy now</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+    </script>
+</body>
 </html>
