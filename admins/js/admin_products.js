@@ -73,11 +73,9 @@ document.addEventListener('DOMContentLoaded', function () {
         redirectUrl.searchParams.set('toast_msg', msg);
         
         // Preserve existing page parameter if present
-        if (window.location.search.includes('page=')) {
-            const pageMatch = window.location.search.match(/page=(\d+)/);
-            if (pageMatch && pageMatch[1]) {
-                redirectUrl.searchParams.set('page', pageMatch[1]);
-            }
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('page')) {
+            redirectUrl.searchParams.set('page', urlParams.get('page'));
         }
         
         // Redirect to show the toast

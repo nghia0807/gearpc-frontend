@@ -108,6 +108,9 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
 } else {
     $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to load categories.'];
 }
+
+// Calculate total pages for pagination
+$totalPages = ceil($totalCount / $pageSize);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -118,10 +121,41 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Thay thế style inline bằng tham chiếu đến file CSS riêng -->
     <link rel="stylesheet" href="css/admin_categories.css">
+    <style>
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #fff;
+            padding: 15px 10px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: padding 0.3s, box-shadow 0.3s;
+            border-radius: 10px;
+        }
+        
+        .sticky-header.is-sticky {
+            padding: 10px 0;
+        }
+        
+        @media (max-width: 767.98px) {
+            .sticky-header .d-flex {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .sticky-header h4 {
+                margin-bottom: 10px !important;
+            }
+        }
+        
+        /* Add some padding to top of content to prevent sudden jump */
+        .main-card {
+            padding-top: 10px;
+        }
+    </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
-<div class="container">
+<div class="container position-relative">
     <!-- Loading overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner-container">
@@ -130,10 +164,15 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
         </div>
     </div>
     
-    <div class="main-card">
-        <?php renderToasts('toast-container', 'bottom-0 end-0 p-3', 3500); ?>
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>Category List</h4>
+    <!-- Toast container positioned absolutely -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        <?php renderToasts('toast-container', 0, 3500); ?>
+    </div>
+    
+    <!-- New sticky header div -->
+    <div class="sticky-header mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Category List</h4>
             <div class="d-flex gap-2">
                 <button id="btnDeleteSelectedCategories" class="btn btn-danger" disabled>
                     <i class="fa fa-trash"></i> Delete
@@ -143,6 +182,9 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                 </button>
             </div>
         </div>
+    </div>
+    
+    <div class="main-card">
         <div class="card shadow-sm">
             <div class="table-responsive">
                 <table class="table table-bordered align-middle mb-0">
@@ -151,6 +193,7 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                             <th class="text-center" style="width: 40px;">
                                 <input type="checkbox" id="selectAllCategories" class="custom-checkbox">
                             </th>
+                            <th class="text-center" style="width: 40px;">#</th>
                             <th style="width: 60px;">ID</th>
                             <th>Code</th>
                             <th>Name</th>
@@ -158,44 +201,93 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
                         </tr>
                     </thead>
                     <tbody>
-                    <?php foreach ($categories as $cat): ?>
-                        <tr>
-                            <td class="text-center">
-                                <input type="checkbox" class="category-checkbox custom-checkbox" data-code="<?= htmlspecialchars($cat['code']) ?>">
-                            </td>
-                            <td><span class="category-id"><?= htmlspecialchars($cat['id']) ?></span></td>
-                            <td><span class="category-code"><?= htmlspecialchars($cat['code']) ?></span></td>
-                            <td><span class="category-name"><?= htmlspecialchars($cat['name']) ?></span></td>
-                            <td class="text-center">
-                                <button class="btn btn-sm action-btn edit editBtn"
-                                    data-id="<?= htmlspecialchars($cat['id']) ?>"
-                                    data-name="<?= htmlspecialchars($cat['name']) ?>"
-                                    ><i class="fa fa-pen"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
                     <?php if (empty($categories)): ?>
                         <tr>
-                            <td colspan="5" class="text-center py-4">
+                            <td colspan="6" class="text-center py-4">
                                 <div class="text-muted">
                                     <i class="fa fa-folder fa-2x mb-2"></i>
                                     <p>No categories found.</p>
                                 </div>
                             </td>
                         </tr>
+                    <?php else: ?>
+                        <?php foreach ($categories as $index => $cat): ?>
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="category-checkbox custom-checkbox" data-code="<?= htmlspecialchars($cat['code']) ?>">
+                                </td>
+                                <td class="text-center"><?= $pageIndex * $pageSize + $index + 1 ?></td>
+                                <td><span class="category-id"><?= htmlspecialchars($cat['id']) ?></span></td>
+                                <td><span class="category-code"><?= htmlspecialchars($cat['code']) ?></span></td>
+                                <td><span class="category-name"><?= htmlspecialchars($cat['name']) ?></span></td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm action-btn edit editBtn"
+                                        data-id="<?= htmlspecialchars($cat['id']) ?>"
+                                        data-name="<?= htmlspecialchars($cat['name']) ?>"
+                                        ><i class="fa fa-pen"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     <?php endif; ?>
                     </tbody>
                 </table>
             </div>
-            <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
-                <div class="card-footer bg-white text-center">
-                    <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">
-                        <i class="fa-solid fa-angles-down"></i> Load More
-                    </a>
+            <!-- Replace "Load More" with pagination -->
+            <?php if ($totalCount > 0): ?>
+                <div class="card-footer bg-white py-3">
+                    <nav aria-label="Category pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <!-- Previous page button -->
+                            <li class="page-item <?= ($pageIndex <= 0) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= max(0, $pageIndex - 1) ?>" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            
+                            <!-- First page -->
+                            <?php if ($pageIndex > 2): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=0">1</a>
+                                </li>
+                                <?php if ($pageIndex > 3): ?>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            
+                            <!-- Surrounding pages -->
+                            <?php for ($i = max(0, $pageIndex - 1); $i <= min($pageIndex + 1, $totalPages - 1); $i++): ?>
+                                <li class="page-item <?= ($i == $pageIndex) ? 'active' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $i ?>"><?= $i + 1 ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            
+                            <!-- Last pages -->
+                            <?php if ($pageIndex < $totalPages - 3): ?>
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            <?php endif; ?>
+                            <?php if ($pageIndex < $totalPages - 2 && $totalPages > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?= $totalPages - 1 ?>"><?= $totalPages ?></a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <!-- Next page button -->
+                            <li class="page-item <?= ($pageIndex >= $totalPages - 1) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= min($totalPages - 1, $pageIndex + 1) ?>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             <?php endif; ?>
         </div>
+        
         <?php if ($showSelected): ?>
             <hr>
             <h5 class="mt-4 mb-3">Selected Categories</h5>
@@ -287,7 +379,6 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Thay thế script inline bằng tham chiếu đến file JavaScript riêng -->
 <script src="js/admin_categories.js"></script>
 <?php initializeToasts(); ?>
 </body>

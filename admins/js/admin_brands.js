@@ -9,6 +9,13 @@ function hideLoading() {
     loadingOverlay.classList.remove('active');
 }
 
+// Helper function to preserve pagination when reloading the page
+function getPageUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get('page') || 0;
+    return `?page=${page}`;
+}
+
 // Hide loading overlay when page is fully loaded
 window.addEventListener('load', hideLoading);
 
@@ -103,6 +110,7 @@ btnDeleteSelectedBrands.addEventListener('click', function() {
     // Submit via hidden form (POST)
     const form = document.createElement('form');
     form.method = 'POST';
+    form.action = getPageUrl(); // Preserve pagination
     form.style.display = 'none';
     const input = document.createElement('input');
     input.type = 'hidden';
@@ -120,9 +128,22 @@ btnDeleteSelectedBrands.addEventListener('click', function() {
 
 // Add form submission handlers for loading indicator
 document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function() {
+    form.addEventListener('submit', function(e) {
         // Don't show loading for forms that aren't submitting to API
         if (this.getAttribute('data-no-loading') === 'true') return;
+        
+        // Add the current page to the form action for regular forms
+        if (!this.action || this.action === window.location.href) {
+            const currentPageUrl = getPageUrl();
+            const formAction = this.getAttribute('action') || '';
+            if (!formAction.includes('page=')) {
+                if (formAction.includes('?')) {
+                    this.action = formAction + '&' + currentPageUrl.substring(1);
+                } else {
+                    this.action = formAction + currentPageUrl;
+                }
+            }
+        }
         showLoading();
     });
 });

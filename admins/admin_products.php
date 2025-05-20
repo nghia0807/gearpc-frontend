@@ -268,6 +268,8 @@ $giftsList = fetchAll('http://localhost:5000/api/gifts/get', $token);
 // --- Fetch products for current page ---
 $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $totalCount);
 
+$totalPages = ceil($totalCount / $pageSize);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -278,13 +280,49 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Tham chiếu đến file CSS riêng -->
     <link rel="stylesheet" href="css/admin_products.css">
+    <style>
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #fff;
+            padding: 15px 10px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: padding 0.3s, box-shadow 0.3s;
+            border-radius: 10px;
+        }
+        
+        .sticky-header.is-sticky {
+            padding: 10px 0;
+        }
+        
+        @media (max-width: 767.98px) {
+            .sticky-header .d-flex {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .sticky-header h4 {
+                margin-bottom: 10px !important;
+            }
+        }
+        
+        /* Add some padding to top of content to prevent sudden jump */
+        .main-card {
+            padding-top: 10px;
+        }
+    </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
-<div class="container">
-    <div class="main-card">
+<div class="container position-relative">
+    <!-- Toast container positioned absolutely -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
         <?php renderToasts('toast-container', 0, 3500); ?>
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    </div>
+
+    <!-- New sticky header div -->
+    <div class="sticky-header mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
             <h4 class="mb-0">Product List</h4>
             <div class="d-flex gap-2">
                 <button id="btnDeleteSelected" class="btn btn-danger" disabled>
@@ -295,6 +333,9 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                 </button>
             </div>
         </div>
+    </div>
+
+    <div class="main-card">
         <div class="card shadow-sm">
             <div class="table-responsive">
                 <table class="table table-bordered align-middle mb-0">
@@ -303,6 +344,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                         <th class="text-center" style="width:40px;">
                             <input type="checkbox" id="selectAllProducts" class="custom-checkbox">
                         </th>
+                        <th class="text-center" style="width:40px;">#</th>
                         <th style="width:60px;">ID</th>
                         <th>Product Code</th>
                         <th>Product Name</th>
@@ -316,7 +358,7 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                     <tbody>
                     <?php if (empty($products)): ?>
                         <tr>
-                            <td colspan="9" class="text-center py-4">
+                            <td colspan="10" class="text-center py-4">
                                 <div class="text-muted">
                                     <i class="fa fa-box fa-2x mb-2"></i>
                                     <p>No products found.</p>
@@ -324,11 +366,12 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                             </td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($products as $product): ?>
+                        <?php foreach ($products as $index => $product): ?>
                             <tr>
                                 <td class="text-center">
                                     <input type="checkbox" class="product-checkbox custom-checkbox" data-code="<?= htmlspecialchars($product['code']) ?>">
                                 </td>
+                                <td class="text-center"><?= $pageIndex * $pageSize + $index + 1 ?></td>
                                 <td><span class="product-id"><?= htmlspecialchars($product['id']) ?></span></td>
                                 <td><span class="product-code"><?= htmlspecialchars($product['code']) ?></span></td>
                                 <td><span class="product-name"><?= htmlspecialchars($product['name']) ?></span></td>
@@ -358,11 +401,57 @@ $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $
                     </tbody>
                 </table>
             </div>
-            <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
-                <div class="card-footer bg-white text-center py-3">
-                    <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">
-                        <i class="fa-solid fa-angles-down"></i> Load More
-                    </a>
+            <!-- Replace the "Load More" button with pagination -->
+            <?php if ($totalCount > 0): ?>
+                <div class="card-footer bg-white py-3">
+                    <nav aria-label="Product pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <!-- Previous page button -->
+                            <li class="page-item <?= ($pageIndex <= 0) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= max(0, $pageIndex - 1) ?>" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            
+                            <!-- First page -->
+                            <?php if ($pageIndex > 2): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=0">1</a>
+                                </li>
+                                <?php if ($pageIndex > 3): ?>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            
+                            <!-- Surrounding pages -->
+                            <?php for ($i = max(0, $pageIndex - 1); $i <= min($pageIndex + 1, $totalPages - 1); $i++): ?>
+                                <li class="page-item <?= ($i == $pageIndex) ? 'active' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $i ?>"><?= $i + 1 ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            
+                            <!-- Last pages -->
+                            <?php if ($pageIndex < $totalPages - 3): ?>
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            <?php endif; ?>
+                            <?php if ($pageIndex < $totalPages - 2 && $totalPages > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?= $totalPages - 1 ?>"><?= $totalPages ?></a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <!-- Next page button -->
+                            <li class="page-item <?= ($pageIndex >= $totalPages - 1) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= min($totalPages - 1, $pageIndex + 1) ?>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             <?php endif; ?>
         </div>

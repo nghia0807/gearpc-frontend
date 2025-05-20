@@ -117,6 +117,9 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
     $alerts[] = ['type' => 'danger', 'msg' => $res['message'] ?? 'Unable to load brands.'];
 }
 
+// Calculate total pages for pagination
+$totalPages = ceil($totalCount / $pageSize);
+
 // Helper: image placeholder
 function brandImage($img) {
     if (!$img) {
@@ -141,12 +144,42 @@ function brandImage($img) {
     <title>Brand Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Thay thế style inline bằng tham chiếu đến file CSS riêng -->
     <link rel="stylesheet" href="css/admin_brands.css">
+    <style>
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #fff;
+            padding: 15px 10px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: padding 0.3s, box-shadow 0.3s;
+            border-radius: 10px;
+        }
+        
+        .sticky-header.is-sticky {
+            padding: 10px 0;
+        }
+        
+        @media (max-width: 767.98px) {
+            .sticky-header .d-flex {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .sticky-header h4 {
+                margin-bottom: 10px !important;
+            }
+        }
+        
+        /* Add some padding to top of content to prevent sudden jump */
+        .main-card {
+            padding-top: 10px;
+        }
+    </style>
 </head>
 <body>
 <?php include 'admin_navbar.php'; ?>
-<div class="container">
+<div class="container position-relative">
     <!-- Loading overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner-container">
@@ -155,10 +188,14 @@ function brandImage($img) {
         </div>
     </div>
 
-    <div class="main-card">
-        <?php renderToasts('toast-container', 'bottom-0 end-0 p-3', 3500); ?>
-        
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <!-- Toast container positioned absolutely -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        <?php renderToasts('toast-container', 0, 3500); ?>
+    </div>
+
+    <!-- New sticky header div -->
+    <div class="sticky-header mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
             <h4 class="mb-0">Brand List</h4>
             <div class="d-flex gap-2">
                 <button id="btnDeleteSelectedBrands" class="btn btn-danger" disabled>
@@ -169,6 +206,9 @@ function brandImage($img) {
                 </button>
             </div>
         </div>
+    </div>
+    
+    <div class="main-card">
         <div class="card shadow-sm">
             <div class="table-responsive">
                 <table class="table table-bordered align-middle shadow-sm mb-0">
@@ -177,6 +217,7 @@ function brandImage($img) {
                             <th class="text-center" style="width: 40px;">
                                 <input type="checkbox" id="selectAllBrands" class="custom-checkbox">
                             </th>
+                            <th class="text-center" style="width: 40px;">#</th>
                             <th style="width: 60px;">ID</th>
                             <th>Code</th>
                             <th>Name</th>
@@ -185,53 +226,101 @@ function brandImage($img) {
                         </tr>
                     </thead>
                     <tbody>
-                    <?php foreach ($brands as $brand): ?>
-                        <tr>
-                            <td class="text-center">
-                                <input type="checkbox" class="brand-checkbox custom-checkbox" data-code="<?= htmlspecialchars($brand['code']) ?>">
-                            </td>
-                            <td><span class="brand-id"><?= htmlspecialchars($brand['id']) ?></span></td>
-                            <td><span class="brand-code"><?= htmlspecialchars($brand['code']) ?></span></td>
-                            <td><span class="brand-name"><?= htmlspecialchars($brand['name']) ?></span></td>
-                            <td class="text-center">
-                                <div class="brand-image-container">
-                                    <?php if (!empty($brand['image'])): ?>
-                                        <img src="<?= htmlspecialchars($brand['image']) ?>" alt="Brand Image">
-                                    <?php else: ?>
-                                        <i class="fa fa-image text-muted"></i>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <button 
-                                    class="btn btn-sm action-btn edit editBtn"
-                                    data-id="<?= htmlspecialchars($brand['id']) ?>"
-                                    data-code="<?= htmlspecialchars($brand['code']) ?>"
-                                    data-name="<?= htmlspecialchars($brand['name']) ?>"
-                                    data-image="<?= htmlspecialchars($brand['image']) ?>"
-                                    ><i class="fa fa-pen"></i>
-                            </button>
-                        </td>
-                        </tr>
-                    <?php endforeach; ?>
                     <?php if (empty($brands)): ?>
                         <tr>
-                            <td colspan="6" class="text-center py-4">
+                            <td colspan="7" class="text-center py-4">
                                 <div class="text-muted">
                                     <i class="fa fa-building fa-2x mb-2"></i>
                                     <p>No brands found.</p>
                                 </div>
                             </td>
                         </tr>
+                    <?php else: ?>
+                        <?php foreach ($brands as $index => $brand): ?>
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="brand-checkbox custom-checkbox" data-code="<?= htmlspecialchars($brand['code']) ?>">
+                                </td>
+                                <td class="text-center"><?= $pageIndex * $pageSize + $index + 1 ?></td>
+                                <td><span class="brand-id"><?= htmlspecialchars($brand['id']) ?></span></td>
+                                <td><span class="brand-code"><?= htmlspecialchars($brand['code']) ?></span></td>
+                                <td><span class="brand-name"><?= htmlspecialchars($brand['name']) ?></span></td>
+                                <td class="text-center">
+                                    <div class="brand-image-container">
+                                        <?php if (!empty($brand['image'])): ?>
+                                            <img src="<?= htmlspecialchars($brand['image']) ?>" alt="Brand Image">
+                                        <?php else: ?>
+                                            <i class="fa fa-image text-muted"></i>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <button 
+                                        class="btn btn-sm action-btn edit editBtn"
+                                        data-id="<?= htmlspecialchars($brand['id']) ?>"
+                                        data-code="<?= htmlspecialchars($brand['code']) ?>"
+                                        data-name="<?= htmlspecialchars($brand['name']) ?>"
+                                        data-image="<?= htmlspecialchars($brand['image']) ?>"
+                                        ><i class="fa fa-pen"></i>
+                                </button>
+                            </td>
+                            </tr>
+                        <?php endforeach; ?>
                     <?php endif; ?>
                     </tbody>
                 </table>
             </div>
-            <?php if ($totalCount > ($pageIndex + 1) * $pageSize): ?>
-                <div class="card-footer bg-white text-center py-3">
-                    <a href="?page=<?= $pageIndex + 1 ?>" class="btn btn-outline-secondary">
-                        <i class="fa fa-angle-double-down"></i> Load More
-                    </a>
+            <!-- Replace "Load More" button with pagination -->
+            <?php if ($totalCount > 0): ?>
+                <div class="card-footer bg-white py-3">
+                    <nav aria-label="Brand pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <!-- Previous page button -->
+                            <li class="page-item <?= ($pageIndex <= 0) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= max(0, $pageIndex - 1) ?>" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            
+                            <!-- First page -->
+                            <?php if ($pageIndex > 2): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=0">1</a>
+                                </li>
+                                <?php if ($pageIndex > 3): ?>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            
+                            <!-- Surrounding pages -->
+                            <?php for ($i = max(0, $pageIndex - 1); $i <= min($pageIndex + 1, $totalPages - 1); $i++): ?>
+                                <li class="page-item <?= ($i == $pageIndex) ? 'active' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $i ?>"><?= $i + 1 ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            
+                            <!-- Last pages -->
+                            <?php if ($pageIndex < $totalPages - 3): ?>
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            <?php endif; ?>
+                            <?php if ($pageIndex < $totalPages - 2 && $totalPages > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?= $totalPages - 1 ?>"><?= $totalPages ?></a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <!-- Next page button -->
+                            <li class="page-item <?= ($pageIndex >= $totalPages - 1) ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= min($totalPages - 1, $pageIndex + 1) ?>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             <?php endif; ?>
         </div>
