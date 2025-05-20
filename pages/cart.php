@@ -456,7 +456,7 @@ $cartItems = $data['data']['items'] ?? [];
         const selectedTotalSpan = document.getElementById('selectedTotal');
 
         // Function to update UI based on selection
-        function updateSelectionUI() {
+        window.updateSelectionUI = function updateSelectionUI() {
             const selectedCheckboxes = document.querySelectorAll('.item-checkbox:checked');
             const selectedCount = selectedCheckboxes.length;
 

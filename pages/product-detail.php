@@ -116,6 +116,7 @@ function getProductImages($product)
         }
 
         .product-container {
+            width: 100%;
             background-color: #1e1e1e;
             color: #ffffff;
             border-radius: 10px;
@@ -661,8 +662,11 @@ function getProductImages($product)
                     <div class="col-lg-5 mb-4">
                         <?php
                         $images = getProductImages($product);
+                        if (empty($images)) {
+                            $images[] = ['url' => $product['productInfo']['imageUrl']];
+                        }
                         // Remove the first image (main image), only show option images
-                        if (count($images) > 0) {
+                        if (count($images) > 1) {
                             array_shift($images);
                         }
                         $mainImageUrl = $images[0]['url'] ?? 'https://via.placeholder.com/400x400?text=No+Image';
