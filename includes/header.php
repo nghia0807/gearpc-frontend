@@ -277,6 +277,78 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
     .navbar-nav {
       flex-wrap: nowrap !important;
     }
+
+    /* Search suggestions dropdown */
+    .search-suggestions {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background: #212121;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      z-index: 1050;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .search-suggestions.show {
+      display: block;
+    }
+
+    .suggestion-group {
+      padding: 10px 0;
+    }
+
+    .suggestion-group h6 {
+      padding: 0 15px;
+      margin-bottom: 8px;
+      color: #6c757d;
+      font-size: 0.8rem;
+    }
+
+    .suggestion-item {
+      padding: 8px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      color: #fff;
+    }
+
+    .suggestion-item:hover,
+    .suggestion-item.selected {
+      background-color: #313131;
+    }
+
+    .suggestion-item img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      margin-right: 10px;
+      background: #363636;
+      border-radius: 4px;
+    }
+
+    .suggestion-item-info {
+      flex-grow: 1;
+    }
+
+    .suggestion-item-title {
+      font-weight: 500;
+    }
+
+    .suggestion-item-meta {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+
+    .search-spinner {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
   </style>
 </head>
 
@@ -295,12 +367,28 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
       <div class="navbar-collapse" id="navbarContent" style="display: flex !important;">
         <!-- Centered search bar, flexes to fill space between logo and right buttons -->
         <div class="header-search-flex">
-          <form action="search.php" method="get" class="mx-auto">
+          <form action="index.php" method="get" class="mx-auto position-relative">
             <div class="input-group">
-              <input class="form-control" type="search" name="q" placeholder="Search Tech Zone!" aria-label="Search" />
+              <input class="form-control" type="search" name="q" id="searchInput" 
+                     placeholder="Search Tech Zone!" aria-label="Search" 
+                     autocomplete="off" />
               <button class="btn btn-search" type="submit">
                 <i class="bi bi-search text-white"></i>
+                <div class="spinner-border spinner-border-sm text-light search-spinner" role="status" style="display:none">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
               </button>
+            </div>
+            <div class="search-suggestions" id="searchSuggestions">
+              <div class="suggestion-group" id="recentSearches">
+                <h6>Recent Searches</h6>
+                <div class="suggestions-list" id="recentSearchesList"></div>
+              </div>
+              <!-- Add dedicated section for product suggestions -->
+              <div class="suggestion-group" id="suggestedProducts">
+                <h6>Products</h6>
+                <div class="suggestions-list" id="suggestedProductsList"></div>
+              </div>
             </div>
           </form>
         </div>
@@ -395,6 +483,295 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
       }
       btn.addEventListener('mouseenter', positionPopover);
       window.addEventListener('resize', positionPopover);
+    })();
+
+    // Enhanced Search Feature
+    (function() {
+      const searchInput = document.getElementById('searchInput');
+      const searchSuggestions = document.getElementById('searchSuggestions');
+      const suggestedProductsList = document.getElementById('suggestedProductsList');
+      const recentSearchesList = document.getElementById('recentSearchesList');
+      const searchSpinner = document.querySelector('.search-spinner');
+      
+      if (!searchInput || !searchSuggestions) return;
+      
+      let debounceTimer;
+      let abortController = null;
+      let selectedIndex = -1;
+      let allSuggestionItems = [];
+      
+      // Load recent searches from localStorage
+      function loadRecentSearches() {
+        const searches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+        recentSearchesList.innerHTML = '';
+        
+        if (searches.length === 0) {
+          recentSearchesList.innerHTML = '<div class="px-3 py-2 text-muted">No recent searches</div>';
+          return;
+        }
+        
+        searches.slice(0, 5).forEach(term => {
+          const div = document.createElement('div');
+          div.className = 'suggestion-item';
+          div.innerHTML = `
+            <i class="bi bi-clock-history me-2"></i>
+            <div class="suggestion-item-info">
+              <div class="suggestion-item-title">${term}</div>
+            </div>
+          `;
+          div.addEventListener('click', () => {
+            searchInput.value = term;
+            searchSuggestions.classList.remove('show');
+            // Direct search to products page with search parameter
+            window.location.href = `index.php?page=products&q=${encodeURIComponent(term)}`;
+          });
+          recentSearchesList.appendChild(div);
+        });
+      }
+      
+      // Add search term to history
+      function addToRecentSearches(term) {
+        if (!term.trim()) return;
+        
+        const searches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+        // Remove if exists and add to beginning
+        const filteredSearches = searches.filter(s => s.toLowerCase() !== term.toLowerCase());
+        filteredSearches.unshift(term);
+        
+        // Keep only latest 10 searches
+        const updatedSearches = filteredSearches.slice(0, 10);
+        localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+      }
+      
+      // Fetch product suggestions with improved error handling
+      async function fetchSuggestions(query) {
+        if (!query.trim()) {
+          // Just show recent searches when query is empty
+          document.getElementById('suggestedProducts').style.display = 'none';
+          loadRecentSearches();
+          searchSuggestions.classList.add('show');
+          return;
+        }
+        
+        // Show spinner while loading
+        searchSpinner.style.display = 'inline-block';
+        document.getElementById('suggestedProducts').style.display = 'block';
+        
+        // Cancel previous request if any
+        if (abortController) {
+          abortController.abort();
+        }
+        
+        // Create new abort controller for this request
+        abortController = new AbortController();
+        
+        try {
+          const apiUrl = `http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}&pageSize=5`;
+          
+          const response = await fetch(apiUrl, {
+            signal: abortController.signal,
+            headers: {
+              'Accept': 'application/json'
+            },
+            // Add timeout using Promise.race
+          }).catch(error => {
+            if (error.name === 'AbortError') {
+              // Request was aborted, no need to handle
+              return null;
+            }
+            throw error;
+          });
+          
+          if (!response || !response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          
+          const result = await response.json();
+          if (result.success && result.data) {
+            renderProductSuggestions(result.data.data || []);
+          } else {
+            renderProductSuggestions([]);
+          }
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+          // Show empty product list on error
+          renderProductSuggestions([]);
+        } finally {
+          searchSpinner.style.display = 'none';
+          abortController = null;
+        }
+      }
+      
+      // Render product suggestions with improved display
+      function renderProductSuggestions(products) {
+        suggestedProductsList.innerHTML = '';
+        
+        if (!products || products.length === 0) {
+          suggestedProductsList.innerHTML = '<div class="px-3 py-2 text-muted">No products found</div>';
+          searchSuggestions.classList.add('show');
+          return;
+        }
+        
+        products.forEach(product => {
+          const div = document.createElement('div');
+          div.className = 'suggestion-item';
+          
+          // Format price with VND currency formatting
+          const price = product.currentPrice ? 
+            new Intl.NumberFormat('vi-VN', { 
+              style: 'currency', 
+              currency: 'VND',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0 
+            }).format(product.currentPrice).replace('₫', '').trim() + ' ₫' : 
+            'Liên hệ';
+          
+          // Highlight matching terms in product name
+          let highlightedName = product.name;
+          const searchTerms = searchInput.value.trim().split(/\s+/).filter(term => term.length > 1);
+          
+          if (searchTerms.length > 0) {
+            const escapedTerms = searchTerms.map(term => 
+              term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            );
+            const pattern = new RegExp(`(${escapedTerms.join('|')})`, 'gi');
+            highlightedName = product.name.replace(pattern, '<b>$1</b>');
+          }
+          
+          // Get category name or brand name, with fallbacks
+          const category = product.categoryName || product.category || 'Sản phẩm';
+          const brand = product.brandName || product.brand || '';
+          const meta = brand ? `${category} • ${brand}` : category;
+          
+          div.innerHTML = `
+            <img src="${product.imageUrl || product.image || 'assets/img/placeholder.png'}" 
+                 alt="${product.name}" 
+                 onerror="this.src='assets/img/placeholder.png'">
+            <div class="suggestion-item-info">
+              <div class="suggestion-item-title">${highlightedName}</div>
+              <div class="suggestion-item-meta">${meta} • ${price}</div>
+            </div>
+          `;
+          
+          div.addEventListener('click', () => {
+            // Add search term to history
+            addToRecentSearches(searchInput.value.trim());
+            // Navigate to product detail page
+            window.location.href = `index.php?page=product-detail&id=${product.id}`;
+          });
+          
+          suggestedProductsList.appendChild(div);
+        });
+        
+        searchSuggestions.classList.add('show');
+        selectedIndex = -1;
+        updateAllSuggestionItems();
+      }
+      
+      // Update all suggestion items for keyboard navigation
+      function updateAllSuggestionItems() {
+        allSuggestionItems = Array.from(searchSuggestions.querySelectorAll('.suggestion-item'));
+      }
+      
+      // Handle keyboard navigation
+      function handleKeyNavigation(e) {
+        if (!searchSuggestions.classList.contains('show')) return;
+        
+        // Arrow down
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (selectedIndex < allSuggestionItems.length - 1) {
+            selectedIndex++;
+            updateSelection();
+          }
+        }
+        // Arrow up
+        else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (selectedIndex > 0) {
+            selectedIndex--;
+            updateSelection();
+          }
+        }
+        // Enter
+        else if (e.key === 'Enter') {
+          if (selectedIndex >= 0) {
+            e.preventDefault();
+            allSuggestionItems[selectedIndex].click();
+          } else if (searchInput.value.trim()) {
+            // Add to recent searches on direct form submission
+            addToRecentSearches(searchInput.value.trim());
+          }
+        }
+        // Escape
+        else if (e.key === 'Escape') {
+          searchSuggestions.classList.remove('show');
+          searchInput.blur();
+        }
+      }
+      
+      function updateSelection() {
+        allSuggestionItems.forEach((item, index) => {
+          if (index === selectedIndex) {
+            item.classList.add('selected');
+            item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          } else {
+            item.classList.remove('selected');
+          }
+        });
+      }
+      
+      // Update search form to direct to products page
+      const searchForm = document.querySelector('.header-search-flex form');
+      if (searchForm) {
+        searchForm.setAttribute('action', 'index.php');
+        
+        // Add hidden input for page parameter
+        const pageInput = document.createElement('input');
+        pageInput.type = 'hidden';
+        pageInput.name = 'page';
+        pageInput.value = 'products';
+        searchForm.appendChild(pageInput);
+        
+        // Add form submit handler to save search term
+        searchForm.addEventListener('submit', function(e) {
+          const term = searchInput.value.trim();
+          if (term) {
+            addToRecentSearches(term);
+          }
+        });
+      }
+      
+      // Event listeners for search interaction
+      searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          fetchSuggestions(this.value);
+        }, 300);
+      });
+      
+      searchInput.addEventListener('focus', function() {
+        if (this.value.trim()) {
+          fetchSuggestions(this.value);
+        } else {
+          document.getElementById('suggestedProducts').style.display = 'none';
+          loadRecentSearches();
+          searchSuggestions.classList.add('show');
+          updateAllSuggestionItems();
+        }
+      });
+      
+      searchInput.addEventListener('keydown', handleKeyNavigation);
+      
+      // Close suggestions when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!searchSuggestions.contains(e.target) && e.target !== searchInput) {
+          searchSuggestions.classList.remove('show');
+        }
+      });
+      
+      // Initial load of recent searches
+      loadRecentSearches();
     })();
   </script>
 </body>

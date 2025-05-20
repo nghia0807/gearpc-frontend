@@ -72,7 +72,6 @@
 
     /* Adjust container for desktop width */
     .container-fluid {
-      max-width: 1400px;
       margin-left: auto;
       margin-right: auto;
     }
