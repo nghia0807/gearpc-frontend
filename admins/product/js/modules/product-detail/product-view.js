@@ -78,14 +78,14 @@ function renderProductDetail(data) {
     let imgThumb = info.imageUrl ? `<img src="${escapeHtml(info.imageUrl)}" class="modal-product-thumb me-2 mb-2" alt="Product Image">` :
         `<img src="https://via.placeholder.com/96x96?text=No+Image" class="modal-product-thumb me-2 mb-2" alt="No Image">`;
 
-    // Add edit button for main image
+    // Add image display with edit button
     imgThumb = `
         <div class="position-relative">
-            ${imgThumb}
-            <button class="btn btn-sm btn-edit-product-main-image position-absolute end-0 bottom-0 p-1" 
-                data-product-code="${escapeHtml(info.code)}" 
-                title="Change main image">
-                <i class="fa-solid fa-camera text-primary"></i>
+            <span id="productMainImage-display">${imgThumb}</span>
+            <button class="btn btn-sm edit-btn p-1" data-field="productMainImage" 
+                data-code="${escapeHtml(info.code)}" 
+                title="Edit Product Image">
+                <i class="fa-solid fa-pen text-warning"></i>
             </button>
         </div>
     `;

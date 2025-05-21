@@ -2,12 +2,16 @@ import { showInlineEditForm } from './product-edit-common.js';
 import { showBrandEditForm } from './product-edit-brand.js';
 import { showCategoryEditForm } from './product-edit-categories.js';
 import { showGiftEditForm } from './product-edit-gifts.js';
+import { initProductMainImageEdit } from './product-edit-image.js';
 
 /**
  * Thiết lập các sự kiện xử lý nút chỉnh sửa inline
  */
 export function setupInlineEditHandlers(productData) {
     const info = productData.productInfo || {};
+    
+    // Initialize the image edit functionality
+    initProductMainImageEdit();
     
     // Add event listeners for edit buttons
     document.querySelectorAll('.edit-btn').forEach(btn => {

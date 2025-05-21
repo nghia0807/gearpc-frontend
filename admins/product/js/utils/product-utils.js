@@ -6,7 +6,7 @@ export function fileToBase64(file) {
             return;
         }
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onload = () => resolve(reader.result); // Return the full data URL
         reader.onerror = error => reject(error);
         reader.readAsDataURL(file);
     });

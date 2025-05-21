@@ -2,7 +2,7 @@
 // Import all modules
 import { initProductDeletion } from './modules/product-delete.js';
 import { initVariantsSection } from './modules/product-variants.js';
-import { initProductDetailView, initProductNameEdit, initProductMainImageEdit } from './modules/product-detail.js';
+import { initProductDetailView, initProductNameEdit } from './modules/product-detail.js';
 import { initAddProduct } from './modules/product-add.js';
 
 // Initialize all functionality when DOM is ready
@@ -18,9 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize product name editing
     initProductNameEdit();
-    
-    // Initialize product main image editing
-    initProductMainImageEdit();
     
     // Initialize add product functionality
     initAddProduct();

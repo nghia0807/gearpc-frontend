@@ -210,16 +210,7 @@ function updateProductGifts($productCode, $giftCodes, $token) {
 }
 
 // Update product main image
-function updateProductMainImage($productCode, $imageBase64, $mimeType = null, $token) {
-    // Validate the image data
-    if (empty($imageBase64)) {
-        return [
-            'success' => false,
-            'message' => 'Image data is empty'
-        ];
-    }
-
-    // API call preparation
+function updateProductMainImage($productCode, $imageBase64, $token) {
     $url = "http://localhost:5000/api/products/updateProductMainImage?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -228,27 +219,10 @@ function updateProductMainImage($productCode, $imageBase64, $mimeType = null, $t
         "Authorization: Bearer $token",
         "Content-Type: application/json"
     ]);
-    
-    // Send the entire data URL as is - the API should handle it
-    $requestBody = ['imageBase64' => $imageBase64];
-    
-    // Add mime type if provided
-    if ($mimeType) {
-        $requestBody['mimeType'] = $mimeType;
-    }
-    
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestBody));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['imageBase64' => $imageBase64]));
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    
-    // Check for curl errors
-    if ($response === false) {
-        return [
-            'success' => false,
-            'message' => 'Connection to API failed'
-        ];
-    }
     
     $data = json_decode($response, true);
     return [
@@ -334,8 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Update product main image handler
     if (isset($_POST['action']) && $_POST['action'] === 'updateProductMainImage' && 
         isset($_POST['productCode']) && isset($_POST['imageBase64'])) {
-        $mimeType = isset($_POST['mimeType']) ? $_POST['mimeType'] : null;
-        $result = updateProductMainImage($_POST['productCode'], $_POST['imageBase64'], $mimeType, $token);
+        $result = updateProductMainImage($_POST['productCode'], $_POST['imageBase64'], $token);
         echo json_encode($result);
         exit;
     }
