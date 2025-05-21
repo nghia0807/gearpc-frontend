@@ -181,7 +181,7 @@ if (!isset($product) || empty($product)) {
                     <span>Add to cart</span>
                 </button>
                 <button type="button" class="btn-buy-now mb-3"
-                    onclick="buyNowAsync('<?= htmlspecialchars($product['id']) ?>')">
+                    onclick="window.location.href = 'index.php?page=order&buyNow=true&itemId=' + encodeURIComponent('<?= htmlspecialchars($product['id']) ?>')">
                     <i class="bi bi-bag-check"></i>
                     <span>Buy now</span>
                 </button>

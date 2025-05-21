@@ -1166,8 +1166,8 @@ function getProductImages($product)
                 const quantity = parseInt(document.getElementById('quantity').value) || 1;
                 const productId = '<?= htmlspecialchars($product['productInfo']['id']) ?>';
 
-                // Redirect to order page with product ID and quantity
-                window.location.href = 'index.php?page=order&items=' + productId + '&quantity=' + quantity;
+                // Redirect to order page with 'Buy Now' parameters
+                window.location.href = 'index.php?page=order&buyNow=true&itemId=' + productId + '&quantity=' + quantity;
             });
             // Function to display toast
             function showToast(message, type = 'info') {

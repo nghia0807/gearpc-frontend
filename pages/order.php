@@ -16,14 +16,15 @@ $customerEmail = $_SESSION['user']['email'] ?? '';
 $customerPhone = '';
 $shippingAddress = '';
 $notes = '';
-$shippingFee = 0; // Default shipping fee
-$selectedItems = []; // Will hold the items data
+$shippingFee = 0;
+$selectedItems = [];
 
-// Handle 'Buy Now' functionality
-if (isset($_GET['buyNow']) && isset($_GET['itemId'])) {
+// Check if 'buyNow' parameter is set
+if (isset($_GET['buyNow']) && $_GET['buyNow'] === 'true' && isset($_GET['itemId'])) {
     $itemId = $_GET['itemId'];
     $requestedQuantity = isset($_GET['quantity']) ? intval($_GET['quantity']) : 1;
-    if ($requestedQuantity < 1) $requestedQuantity = 1;
+    if ($requestedQuantity < 1)
+        $requestedQuantity = 1;
 
     // Call API to get product details directly
     $apiUrl = 'http://localhost:5000/api/products/' . $itemId;
@@ -46,15 +47,34 @@ if (isset($_GET['buyNow']) && isset($_GET['itemId'])) {
         $product = $data['data'] ?? null;
 
         if ($product) {
-            $totalPrice = $product['price'] * $requestedQuantity;
+            $productId = $product['id'] ?? '';
+            $productName = $product['name'] ?? '';
+
+            // Handle cases where price is an array
+            if (is_array($product['price'])) {
+                $productPrice = $product['price']['currentPrice'] ?? 0;
+            } else {
+                $productPrice = $product['price'] ?? 0;
+            }
+
+            // Handle cases where image URL is nested or directly available
+            if (isset($product['productInfo']['imageUrl'])) {
+                $imageUrl = $product['productInfo']['imageUrl'];
+            } elseif (isset($product['imageUrl'])) {
+                $imageUrl = $product['imageUrl'];
+            } else {
+                $imageUrl = 'https://via.placeholder.com/150';
+            }
+
+            $totalPrice = $productPrice * $requestedQuantity;
 
             $selectedItems[] = [
-                'itemId' => $product['id'],
+                'itemId' => $productId,
                 'itemType' => 'Product',
                 'quantity' => $requestedQuantity,
-                'name' => $product['name'],
-                'price' => $product['price'],
-                'imageUrl' => $product['imageUrl'],
+                'name' => $productName,
+                'price' => $productPrice,
+                'imageUrl' => $imageUrl,
                 'totalPrice' => $totalPrice
             ];
         } else {
@@ -65,14 +85,13 @@ if (isset($_GET['buyNow']) && isset($_GET['itemId'])) {
         echo "Unable to retrieve product details. Error code: $httpCode";
         exit;
     }
-}
-// Handle 'Process to Checkout' functionality
-else if (isset($_GET['items'])) {
+} else if (isset($_GET['items'])) {
     $itemIds = explode(',', $_GET['items']);
-    
+
     // Get quantity from URL parameter if provided
     $requestedQuantity = isset($_GET['quantity']) ? intval($_GET['quantity']) : 1;
-    if ($requestedQuantity < 1) $requestedQuantity = 1;
+    if ($requestedQuantity < 1)
+        $requestedQuantity = 1;
 
     // Call API to get cart to retrieve selected items details
     $apiUrl = 'http://localhost:5000/api/carts/get';
@@ -92,13 +111,13 @@ else if (isset($_GET['items'])) {
 
     if ($httpCode === 200) {
         $data = json_decode($response, true);
-        $cartItems = $data['data']['items'] ?? [];        // Filter only the selected items
+        $cartItems = $data['data']['items'] ?? [];
         foreach ($cartItems as $item) {
             if (in_array($item['itemId'], $itemIds)) {
                 // Use requested quantity if available and directly buying from product page
                 $quantity = isset($requestedQuantity) && count($itemIds) == 1 ? $requestedQuantity : $item['quantity'];
                 $totalPrice = $item['price'] * $quantity;
-                
+
                 $selectedItems[] = [
                     'itemId' => $item['itemId'],
                     'itemType' => 'Product',
@@ -115,7 +134,7 @@ else if (isset($_GET['items'])) {
         exit;
     }
 } else {
-    // No items selected
+    // No valid parameters
     header('Location: index.php?page=cart');
     exit;
 }
