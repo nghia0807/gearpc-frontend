@@ -165,9 +165,9 @@ function updateProductBrand($productCode, $brandCode, $token) {
     ];
 }
 
-// Update product gifts
-function updateProductGifts($productCode, $giftCodes, $token) {
-    $url = "http://localhost:5000/api/products/updateProductGift?productCode=$productCode";
+// Update product categories
+function updateProductCategories($productCode, $categoriesCodes, $token) {
+    $url = "http://localhost:5000/api/products/updateProductCategories?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -175,7 +175,7 @@ function updateProductGifts($productCode, $giftCodes, $token) {
         "Authorization: Bearer $token",
         "Content-Type: application/json"
     ]);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['giftCodes' => $giftCodes]));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['categoriesCode' => $categoriesCodes]));
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -243,11 +243,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
-    // Update product gifts handler
-    if (isset($_POST['action']) && $_POST['action'] === 'updateProductGifts' && 
-        isset($_POST['productCode']) && isset($_POST['giftCodes'])) {
-        $giftCodes = json_decode($_POST['giftCodes'], true);
-        $result = updateProductGifts($_POST['productCode'], $giftCodes, $token);
+    // Update product categories handler
+    if (isset($_POST['action']) && $_POST['action'] === 'updateProductCategories' && 
+        isset($_POST['productCode']) && isset($_POST['categoriesCode'])) {
+        $categoriesCode = json_decode($_POST['categoriesCode'], true);
+        $result = updateProductCategories($_POST['productCode'], $categoriesCode, $token);
         echo json_encode($result);
         exit;
     }
@@ -665,37 +665,6 @@ $totalPages = ceil($totalCount / $pageSize);
   </div>
 </div>
 
-<!-- Gift Edit Modal -->
-<div class="modal fade" id="editGiftsModal" tabindex="-1" aria-labelledby="editGiftsModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-warning bg-opacity-75 text-dark">
-        <h5 class="modal-title" id="editGiftsModalLabel">
-          <i class="fa-solid fa-gift me-2"></i>Edit Product Gifts
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="editGiftsAlert"></div>
-        <form id="editGiftsForm">
-          <input type="hidden" id="editGiftsProductCode">
-          <div class="border rounded p-3 bg-light">
-            <div class="row" id="editGiftsCheckboxes">
-              <!-- Checkboxes will be inserted here -->
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-warning" id="saveGiftsBtn">
-          <i class="fa-solid fa-save me-1"></i>Save Changes
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Thêm container ẩn để lưu trữ brand options cho JavaScript -->
 <div id="brandSelectOptions" style="display: none;">
     <?php foreach ($brandsList as $brand): ?>
@@ -705,9 +674,25 @@ $totalPages = ceil($totalCount / $pageSize);
     <?php endforeach; ?>
 </div>
 
+<!-- Hidden container to store categories options for JavaScript -->
+<div id="categoriesCheckboxes" style="display: none;">
+    <?php foreach ($categoriesList as $cat): ?>
+    <div class="form-check">
+        <!-- Thêm một data attribute để debug -->
+        <input class="form-check-input" type="checkbox" 
+               value="<?= htmlspecialchars($cat['code']) ?>" 
+               id="modal_cat_<?= htmlspecialchars($cat['code']) ?>"
+               data-category-code="<?= htmlspecialchars($cat['code']) ?>">
+        <label class="form-check-label" for="modal_cat_<?= htmlspecialchars($cat['code']) ?>">
+            <?= htmlspecialchars($cat['name']) ?>
+        </label>
+    </div>
+    <?php endforeach; ?>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Replace the inline script with a reference to the external file -->
-<script src="js/admin_products.js"></script>
+<script src="js/admin_products.js" type="module"></script>
 <?php initializeToasts(); ?>
 </body>
 </html>
