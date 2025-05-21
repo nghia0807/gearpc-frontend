@@ -16,7 +16,7 @@ export function initAddProduct() {
     btnAddProduct.addEventListener('click', function() {
         addProductForm.reset();
         addProductAlert.innerHTML = '';
-        // Show the modal - this was missing
+        // Show the modal
         addProductModal.show();
     });
 
