@@ -22,7 +22,8 @@ try {
                 'Laptops',
                 // Core Components
                 'Motherboards',
-                'Main, CPU, VGA',
+                'CPUs',
+                'Graphics Cards',
                 'Memory (RAM)',
                 'Power Supply Unit (PSU)',
                 'CPU Cooler',
@@ -59,7 +60,8 @@ $icons = [
     'Laptops' => 'bi bi-laptop-fill',
     // Core Components
     'Motherboards' => 'bi bi-motherboard-fill',
-    'Main, CPU, VGA' => 'bi bi-cpu-fill',
+    'CPUs' => 'bi bi-cpu-fill',
+    'Graphics Cards' => 'bi bi-gpu-card',
     'Memory (RAM)' => 'bi bi-memory',
     'Power Supply Unit (PSU)' => 'bi bi-lightning-charge-fill',
     'CPU Cooler' => 'bi bi-fan',
