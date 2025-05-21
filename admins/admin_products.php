@@ -187,6 +187,76 @@ function updateProductCategories($productCode, $categoriesCodes, $token) {
     ];
 }
 
+// Update product gifts
+function updateProductGifts($productCode, $giftCodes, $token) {
+    $url = "http://localhost:5000/api/products/updateProductGift?productCode=$productCode";
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer $token",
+        "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['giftCodes' => $giftCodes]));
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    $data = json_decode($response, true);
+    return [
+        'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
+        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+    ];
+}
+
+// Update product main image
+function updateProductMainImage($productCode, $imageBase64, $mimeType = null, $token) {
+    // Validate the image data
+    if (empty($imageBase64)) {
+        return [
+            'success' => false,
+            'message' => 'Image data is empty'
+        ];
+    }
+
+    // API call preparation
+    $url = "http://localhost:5000/api/products/updateProductMainImage?productCode=$productCode";
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer $token",
+        "Content-Type: application/json"
+    ]);
+    
+    // Send the entire data URL as is - the API should handle it
+    $requestBody = ['imageBase64' => $imageBase64];
+    
+    // Add mime type if provided
+    if ($mimeType) {
+        $requestBody['mimeType'] = $mimeType;
+    }
+    
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestBody));
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    // Check for curl errors
+    if ($response === false) {
+        return [
+            'success' => false,
+            'message' => 'Connection to API failed'
+        ];
+    }
+    
+    $data = json_decode($response, true);
+    return [
+        'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
+        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+    ];
+}
+
 // Get product details by ID
 function getProductDetail($productId, $token) {
     $url = "http://localhost:5000/api/products/$productId";
@@ -248,6 +318,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         isset($_POST['productCode']) && isset($_POST['categoriesCode'])) {
         $categoriesCode = json_decode($_POST['categoriesCode'], true);
         $result = updateProductCategories($_POST['productCode'], $categoriesCode, $token);
+        echo json_encode($result);
+        exit;
+    }
+    
+    // Update product gifts handler
+    if (isset($_POST['action']) && $_POST['action'] === 'updateProductGifts' && 
+        isset($_POST['productCode']) && isset($_POST['giftCodes'])) {
+        $giftCodes = json_decode($_POST['giftCodes'], true);
+        $result = updateProductGifts($_POST['productCode'], $giftCodes, $token);
+        echo json_encode($result);
+        exit;
+    }
+    
+    // Update product main image handler
+    if (isset($_POST['action']) && $_POST['action'] === 'updateProductMainImage' && 
+        isset($_POST['productCode']) && isset($_POST['imageBase64'])) {
+        $mimeType = isset($_POST['mimeType']) ? $_POST['mimeType'] : null;
+        $result = updateProductMainImage($_POST['productCode'], $_POST['imageBase64'], $mimeType, $token);
         echo json_encode($result);
         exit;
     }
@@ -687,6 +775,16 @@ $totalPages = ceil($totalCount / $pageSize);
             <?= htmlspecialchars($cat['name']) ?>
         </label>
     </div>
+    <?php endforeach; ?>
+</div>
+
+<!-- Hidden container to store gift options for JavaScript -->
+<div id="giftSelectOptions" style="display: none;">
+    <?php foreach ($giftsList as $gift): ?>
+    <option value="<?= htmlspecialchars($gift['code']) ?>" 
+            data-image="<?= htmlspecialchars($gift['imageUrl'] ?? '') ?>">
+        <?= htmlspecialchars($gift['name']) ?>
+    </option>
     <?php endforeach; ?>
 </div>
 
