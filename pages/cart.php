@@ -645,19 +645,19 @@ $cartItems = $data['data']['items'] ?? [];
                     }
                 }, 'Remove Items');
             });
-        }
-
-        // Checkout selected items
+        }        // Checkout selected items
         if (checkoutBtn) {
             checkoutBtn.addEventListener('click', function () {
                 const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked'))
                     .map(checkbox => checkbox.dataset.id);
 
-                if (selectedIds.length === 0) return;
+                if (selectedIds.length === 0) {
+                    alert('Please select at least one item to checkout.');
+                    return;
+                }
 
-                // Store selected items in session storage and redirect to checkout
-                sessionStorage.setItem('checkout_items', JSON.stringify(selectedIds));
-                window.location.href = 'index.php?page=checkout';
+                // Redirect to the order page with selected item IDs
+                window.location.href = 'index.php?page=order&items=' + selectedIds.join(',');
             });
         }
 
