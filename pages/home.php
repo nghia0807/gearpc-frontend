@@ -1,11 +1,8 @@
 <?php
 // Fetch categories using PHP cURL
-$pageIndex = isset($_GET['pageIndex']) ? (int) $_GET['pageIndex'] : 0;
-$pageSize = 10;
-$apiUrl = "http://localhost:5000/api/categories/get?pageIndex={$pageIndex}&pageSize={$pageSize}";
+$apiUrl = "http://localhost:5000/api/categories/get?pageSize=1000"; // Fetch all categories
 
 $categories = [];
-$totalCount = 0;
 $errorMsg = '';
 
 try {
@@ -18,17 +15,27 @@ try {
         $jsonData = json_decode($response, true);
         if (isset($jsonData['data']['data'])) {
             $categories = $jsonData['data']['data'];
-            $totalCount = $jsonData['data']['totalCount'] ?? 0;
             // Custom order for categories
             $customOrder = [
-                'Laptops',
+                // Main Products
                 'PCs',
+                'Laptops',
+                // Core Components
+                'Motherboards',
                 'Main, CPU, VGA',
+                'Memory (RAM)',
+                'Power Supply Unit (PSU)',
+                'CPU Cooler',
+                'Hard Drives & Storage Devices',
+                'PC Cases',
+                // Peripherals
                 'Monitors',
                 'Keyboards',
-                'Mouse + Mouse Pad',
-                'Earphones',
-                'Sounds'
+                'Mouses + Mouse Pads',
+                // Audio
+                'Sounds',
+                // Software
+                'Operating System'
             ];
             usort($categories, function ($a, $b) use ($customOrder) {
                 $posA = array_search($a['name'], $customOrder);
@@ -47,14 +54,25 @@ try {
 }
 
 $icons = [
-    'Laptops' => 'bi bi-laptop',
-    'PCs' => 'bi bi-pc-display',
-    'Main, CPU, VGA' => 'bi bi-cpu',
-    'Mouses + Mouse Pads' => 'bi bi-mouse',
-    'Sounds' => 'bi bi-speaker',
-    'Monitors' => 'bi bi-display',
-    'Earphones' => 'bi bi-headphones',
-    'Keyboards' => 'bi bi-keyboard',
+    // Main Products
+    'PCs' => 'bi bi-pc-display-horizontal',
+    'Laptops' => 'bi bi-laptop-fill',
+    // Core Components
+    'Motherboards' => 'bi bi-motherboard-fill',
+    'Main, CPU, VGA' => 'bi bi-cpu-fill',
+    'Memory (RAM)' => 'bi bi-memory',
+    'Power Supply Unit (PSU)' => 'bi bi-lightning-charge-fill',
+    'CPU Cooler' => 'bi bi-fan',
+    'Hard Drives & Storage Devices' => 'bi bi-device-hdd-fill',
+    'PC Cases' => 'bi bi-pc-display',
+    // Peripherals
+    'Monitors' => 'bi bi-display-fill',
+    'Keyboards' => 'bi bi-keyboard-fill',
+    'Mouses + Mouse Pads' => 'bi bi-mouse3-fill',
+    // Audio
+    'Sounds' => 'bi bi-speaker-fill',
+    // Software
+    'Operating System' => 'bi bi-windows'
 ];
 ?>
 
@@ -80,8 +98,30 @@ $icons = [
         .sidebar-menu {
             background-color: #414141;
             min-height: auto;
+            max-height: 80vh; /* Set maximum height */
             box-shadow: none;
             border-radius: 10px;
+            width: auto !important;
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        /* Style the scrollbar */
+        .sidebar-menu::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-track {
+            background: #414141;
+            border-radius: 10px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: #686868;
+            border-radius: 10px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
         .sidebar-menu a {
@@ -104,7 +144,7 @@ $icons = [
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <nav class="sidebar-menu col-md-2 col-12 p-3 mt-3">
+            <nav class="sidebar-menu col-12 p-3 mt-3">
                 <?php if ($errorMsg): ?>
                     <div class="alert alert-danger"><?= htmlspecialchars($errorMsg) ?></div>
                 <?php elseif ($categories): ?>
@@ -121,9 +161,6 @@ $icons = [
                             </a>
                         <?php endforeach; ?>
                     </div>
-                    <?php if ($totalCount > count($categories)): ?>
-                        <a href="index.php?page=home&pageIndex=<?= $pageIndex + 1 ?>" class="btn btn-primary mt-3">Load More</a>
-                    <?php endif; ?>
                 <?php else: ?>
                     <p>Không có danh mục nào</p>
                 <?php endif; ?>

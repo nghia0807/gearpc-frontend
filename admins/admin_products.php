@@ -165,6 +165,28 @@ function updateProductBrand($productCode, $brandCode, $token) {
     ];
 }
 
+// Update product categories
+function updateProductCategories($productCode, $categoriesCodes, $token) {
+    $url = "http://localhost:5000/api/products/updateProductCategories?productCode=$productCode";
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer $token",
+        "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['categoriesCode' => $categoriesCodes]));
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    $data = json_decode($response, true);
+    return [
+        'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
+        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+    ];
+}
+
 // Update product gifts
 function updateProductGifts($productCode, $giftCodes, $token) {
     $url = "http://localhost:5000/api/products/updateProductGift?productCode=$productCode";
@@ -176,6 +198,28 @@ function updateProductGifts($productCode, $giftCodes, $token) {
         "Content-Type: application/json"
     ]);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['giftCodes' => $giftCodes]));
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    $data = json_decode($response, true);
+    return [
+        'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
+        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+    ];
+}
+
+// Update product main image
+function updateProductMainImage($productCode, $imageBase64, $token) {
+    $url = "http://localhost:5000/api/products/updateProductMainImage?productCode=$productCode";
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer $token",
+        "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['imageBase64' => $imageBase64]));
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -243,11 +287,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
+    // Update product categories handler
+    if (isset($_POST['action']) && $_POST['action'] === 'updateProductCategories' && 
+        isset($_POST['productCode']) && isset($_POST['categoriesCode'])) {
+        $categoriesCode = json_decode($_POST['categoriesCode'], true);
+        $result = updateProductCategories($_POST['productCode'], $categoriesCode, $token);
+        echo json_encode($result);
+        exit;
+    }
+    
     // Update product gifts handler
     if (isset($_POST['action']) && $_POST['action'] === 'updateProductGifts' && 
         isset($_POST['productCode']) && isset($_POST['giftCodes'])) {
         $giftCodes = json_decode($_POST['giftCodes'], true);
         $result = updateProductGifts($_POST['productCode'], $giftCodes, $token);
+        echo json_encode($result);
+        exit;
+    }
+    
+    // Update product main image handler
+    if (isset($_POST['action']) && $_POST['action'] === 'updateProductMainImage' && 
+        isset($_POST['productCode']) && isset($_POST['imageBase64'])) {
+        $result = updateProductMainImage($_POST['productCode'], $_POST['imageBase64'], $token);
         echo json_encode($result);
         exit;
     }
@@ -281,8 +342,8 @@ $totalPages = ceil($totalCount / $pageSize);
     <title>Product Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- Tham chiếu đến file CSS riêng -->
-    <link rel="stylesheet" href="css/admin_products.css">
+    <!-- Cập nhật đường dẫn đến file CSS -->
+    <link rel="stylesheet" href="product/css/admin_products.css">
     <style>
         .sticky-header {
             position: sticky;
@@ -665,37 +726,6 @@ $totalPages = ceil($totalCount / $pageSize);
   </div>
 </div>
 
-<!-- Gift Edit Modal -->
-<div class="modal fade" id="editGiftsModal" tabindex="-1" aria-labelledby="editGiftsModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-warning bg-opacity-75 text-dark">
-        <h5 class="modal-title" id="editGiftsModalLabel">
-          <i class="fa-solid fa-gift me-2"></i>Edit Product Gifts
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="editGiftsAlert"></div>
-        <form id="editGiftsForm">
-          <input type="hidden" id="editGiftsProductCode">
-          <div class="border rounded p-3 bg-light">
-            <div class="row" id="editGiftsCheckboxes">
-              <!-- Checkboxes will be inserted here -->
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-warning" id="saveGiftsBtn">
-          <i class="fa-solid fa-save me-1"></i>Save Changes
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Thêm container ẩn để lưu trữ brand options cho JavaScript -->
 <div id="brandSelectOptions" style="display: none;">
     <?php foreach ($brandsList as $brand): ?>
@@ -705,9 +735,35 @@ $totalPages = ceil($totalCount / $pageSize);
     <?php endforeach; ?>
 </div>
 
+<!-- Hidden container to store categories options for JavaScript -->
+<div id="categoriesCheckboxes" style="display: none;">
+    <?php foreach ($categoriesList as $cat): ?>
+    <div class="form-check">
+        <!-- Thêm một data attribute để debug -->
+        <input class="form-check-input" type="checkbox" 
+               value="<?= htmlspecialchars($cat['code']) ?>" 
+               id="modal_cat_<?= htmlspecialchars($cat['code']) ?>"
+               data-category-code="<?= htmlspecialchars($cat['code']) ?>">
+        <label class="form-check-label" for="modal_cat_<?= htmlspecialchars($cat['code']) ?>">
+            <?= htmlspecialchars($cat['name']) ?>
+        </label>
+    </div>
+    <?php endforeach; ?>
+</div>
+
+<!-- Hidden container to store gift options for JavaScript -->
+<div id="giftSelectOptions" style="display: none;">
+    <?php foreach ($giftsList as $gift): ?>
+    <option value="<?= htmlspecialchars($gift['code']) ?>" 
+            data-image="<?= htmlspecialchars($gift['imageUrl'] ?? '') ?>">
+        <?= htmlspecialchars($gift['name']) ?>
+    </option>
+    <?php endforeach; ?>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Replace the inline script with a reference to the external file -->
-<script src="js/admin_products.js"></script>
+<!-- Cập nhật đường dẫn đến file JavaScript -->
+<script src="product/js/admin_products.js" type="module"></script>
 <?php initializeToasts(); ?>
 </body>
 </html>
