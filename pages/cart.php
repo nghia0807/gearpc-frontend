@@ -112,6 +112,14 @@ $cartItems = $data['data']['items'] ?? [];
             border-color: #e0851c !important;
         }
 
+        .btn-primary:focus,
+        .btn-primary:focus-visible,
+        .btn-primary:active:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+
         .cart-item {
             display: grid;
             grid-template-columns: 40px 100px 2fr 1fr 1fr 1fr 0.5fr;

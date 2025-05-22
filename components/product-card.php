@@ -175,13 +175,11 @@ if (!isset($product) || empty($product)) {
         </a>
         <div class="product-action">
             <div class="w-100 d-flex justify-content-between gap-2">
-                <button type="button" class="btn-add-cart mb-3"
-                    onclick="addToCartAsync('<?= htmlspecialchars($product['id']) ?>')">
+                <button type="button" class="btn-add-cart mb-3" id="addToCart-<?= htmlspecialchars($product['id']) ?>">
                     <i class="bi bi-cart-plus"></i>
                     <span>Add to cart</span>
                 </button>
-                <button type="button" class="btn-buy-now mb-3"
-                    onclick="window.location.href = 'index.php?page=order&buyNow=true&itemId=' + encodeURIComponent('<?= htmlspecialchars($product['id']) ?>')">
+                <button type="button" class="btn-buy-now mb-3" id="buyNow-<?= htmlspecialchars($product['id']) ?>">
                     <i class="bi bi-bag-check"></i>
                     <span>Buy now</span>
                 </button>
@@ -189,12 +187,52 @@ if (!isset($product) || empty($product)) {
         </div>
     </div>
 </div>
+<!-- Login Modal -->
+<div class="modal fade" id="loginConfirmModal" tabindex="-1" aria-labelledby="loginConfirmModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title" id="loginConfirmModalLabel"><i class="bi bi-person-circle me-2"></i>Login
+                    required</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Please login to use this fearture.</p>
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <a href="pages/login.php" class="btn"
+                    style="background-color: #ffa33a; color: #000000; font-weight: 600;">Login</a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"
     style="z-index: 1080; margin-bottom: 1.5rem; margin-right: 1.5rem; width: max-content; min-width: 300px; max-width: 90vw;">
 </div>
 
 <script>
+    // Check if user is logged in
+    function isUserLoggedIn() {
+        return <?= isset($_SESSION['token']) ? 'true' : 'false' ?>;
+    }
+
+    // Show login confirmation modal
+    function showLoginConfirmModal() {
+        const modal = new bootstrap.Modal(document.getElementById('loginConfirmModal'));
+        modal.show();
+    }
+
     function addToCartAsync(productId) {
+        // Check if user is logged in
+        if (!isUserLoggedIn()) {
+            showLoginConfirmModal();
+            return;
+        }
+
         fetch('actions/add-to-cart.php', {
             method: 'POST',
             headers: {
@@ -218,11 +256,14 @@ if (!isset($product) || empty($product)) {
     }
 
     function buyNowAsync(productId) {
-        // Store selected product in session storage
-        sessionStorage.setItem('checkout_items', JSON.stringify([{ productId, quantity: 1 }]));
+        // Check if user is logged in
+        if (!isUserLoggedIn()) {
+            showLoginConfirmModal();
+            return;
+        }
 
-        // Redirect to checkout page
-        window.location.href = 'index.php?page=checkout';
+        // Redirect to order page with 'Buy Now' parameters
+        window.location.href = 'index.php?page=order&buyNow=true&itemId=' + encodeURIComponent(productId);
     }
 
     function showToast(message, type = 'info') {
@@ -251,4 +292,23 @@ if (!isset($product) || empty($product)) {
             toastEl.remove();
         });
     }
+
+    // Initialize event listeners for Add to Cart and Buy Now buttons
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add event handler for Add to Cart button
+        const addToCartBtn = document.getElementById('addToCart-<?= htmlspecialchars($product['id']) ?>');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function () {
+                addToCartAsync('<?= htmlspecialchars($product['id']) ?>');
+            });
+        }
+
+        // Add event handler for Buy Now button
+        const buyNowBtn = document.getElementById('buyNow-<?= htmlspecialchars($product['id']) ?>');
+        if (buyNowBtn) {
+            buyNowBtn.addEventListener('click', function () {
+                buyNowAsync('<?= htmlspecialchars($product['id']) ?>');
+            });
+        }
+    });
 </script>

@@ -1009,6 +1009,30 @@ function getProductImages($product)
             </div>
         <?php endif; ?>
     </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginConfirmModal" tabindex="-1" aria-labelledby="loginConfirmModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title" id="loginConfirmModalLabel"><i class="bi bi-person-circle me-2"></i>
+                        Login required</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Please login to use this fearture.</p>
+                </div>
+                <div class="modal-footer border-top border-secondary">
+                    <a href="pages/login.php" class="btn"
+                        style="background-color: #ffa33a; color: #000000; font-weight: 600;">Login</a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast container -->
     <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"
         style="z-index: 1080; margin-bottom: 1.5rem; margin-right: 1.5rem; width: max-content; min-width: 300px; max-width: 90vw;">
@@ -1135,9 +1159,25 @@ function getProductImages($product)
                         }, 100);
                     });
                 });
-            <?php endif; ?>
+            <?php endif; ?>            // Check if user is logged in
+            function isUserLoggedIn() {
+                return <?= isset($_SESSION['token']) ? 'true' : 'false' ?>;
+            }
+
+            // Show login confirmation modal
+            function showLoginConfirmModal() {
+                const modal = new bootstrap.Modal(document.getElementById('loginConfirmModal'));
+                modal.show();
+            }
+
             // Add to cart with AJAX
             document.getElementById('addToCartBtn').onclick = function () {
+                // Check if user is logged in
+                if (!isUserLoggedIn()) {
+                    showLoginConfirmModal();
+                    return;
+                }
+
                 const quantity = parseInt(quantityInput.value) || 1;
                 // Send AJAX request to add-to-cart.php
                 fetch('actions/add-to-cart.php', {
@@ -1161,8 +1201,16 @@ function getProductImages($product)
                         console.error('Error:', error);
                         showToast('An error occurred while processing your request.', 'danger');
                     });
-            };            // Buy now button
+            };
+
+            // Buy now button
             document.getElementById('buyNowBtn').addEventListener('click', function () {
+                // Check if user is logged in
+                if (!isUserLoggedIn()) {
+                    showLoginConfirmModal();
+                    return;
+                }
+
                 const quantity = parseInt(document.getElementById('quantity').value) || 1;
                 const productId = '<?= htmlspecialchars($product['productInfo']['id']) ?>';
 
