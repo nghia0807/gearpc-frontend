@@ -76,11 +76,45 @@ require_once __DIR__ . '/../includes/session_init.php';
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
-    }
-
-    .summary-card {
+    }    .summary-card {
         position: sticky;
         top: 20px;
+    }
+
+    .summary-item-img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+        border-radius: 4px;
+        background-color: white;
+    }
+
+    .summary-item-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: #ff9620;
+        background-color: #fff;
+        border-radius: 4px;
+    }
+
+    .summary-item-details {
+        max-width: 150px;
+        overflow: hidden;
+    }
+
+    .summary-item-name {
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .summary-item-category {
+        font-size: 0.75rem;
     }
 
     .category-icon {

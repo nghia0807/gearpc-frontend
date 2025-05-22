@@ -221,14 +221,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     psu: 'lightning-charge',
                     cooler: 'fan'
                 }[category] || 'gear';
-                
-                summaryContainer.innerHTML += `
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div>
-                            <i class="bi bi-${icon} me-2"></i>
-                            ${component.name}
+                  summaryContainer.innerHTML += `
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            ${component.imageUrl ? 
+                                `<img src="${component.imageUrl}" alt="${component.name}" class="summary-item-img me-2">` : 
+                                `<i class="bi bi-${icon} me-2 summary-item-icon"></i>`
+                            }
+                            <div class="summary-item-details">
+                                <div class="summary-item-name">${component.name}</div>
+                                <div class="summary-item-category text-muted small">${category.toUpperCase()}</div>
+                            </div>
                         </div>
-                        <div>$${component.currentPrice}</div>
+                        <div class="summary-item-price">$${component.currentPrice}</div>
                     </div>
                 `;
             }
