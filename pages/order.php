@@ -9,7 +9,6 @@ if (!$token) {
     exit;
 }
 
-// Get selected items from session storage (passed from cart page)
 // Initialize variables for form data
 $customerName = $_SESSION['user']['fullName'] ?? '';
 $customerEmail = $_SESSION['user']['email'] ?? '';
@@ -19,13 +18,14 @@ $notes = '';
 $shippingFee = 0;
 $selectedItems = [];
 
-// Check if 'buyNow' parameter is set
-if (isset($_GET['buyNow']) && $_GET['buyNow'] === 'true' && isset($_GET['itemId'])) {
-    $itemId = $_GET['itemId'];
-    $requestedQuantity = isset($_GET['quantity']) ? intval($_GET['quantity']) : 1;
-    if ($requestedQuantity < 1)
-        $requestedQuantity = 1;
-
+/**
+ * Handle Buy Now functionality - fetches a single product by ID
+ * @param string $itemId The product ID
+ * @param int $quantity The quantity to purchase
+ * @param string $token The user's authentication token
+ * @return array|null The product details if found, null otherwise
+ */
+function handleBuyNow($itemId, $quantity, $token) {
     // Call API to get product details directly
     $apiUrl = 'http://localhost:5000/api/products/' . $itemId;
     $ch = curl_init($apiUrl);
@@ -42,79 +42,122 @@ if (isset($_GET['buyNow']) && $_GET['buyNow'] === 'true' && isset($_GET['itemId'
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if ($httpCode === 200) {
-        $data = json_decode($response, true);
-        $product = $data['data'] ?? null;
+    if ($httpCode !== 200) {
+        return [
+            'success' => false,
+            'error' => "Unable to retrieve product details. Error code: $httpCode"
+        ];
+    }
 
-        if ($product) {
-            $productId = $product['id'] ?? '';
-            $productName = $product['name'] ?? '';
+    $data = json_decode($response, true);
+    $product = $data['data'] ?? null;
 
-            // Handle cases where price is an array
-            if (is_array($product['price'])) {
-                $productPrice = $product['price']['currentPrice'] ?? 0;
-            } else {
-                $productPrice = $product['price'] ?? 0;
-            }
+    if (!$product) {
+        return [
+            'success' => false,
+            'error' => "Product not found."
+        ];
+    }
 
-            // Handle cases where image URL is nested or directly available
-            if (isset($product['productInfo']['imageUrl'])) {
-                $imageUrl = $product['productInfo']['imageUrl'];
-            } elseif (isset($product['imageUrl'])) {
-                $imageUrl = $product['imageUrl'];
-            } else {
-                $imageUrl = 'https://via.placeholder.com/150';
-            }
+    $productId = $product['id'] ?? '';
+    $productName = $product['name'] ?? '';
 
-            $totalPrice = $productPrice * $requestedQuantity;
-
-            $selectedItems[] = [
-                'itemId' => $productId,
-                'itemType' => 'Product',
-                'quantity' => $requestedQuantity,
-                'name' => $productName,
-                'price' => $productPrice,
-                'imageUrl' => $imageUrl,
-                'totalPrice' => $totalPrice
-            ];
-        } else {
-            echo "Product not found.";
-            exit;
-        }
+    // Handle cases where price is an array
+    if (is_array($product['price'])) {
+        $productPrice = $product['price']['currentPrice'] ?? 0;
     } else {
-        echo "Unable to retrieve product details. Error code: $httpCode";
+        $productPrice = $product['price'] ?? 0;
+    }
+
+    // Handle cases where image URL is nested or directly available
+    if (isset($product['productInfo']['imageUrl'])) {
+        $imageUrl = $product['productInfo']['imageUrl'];
+    } elseif (isset($product['imageUrl'])) {
+        $imageUrl = $product['imageUrl'];
+    } else {
+        $imageUrl = 'https://via.placeholder.com/150';
+    }
+
+    $totalPrice = $productPrice * $quantity;
+
+    return [
+        'success' => true,
+        'item' => [
+            'itemId' => $itemId,
+            'itemType' => 'Product',
+            'quantity' => $quantity,
+            'name' => $productName,
+            'price' => $productPrice,
+            'imageUrl' => $imageUrl,
+            'totalPrice' => $totalPrice
+        ]
+    ];
+}
+
+// Check if 'buyNow' parameter is set - this represents direct purchase from product card or product detail
+if (isset($_GET['buyNow']) && $_GET['buyNow'] === 'true' && isset($_GET['itemId'])) {
+    $itemId = $_GET['itemId'];
+    
+    // Get quantity from URL parameter if provided (from product detail page)
+    // or default to 1 (from product card)
+    $requestedQuantity = isset($_GET['quantity']) ? intval($_GET['quantity']) : 1;
+    if ($requestedQuantity < 1) {
+        $requestedQuantity = 1;
+    }
+
+    $result = handleBuyNow($itemId, $requestedQuantity, $token);
+    
+    if (!$result['success']) {
+        echo $result['error'];
         exit;
     }
+    
+    // For Buy Now, we have a single product only
+    $selectedItems[] = $result['item'];
 } else if (isset($_GET['items'])) {
-    $itemIds = explode(',', $_GET['items']);
+    /**
+     * Handle Cart Checkout functionality - fetches selected items from user's cart
+     * @param array $itemIds Array of product IDs to checkout from cart
+     * @param int|null $requestedQuantity Optional quantity override for single item purchases
+     * @param string $token The user's authentication token  
+     * @return array Result with success status and items or error message
+     */
+    function handleCartCheckout($itemIds, $requestedQuantity, $token) {
+        $result = [
+            'success' => false,
+            'items' => [],
+            'error' => ''
+        ];
+        
+        // Call API to get cart to retrieve selected items details
+        $apiUrl = 'http://localhost:5000/api/carts/get';
+        $ch = curl_init($apiUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ],
+            CURLOPT_TIMEOUT => 10
+        ]);
 
-    // Get quantity from URL parameter if provided
-    $requestedQuantity = isset($_GET['quantity']) ? intval($_GET['quantity']) : 1;
-    if ($requestedQuantity < 1)
-        $requestedQuantity = 1;
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-    // Call API to get cart to retrieve selected items details
-    $apiUrl = 'http://localhost:5000/api/carts/get';
-    $ch = curl_init($apiUrl);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $token
-        ],
-        CURLOPT_TIMEOUT => 10
-    ]);
+        if ($httpCode !== 200) {
+            $result['error'] = "Unable to retrieve cart items. Error code: $httpCode";
+            return $result;
+        }
 
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($httpCode === 200) {
         $data = json_decode($response, true);
         $cartItems = $data['data']['items'] ?? [];
+        $selectedItems = [];
+        
+        // Process only the items that were selected in the cart
         foreach ($cartItems as $item) {
             if (in_array($item['itemId'], $itemIds)) {
-                // Use requested quantity if available and directly buying from product page
+                // Use requested quantity if available and only one item selected
                 $quantity = isset($requestedQuantity) && count($itemIds) == 1 ? $requestedQuantity : $item['quantity'];
                 $totalPrice = $item['price'] * $quantity;
 
@@ -129,8 +172,32 @@ if (isset($_GET['buyNow']) && $_GET['buyNow'] === 'true' && isset($_GET['itemId'
                 ];
             }
         }
-    } else {
-        echo "Unable to retrieve cart items. Error code: $httpCode";
+        
+        $result['success'] = true;
+        $result['items'] = $selectedItems;
+        return $result;
+    }
+
+    $itemIds = explode(',', $_GET['items']);
+
+    // Get quantity from URL parameter if provided
+    $requestedQuantity = isset($_GET['quantity']) ? intval($_GET['quantity']) : 1;
+    if ($requestedQuantity < 1) {
+        $requestedQuantity = 1;
+    }
+
+    $result = handleCartCheckout($itemIds, $requestedQuantity, $token);
+    
+    if (!$result['success']) {
+        echo $result['error'];
+        exit;
+    }
+    
+    // For cart checkout, we might have multiple items
+    $selectedItems = $result['items'];
+    
+    if (empty($selectedItems)) {
+        echo "No items were found in your cart.";
         exit;
     }
 } else {
