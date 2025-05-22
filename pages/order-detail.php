@@ -98,7 +98,10 @@ function formatOrderDate($dateString)
 {
     try {
         $date = new DateTime($dateString);
-        return $date->format('M d, Y h:i A');
+        // Set timezone to UTC+7 (Vietnam timezone)
+        $date->setTimezone(new DateTimeZone('Asia/Ho_Chi_Minh'));
+        // Vietnamese date format: DD/MM/YYYY HH:MM
+        return $date->format('d/m/Y H:i');
     } catch (Exception $e) {
         // If date parsing fails, return a fallback
         return 'N/A';
