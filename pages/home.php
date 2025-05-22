@@ -96,77 +96,17 @@ $icons = [
         .content {
             flex: 1;
         }
-
-        .sidebar-menu {
-            background-color: #414141;
-            min-height: auto;
-            max-height: 80vh; /* Set maximum height */
-            box-shadow: none;
-            border-radius: 10px;
-            width: auto !important;
-            overflow-y: auto; /* Enable vertical scrolling */
-        }
-
-        /* Style the scrollbar */
-        .sidebar-menu::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .sidebar-menu::-webkit-scrollbar-track {
-            background: #414141;
-            border-radius: 10px;
-        }
-
-        .sidebar-menu::-webkit-scrollbar-thumb {
-            background: #686868;
-            border-radius: 10px;
-        }
-
-        .sidebar-menu::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        .sidebar-menu a {
-            color: white;
-            transition: background-color 0.2s;
-        }
-
-        .sidebar-menu a:hover {
-            background-color: #303030 !important;
-            color: white;
-        }
-
-        .list-group-item {
-            border: none !important;
-            border-radius: 10px !important;
-            background-color: #414141 !important;
-        }
     </style>
 </head>
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <nav class="sidebar-menu col-12 p-3 mt-3">
-                <?php if ($errorMsg): ?>
-                    <div class="alert alert-danger"><?= htmlspecialchars($errorMsg) ?></div>
-                <?php elseif ($categories): ?>
-                    <div class="list-group">
-                        <?php foreach ($categories as $cat): ?>
-                            <?php
-                            if (!is_array($cat) || !isset($cat['id']) || !isset($cat['name']))
-                                continue;
-                            $iconClass = $icons[$cat['name']] ?? 'fas fa-folder';
-                            ?>
-                            <a href="index.php?page=products&category=<?= urlencode($cat['code'] ?? $cat['name']) ?>"
-                                class="list-group-item list-group-item-action">
-                                <i class="<?= $iconClass ?>"></i> <?= htmlspecialchars($cat['name']) ?>
-                            </a>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else: ?>
-                    <p>Không có danh mục nào</p>
-                <?php endif; ?>
-            </nav>
+            <div class="col-md-3 col-12 home-sidebar">
+                <?php 
+                // Include the sidebar component on the home page
+                include_once 'components/sidebar/sidebar-menu.php';
+                ?>
+            </div>
             <main class="col-md-9 col-12">
                 <div class="p-3">
                     <h2>Sản phẩm nổi bật</h2>

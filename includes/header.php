@@ -349,6 +349,27 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
       top: 50%;
       transform: translateY(-50%);
     }
+
+    .sidebar-popup {
+      min-width: auto !important;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: none;
+    }
+
+    .sidebar-popup .sidebar-menu {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      border-radius: 0 10px 10px 0;
+      padding: 20px;
+      max-height: 100vh;
+    }
   </style>
 </head>
 
@@ -359,9 +380,6 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
       <a class="navbar-brand" href="index.php">
         <img src="assets/img/logo.png" alt="Site Logo" width="50px" height="50px" />
       </a>
-
-      <!-- Remove toggler for mobile -->
-      <!-- <button ...navbar-toggler...> ... </button> -->
 
       <!-- Remove collapse wrapper, keep content always visible -->
       <div class="navbar-collapse" id="navbarContent" style="display: flex !important;">

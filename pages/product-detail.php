@@ -954,7 +954,7 @@ function getProductImages($product)
                 </div>
             </div> <!-- Related Products Slider -->
             <div class="product-container w-100">
-                <h3 class="mb-4">Similar products</h3>
+                <h3 class="mb-4">Products related to this item</h3>
                 <?php if ($relatedProducts): ?>
                     <div class="related-products-slider">
                         <button class="slider-btn prev" id="prevBtn">
