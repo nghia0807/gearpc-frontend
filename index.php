@@ -20,6 +20,7 @@ $allowedPages = [
     'profile' => 'pages/profile.php',
     'login' => 'pages/login.php',
     'register' => 'pages/register.php',
+    'build' => 'pages/build-pc.php',
     // Add more pages here as needed
 ];
 
