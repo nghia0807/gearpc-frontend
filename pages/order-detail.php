@@ -109,26 +109,149 @@ function formatOrderDate($dateString)
 $orderResponse = getOrderDetail($token, $orderId);
 
 if ($orderResponse['success'] && isset($orderResponse['data'])) {
-    $order = $orderResponse['data'];
-
-    // Extract order properties with fallback values
+    $order = $orderResponse['data'];    // Extract order properties with fallback values
     $orderId = $order['id'] ?? $order['orderId'] ?? 'N/A';
     $orderDate = $order['createdAt'] ?? $order['orderDate'] ?? date('Y-m-d H:i:s');
     $orderStatus = $order['status'] ?? 'pending';
     $paymentStatus = $order['paymentStatus'] ?? 'pending';
-    $totalAmount = $order['totalAmount'] ?? $order['total'] ?? 0;
+
+    // Handle total amount with more robust fallbacks
+    if (isset($order['totalAmount']) && is_numeric($order['totalAmount'])) {
+        $totalAmount = $order['totalAmount'];
+    } elseif (isset($order['total']) && is_numeric($order['total'])) {
+        $totalAmount = $order['total'];
+    } elseif (isset($order['amount']) && is_numeric($order['amount'])) {
+        $totalAmount = $order['amount'];
+    } else {
+        // Calculate total from items if no total is provided
+        $totalAmount = 0;
+        $items = $order['orderItems'] ?? $order['items'] ?? [];
+        foreach ($items as $item) {
+            $itemPrice = $item['price'] ?? $item['unitPrice'] ?? $item['productPrice'] ?? 0;
+            $itemQty = $item['quantity'] ?? 1;
+            $totalAmount += ($itemPrice * $itemQty);
+        }
+    }
+
+    // Get other order details
     $orderItems = $order['orderItems'] ?? $order['items'] ?? [];
-    $customerName = $order['customer']['fullName'] ?? $order['customerName'] ?? 'N/A';
-    $customerPhone = $order['customer']['phone'] ?? $order['customerPhone'] ?? 'N/A';
-    $customerEmail = $order['customer']['email'] ?? $order['customerEmail'] ?? 'N/A';
-    $shippingAddress = $order['deliveryAddress'] ?? $order['shippingAddress'] ?? 'N/A';
-    $paymentMethod = $order['paymentMethod'] ?? 'N/A';
-    $notes = $order['note'] ?? $order['notes'] ?? '';
-    $shippingFee = $order['shippingFee'] ?? 0;
+
+    // Get customer information with fallbacks
+    $customerName = isset($order['customer']) && isset($order['customer']['fullName'])
+        ? $order['customer']['fullName']
+        : ($order['customerName'] ?? 'N/A');
+
+    $customerPhone = isset($order['customer']) && isset($order['customer']['phone'])
+        ? $order['customer']['phone']
+        : ($order['customerPhone'] ?? $order['phone'] ?? 'N/A');
+
+    $customerEmail = isset($order['customer']) && isset($order['customer']['email'])
+        ? $order['customer']['email']
+        : ($order['customerEmail'] ?? $order['email'] ?? 'N/A');
+
+    $shippingAddress = $order['deliveryAddress'] ?? $order['shippingAddress'] ?? $order['address'] ?? 'N/A';
+    $paymentMethod = $order['paymentMethod'] ?? $order['payment'] ?? 'N/A';
+    $notes = $order['note'] ?? $order['notes'] ?? $order['orderNotes'] ?? '';
+    $shippingFee = $order['shippingFee'] ?? $order['deliveryFee'] ?? 0;
 } else {
     $errorMessage = $orderResponse['message'] ?? "Could not load order information";
 }
 ?>
+
+<style>
+    /* CSS color variables and parameters */
+    :root {
+        --border-radius: 8px;
+        --transition-speed: 0.25s;
+    }
+
+    /* Profile banner styling */
+    .profile-banner {
+        background: linear-gradient(135deg, #414345, #232526);
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-top: -20px;
+    }
+
+    .profile-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .profile-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Profile content container */
+    .profile-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Sidebar navigation styling */
+    .profile-sidebar {
+        overflow: hidden;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform var(--transition-speed);
+        animation: fadeInLeft 0.6s;
+        width: fit-content;
+        min-width: 100%;
+    }
+
+    .side-nav-item {
+        border: none !important;
+        padding: 12px 16px;
+        position: relative;
+        transition: all var(--transition-speed);
+    }
+
+    .side-nav-item:hover {
+        background-color: rgba(52, 152, 219, 0.1) !important;
+        color: var(--primary-color) !important;
+    }
+
+    .side-nav-item.active {
+        background-color: white !important;
+        color: black !important;
+        font-weight: 600;
+    }
+
+    .side-nav-arrow {
+        opacity: 0;
+        transition: transform var(--transition-speed), opacity var(--transition-speed);
+    }
+
+    .side-nav-item:hover .side-nav-arrow {
+        opacity: 1;
+        transform: translateX(5px);
+    }
+
+    .side-nav-item:hover .side-nav-arrow,
+    .side-nav-item.active .side-nav-arrow {
+        opacity: 1;
+        transform: translateX(5px);
+    }
+
+    /* Alert styling */
+    .alert-custom {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .alert-content {
+        display: flex;
+        align-items: center;
+    }
+
+    .alert-icon {
+        font-size: 1.5rem;
+        margin-right: 15px;
+    }
+</style>
 
 <!-- Bootstrap CSS from CDN -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -153,7 +276,7 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
     </div>
 </div>
 
-<div class="container profile-content mb-5">
+<div class="container-fluid profile-content mb-5">
     <div class="row">
         <div class="col-lg-3 mb-4">
             <!-- Sidebar menu with hover and active effects -->
@@ -274,30 +397,31 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
                                 <thead class="table-light">
                                     <tr>
                                         <th style="width: 60%">Product</th>
-                                        <th class="text-center">Qty</th>
+                                        <th class="text-center">Quantity</th>
                                         <th class="text-end">Price</th>
                                         <th class="text-end">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($orderItems as $item): ?>
-                                        <?php
-                                        // Get the item name
-                                        $itemName = $item['productName'] ?? $item['name'] ?? 'N/A';
-                                        // Get the item quantity
-                                        $itemQuantity = $item['quantity'] ?? 1;
-                                        // Get the item price
-                                        $itemPrice = $item['price'] ?? 0;
-                                        // Get the item image URL
-                                        $itemImageUrl = $item['imageUrl'] ?? '';
-                                        ?>
+                                        <?php                                        // Get the item name
+                                                $itemName = $item['productName'] ?? $item['name'] ?? 'N/A';
+                                                // Get the item quantity
+                                                $itemQuantity = $item['quantity'] ?? 1;
+                                                // Get the item price with multiple fallbacks
+                                                $itemPrice = $item['price'] ?? $item['unitPrice'] ?? $item['productPrice'] ?? 0;
+                                                // Get the item image URL
+                                                $itemImageUrl = $item['imageUrl'] ?? $item['productImage'] ?? '';
+                                                ?>
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <?php if (!empty($itemImageUrl)): ?>
-                                                        <div class="flex-shrink-0 me-3" style="width: 60px; height: 60px;">
+                                                        <div class="flex-shrink-0 me-3"
+                                                            style="width: 60px; height: 60px; overflow: hidden;">
                                                             <img src="<?= htmlspecialchars($itemImageUrl) ?>"
-                                                                alt="<?= htmlspecialchars($itemName) ?>" class="img-fluid rounded">
+                                                                alt="<?= htmlspecialchars($itemName) ?>" class="img-fluid rounded"
+                                                                style="object-fit: contain; max-height: 100%; max-width: 100%;">
                                                         </div>
                                                     <?php endif; ?>
                                                     <div>
@@ -306,24 +430,26 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
                                                 </div>
                                             </td>
                                             <td class="text-center align-middle"><?= htmlspecialchars($itemQuantity) ?></td>
-                                            <td class="text-end align-middle">$<?= number_format($itemPrice, 2) ?></td>
+                                            <td class="text-end align-middle">$<?= number_format((float) $itemPrice, 2) ?></td>
                                             <td class="text-end align-middle">
-                                                $<?= number_format($itemPrice * $itemQuantity, 2) ?></td>
+                                                $<?= number_format((float) ($itemPrice * $itemQuantity), 2) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                                 <tfoot class="table-light">
                                     <tr>
                                         <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
-                                        <td class="text-end">$<?= number_format($totalAmount - $shippingFee, 2) ?></td>
+                                        <td class="text-end">$<?= number_format((float) ($totalAmount - $shippingFee), 2) ?>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td colspan="3" class="text-end"><strong>Shipping Fee:</strong></td>
-                                        <td class="text-end">$<?= number_format($shippingFee, 2) ?></td>
+                                        <td class="text-end">$<?= number_format((float) $shippingFee, 2) ?></td>
                                     </tr>
                                     <tr>
                                         <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                        <td class="text-end"><strong>$<?= number_format($totalAmount, 2) ?></strong></td>
+                                        <td class="text-end"><strong>$<?= number_format((float) $totalAmount, 2) ?></strong>
+                                        </td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -366,83 +492,3 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
 
 <!-- Bootstrap JS Bundle with Popper from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<style>
-    /* Profile banner styling */
-    .profile-banner {
-        background: linear-gradient(135deg, #414345, #232526);
-        border-radius: 0 0 var(--border-radius) var(--border-radius);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        margin-top: -20px;
-    }
-    
-    .profile-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-    
-    .profile-subtitle {
-        color: rgba(255, 255, 255, 0.9);
-    }
-    
-    /* Sidebar navigation styling */
-    .profile-sidebar {
-        overflow: hidden;
-        border-radius: var(--border-radius);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        transition: transform var(--transition-speed);
-        animation: fadeInLeft 0.6s;
-    }
-    
-    .side-nav-item {
-        border: none !important;
-        padding: 12px 16px;
-        position: relative;
-        transition: all var(--transition-speed);
-    }
-
-    .side-nav-item:hover {
-        background-color: rgba(52, 152, 219, 0.1) !important;
-        color: var(--primary-color) !important;
-    }
-
-    .side-nav-item.active {
-        background-color: white !important;
-        color: black !important;
-        font-weight: 600;
-    }
-
-    .side-nav-arrow {
-        opacity: 0;
-        transition: transform var(--transition-speed), opacity var(--transition-speed);
-    }
-
-    .side-nav-item:hover .side-nav-arrow {
-        opacity: 1;
-        transform: translateX(5px);
-    }
-
-    .side-nav-item:hover .side-nav-arrow,
-    .side-nav-item.active .side-nav-arrow {
-        opacity: 1;
-        transform: translateX(5px);
-    }
-
-    /* Alert styling */
-    .alert-custom {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    .alert-content {
-        display: flex;
-        align-items: center;
-    }
-
-    .alert-icon {
-        font-size: 1.5rem;
-        margin-right: 15px;
-    }
-</style>
