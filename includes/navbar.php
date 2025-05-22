@@ -131,48 +131,20 @@
   <nav class="navbar navbar-expand-lg navbar-dark p-2 navbar-items" style="background-color: #363636;">
     <div class="container-fluid">
       <!-- Menu Toggle Button -->
-      <div class="menu-toggle-btn me-3" onclick="openSidebar()">
+      <div class="menu-toggle-btn" onclick="openSidebar()">
         <i class="bi bi-list"></i> Menu
       </div>
 
       <!-- Remove collapse wrapper, keep content always visible -->
       <div class="navbar-collapse" id="navbarContent" style="display: flex !important;">
         <ul class="navbar-nav me-auto mb-0">
-          <!-- Deals dropdown -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownDeals" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              Deals
-            </a>
-            <ul class="dropdown-menu p-2" aria-labelledby="navbarDropdownDeals" style="background-color: #212121;">
-              <li>
-                <a class="dropdown-item blue-text" href="index.php?page=products">
-                  <i class="bi bi-stars deal-icon"></i>Today's Best Deals
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item blue-text" href="index.php?page=products&category=laptops">
-                  Laptop Deals
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item blue-text" href="index.php?page=products&category=headphones">
-                  Headphone Deals
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item blue-text" href="index.php?page=products&category=keyboards">
-                  Keyboard Deals
-                </a>
-              </li>
-            </ul>
-          </li>
           <li class="nav-item" style="display: flex; align-items: center;">
-            <a class="nav-link pe-0" href="index.php?page=products&sort=bestseller"
+            <a class="nav-link pe-0" href="index.php?page=products&sort="
               style="color: yellow !important; font-size: 14px; font-weight: bold;">
-              Best Seller
+              Best Deals
             </a>
-          </li>          <li class="nav-item">
+          </li>          
+          <li class="nav-item">
             <a class="nav-link" href="#">PC Builder</a>
           </li>
           <li class="nav-item">
@@ -256,14 +228,12 @@
         
         // Show popup and prevent background scrolling
         popup.style.display = 'block';
-        document.body.style.overflow = 'hidden';
     }
 
     function closeSidebar() {
         const popup = document.getElementById('sidebarPopup');
         if (popup) {
             popup.style.display = 'none';
-            document.body.style.overflow = 'auto'; // Restore scrolling
         }
     }
 
