@@ -42,7 +42,7 @@
 <body>
 
     <!-- Footer Component -->
-    <footer class="tech-footer bg-black text-light py-4 mt-5">
+    <footer class="tech-footer bg-black text-light py-4 mt-3">
         <div class="container">
             <div class="row" style="flex-direction: row !important;">
                 <!-- About Us -->
