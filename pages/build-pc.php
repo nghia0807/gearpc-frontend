@@ -76,7 +76,9 @@ require_once __DIR__ . '/../includes/session_init.php';
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
-    }    .summary-card {
+    }
+
+    .summary-card {
         position: sticky;
         top: 20px;
     }
@@ -214,10 +216,60 @@ require_once __DIR__ . '/../includes/session_init.php';
         border-color: #ff9620;
         box-shadow: 0 0 0 0.25rem rgba(255, 150, 32, 0.25);
     }
+
+    /* Floating button styles */
+    .scroll-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #ff9620;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        z-index: 1000;
+        display: none; /* Hidden by default */
+    }
+
+    .scroll-to-top:hover {
+        background-color: #e0851c;
+    }
+
+    @media (max-width: 768px) {
+        .summary-card {
+            position: static;
+            width: 90%;
+            max-height: 60vh;
+        }
+
+        #cpu-selection {
+            width: 100%;
+            margin: 0 auto;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .summary-card {
+            position: static;
+            width: 100%;
+            max-height: none;
+        }
+
+        #cpu-selection {
+            width: 100%;
+            margin: 0 auto;
+        }
+    }
 </style>
 
-<div class="container-fluid py-4">
-    <div class="row">
+<div class="container py-4">
+    <div class="row w-100">
         <!-- Component Selection Area -->
         <div class="col-lg-8 mb-4">
             <h2 class="mb-4">Build Your Custom PC</h2>
@@ -425,7 +477,8 @@ require_once __DIR__ . '/../includes/session_init.php';
                     <div id="build-summary">
                         <!-- Summary items will be added here dynamically -->
                     </div>
-                    <hr>                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Total:</h5>
                         <h5 class="mb-0" id="total-price">$0.00</h5>
                     </div>
@@ -469,9 +522,14 @@ require_once __DIR__ . '/../includes/session_init.php';
 </div>
 
 <!-- Toast container for notifications -->
-<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" 
+<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"
     style="z-index: 1080; margin-bottom: 1.5rem; margin-right: 1.5rem; width: max-content; min-width: 300px; max-width: 90vw;">
 </div>
+
+<!-- Floating Scroll-to-Top Button -->
+<button class="scroll-to-top" id="scrollToTopBtn">
+    <i class="bi bi-arrow-up"></i>
+</button>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -481,7 +539,7 @@ require_once __DIR__ . '/../includes/session_init.php';
         const componentModal = new bootstrap.Modal(document.getElementById('componentModal'));
         let currentCategory = null;
         let allComponents = {};
-        
+
         // Set up buttons to open modal
         document.querySelectorAll('.select-component-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -489,7 +547,7 @@ require_once __DIR__ . '/../includes/session_init.php';
                 showComponentModal(category);
             });
         });
-        
+
         // Set up search functionality
         const searchInput = document.getElementById('searchComponent');
         let searchTimeout;
@@ -501,7 +559,7 @@ require_once __DIR__ . '/../includes/session_init.php';
                 filterComponents(searchInput.value);
             }, 300);
         });
-        
+
         async function showComponentModal(category) {
             currentCategory = category;
             const categoryConfig = {
@@ -515,16 +573,16 @@ require_once __DIR__ . '/../includes/session_init.php';
                 psu: { name: 'Power Supply', code: 'psu' },
                 cooler: { name: 'CPU Cooler', code: 'cooler' }
             };
-            
+
             const modalTitle = document.querySelector('#componentModal .modal-title');
             const modalBody = document.getElementById('modal-components');
             const loadingOverlay = document.querySelector('#componentModal .loading-overlay');
-            
+
             modalTitle.textContent = `Select ${categoryConfig[category].name}`;
             modalBody.innerHTML = '';
             searchInput.value = '';
             loadingOverlay.style.display = 'flex';
-            
+
             try {
                 // Fetch components if not cached
                 if (!allComponents[category]) {
@@ -533,7 +591,7 @@ require_once __DIR__ . '/../includes/session_init.php';
                     const result = await response.json();
                     allComponents[category] = result.data?.data || [];
                 }
-                
+
                 displayComponents(category, allComponents[category]);
             } catch (error) {
                 console.error('Error loading components:', error);
@@ -546,14 +604,14 @@ require_once __DIR__ . '/../includes/session_init.php';
             } finally {
                 loadingOverlay.style.display = 'none';
             }
-            
+
             componentModal.show();
         }
-        
+
         function displayComponents(category, components) {
             const modalBody = document.getElementById('modal-components');
             modalBody.innerHTML = '';
-            
+
             components.forEach(component => {
                 const col = document.createElement('div');
                 col.className = 'col-md-4 mb-3';
@@ -563,9 +621,6 @@ require_once __DIR__ . '/../includes/session_init.php';
                         <div class="card-body">
                             <h6 class="card-title mb-1">${component.name}</h6>
                             <p class="text-muted small mb-2">${component.brandName}</p>
-                            <p class="card-text">
-                                <small class="text-muted">${component.shortDescription || ''}</small>
-                            </p>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <div>
                                     <span class="h5 mb-0">$${component.currentPrice}</span>
@@ -580,39 +635,39 @@ require_once __DIR__ . '/../includes/session_init.php';
                         </div>
                     </div>
                 `;
-                
+
                 // Add click event listener
                 const selectBtn = col.querySelector('.select-this-component');
                 selectBtn.addEventListener('click', () => {
                     selectComponent(component, category);
                 });
-                
+
                 modalBody.appendChild(col);
             });
         }
-        
+
         function filterComponents(searchTerm) {
             if (!currentCategory || !allComponents[currentCategory]) return;
-            
+
             searchTerm = searchTerm.toLowerCase();
-            const filtered = allComponents[currentCategory].filter(component => 
+            const filtered = allComponents[currentCategory].filter(component =>
                 component.name.toLowerCase().includes(searchTerm) ||
                 component.brandName.toLowerCase().includes(searchTerm) ||
                 (component.shortDescription && component.shortDescription.toLowerCase().includes(searchTerm))
             );
-            
+
             displayComponents(currentCategory, filtered);
         }
-        
+
         function selectComponent(component, category) {
             // Close modal
             componentModal.hide();
-            
+
             // Update UI to show selected component
             const selectionDiv = document.querySelector(`#${category}-selection`);
             const noSelection = selectionDiv.querySelector('.no-component-selected');
             const selectedComponent = selectionDiv.querySelector('.selected-component');
-            
+
             noSelection.classList.add('d-none');
             selectedComponent.classList.remove('d-none');
             selectedComponent.innerHTML = `
@@ -630,11 +685,11 @@ require_once __DIR__ . '/../includes/session_init.php';
                     </div>
                 </div>
             `;
-            
+
             // Add remove button event listener
             const removeBtn = selectedComponent.querySelector('.remove-component');
             removeBtn.addEventListener('click', () => removeComponent(category));
-            
+
             // Save in app state - will use window.pcBuilderState to share between files
             if (!window.pcBuilderState) {
                 window.pcBuilderState = {
@@ -642,37 +697,37 @@ require_once __DIR__ . '/../includes/session_init.php';
                     totalPrice: 0
                 };
             }
-            
+
             // Make sure the component has an id property
             if (!component.id && component.productId) {
                 component.id = component.productId;
             }
-            
+
             // Log component data for debugging
             console.log(`Selected ${category} component:`, component);
-            
+
             window.pcBuilderState.components[category] = component;
             updateBuildSummary();
         }
-        
+
         function removeComponent(category) {
             // Remove from state
             if (window.pcBuilderState && window.pcBuilderState.components) {
                 delete window.pcBuilderState.components[category];
             }
-            
+
             // Update UI
             const selectionDiv = document.querySelector(`#${category}-selection`);
             const noSelection = selectionDiv.querySelector('.no-component-selected');
             const selectedComponent = selectionDiv.querySelector('.selected-component');
-            
+
             noSelection.classList.remove('d-none');
             selectedComponent.classList.add('d-none');
             selectedComponent.innerHTML = '';
-            
+
             updateBuildSummary();
         }
-        
+
         function updateBuildSummary() {
             if (!window.pcBuilderState) {
                 window.pcBuilderState = {
@@ -680,13 +735,13 @@ require_once __DIR__ . '/../includes/session_init.php';
                     totalPrice: 0
                 };
             }
-            
+
             const summaryContainer = document.getElementById('build-summary');
             let total = 0;
-            
+
             // Clear existing summary
             summaryContainer.innerHTML = '';
-            
+
             // Add each selected component to summary
             for (const [category, component] of Object.entries(window.pcBuilderState.components)) {
                 if (component) {
@@ -702,14 +757,14 @@ require_once __DIR__ . '/../includes/session_init.php';
                         psu: 'lightning-charge',
                         cooler: 'fan'
                     }[category] || 'gear';
-                    
+
                     summaryContainer.innerHTML += `
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div class="d-flex align-items-center">
-                                ${component.imageUrl ? 
-                                    `<img src="${component.imageUrl}" alt="${component.name}" class="summary-item-img me-2">` : 
-                                    `<i class="bi bi-${icon} me-2 summary-item-icon"></i>`
-                                }
+                                ${component.imageUrl ?
+                            `<img src="${component.imageUrl}" alt="${component.name}" class="summary-item-img me-2">` :
+                            `<i class="bi bi-${icon} me-2 summary-item-icon"></i>`
+                        }
                                 <div class="summary-item-details">
                                     <div class="summary-item-name">${component.name}</div>
                                     <div class="summary-item-category text-muted small">${category.toUpperCase()}</div>
@@ -720,16 +775,16 @@ require_once __DIR__ . '/../includes/session_init.php';
                     `;
                 }
             }
-            
+
             // Update total price
             window.pcBuilderState.totalPrice = total;
             document.getElementById('total-price').textContent = `$${total.toFixed(2)}`;
-              // Enable/disable Add to Cart and Buy Now buttons - allow any components to be added
+            // Enable/disable Add to Cart and Buy Now buttons - allow any components to be added
             const hasAnyComponents = Object.values(window.pcBuilderState.components).some(component => component !== null);
-            
+
             const addToCartBtn = document.getElementById('add-to-cart-btn');
             const buyNowBtn = document.getElementById('buy-now-btn');
-            
+
             addToCartBtn.disabled = !hasAnyComponents;
             buyNowBtn.disabled = !hasAnyComponents;
         }
@@ -744,7 +799,7 @@ require_once __DIR__ . '/../includes/session_init.php';
                 showToast('Please select at least one product', 'warning');
                 return null;
             }
-            
+
             const cleanedComponents = {};
             let hasValidComponents = false;
 
@@ -764,27 +819,27 @@ require_once __DIR__ . '/../includes/session_init.php';
                     hasValidComponents = true;
                 }
             }
-            
+
             if (!hasValidComponents) {
                 showToast('Please select at least one component', 'warning');
                 return null;
             }
-            
+
             return {
                 components: cleanedComponents,
                 totalPrice: window.pcBuilderState.totalPrice
             };
-        }        addToCartBtn.addEventListener('click', async () => {            
+        } addToCartBtn.addEventListener('click', async () => {
             try {
                 // Check if user is logged in
                 if (!isUserLoggedIn()) {
                     showLoginConfirmModal();
                     return;
                 }
-                
+
                 const validComponentsData = getValidComponents();
                 if (!validComponentsData) return;
-                
+
                 console.log('Adding build to cart:', validComponentsData.components);
 
                 const response = await fetch('/gearpc-frontend/actions/add-to-cart.php', {
@@ -807,8 +862,8 @@ require_once __DIR__ . '/../includes/session_init.php';
                 } catch (e) {
                     console.error('Failed to parse response:', e);
                     throw new Error('Invalid response from server');
-                }                
-                
+                }
+
                 if (!response.ok) {
                     throw new Error(result?.message || `Error: ${response.status}`);
                 }
@@ -836,7 +891,7 @@ require_once __DIR__ . '/../includes/session_init.php';
                     showLoginConfirmModal();
                     return;
                 }
-                
+
                 const validComponentsData = getValidComponents();
                 if (!validComponentsData) return;
 
@@ -899,7 +954,7 @@ require_once __DIR__ . '/../includes/session_init.php';
                 loginModal.tabIndex = '-1';
                 loginModal.setAttribute('aria-labelledby', 'loginConfirmModalLabel');
                 loginModal.setAttribute('aria-hidden', 'true');
-                
+
                 loginModal.innerHTML = `
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content bg-dark text-white">
@@ -930,7 +985,7 @@ require_once __DIR__ . '/../includes/session_init.php';
         function showToast(message, type = 'success') {
             // Create toast container if it doesn't exist
             const toastContainer = document.getElementById('toastContainer');
-            
+
             // Create toast element
             const toastEl = document.createElement('div');
             toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
@@ -956,5 +1011,25 @@ require_once __DIR__ . '/../includes/session_init.php';
                 toastEl.remove();
             });
         }
+
+        // Scroll to top button functionality
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollToTopBtn.style.display = 'flex';
+            } else {
+                scrollToTopBtn.style.display = 'none';
+            }
+        });
+
+        // Scroll to top on button click
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
     });
 </script>
