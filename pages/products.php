@@ -493,13 +493,9 @@ if ($categoryCode) {
 
                         // Format currency function
                         const formatCurrency = (amount) => {
-                            return new Intl.NumberFormat('vi-VN', {
-                                style: 'currency',
-                                currency: 'VND',
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0
-                            }).format(amount).replace('₫', '') + ' ₫';
+                            return '$' + Number(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                         };
+
 
                         // Calculate discount percentage
                         const calculateDiscount = (original, current) => {
