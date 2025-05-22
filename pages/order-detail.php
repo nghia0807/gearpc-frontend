@@ -230,12 +230,69 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
     .side-nav-item:hover .side-nav-arrow {
         opacity: 1;
         transform: translateX(5px);
-    }
-
-    .side-nav-item:hover .side-nav-arrow,
+    }    .side-nav-item:hover .side-nav-arrow,
     .side-nav-item.active .side-nav-arrow {
         opacity: 1;
         transform: translateX(5px);
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 991px) {
+        .profile-sidebar {
+            min-width: 100% !important;
+            width: 100% !important;
+            margin-bottom: 20px;
+        }
+        
+        .side-nav-item {
+            padding: 10px 16px;
+        }
+        
+        .order-detail-card .card-body {
+            padding: 15px;
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .profile-title {
+            font-size: 2rem;
+        }
+        
+        .profile-banner {
+            padding: 15px 0;
+            margin-top: -10px;
+        }
+        
+        .order-summary-item {
+            margin-bottom: 10px;
+        }
+        
+        .timeline-item {
+            padding-left: 30px;
+        }
+        
+        .timeline-dot {
+            left: 0;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .profile-content {
+            padding: 15px 10px;
+        }
+        
+        .profile-title {
+            font-size: 1.8rem;
+        }
+        
+        .timeline-item {
+            padding-left: 25px;
+        }
+        
+        .order-product-img {
+            width: 60px;
+            height: 60px;
+        }
     }
 
     /* Alert styling */
@@ -396,12 +453,11 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead class="table-light">
+                            <table class="table table-bordered">                                <thead class="table-light">
                                     <tr>
                                         <th style="width: 60%">Product</th>
-                                        <th class="text-center">Quantity</th>
-                                        <th class="text-end">Price</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-end d-none d-sm-table-cell">Price</th>
                                         <th class="text-end">Total</th>
                                     </tr>
                                 </thead>
@@ -431,9 +487,8 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
                                                         <h6 class="mb-0"><?= htmlspecialchars($itemName) ?></h6>
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td class="text-center align-middle"><?= htmlspecialchars($itemQuantity) ?></td>
-                                            <td class="text-end align-middle">$<?= number_format((float) $itemPrice, 2) ?></td>
+                                            </td>                                            <td class="text-center align-middle"><?= htmlspecialchars($itemQuantity) ?></td>
+                                            <td class="text-end align-middle d-none d-sm-table-cell">$<?= number_format((float) $itemPrice, 2) ?></td>
                                             <td class="text-end align-middle">
                                                 $<?= number_format((float) ($itemPrice * $itemQuantity), 2) ?></td>
                                         </tr>
