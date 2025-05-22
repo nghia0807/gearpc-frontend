@@ -415,7 +415,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
           style="flex-direction: row !important; align-items: center; flex-wrap: nowrap !important;">
           <li class="nav-item me-3">
             <a class="nav-link header-items"
-              href="<?php echo $isLoggedIn ? 'index.php?page=profile' : 'pages/not-logged-in.php'; ?>">
+              href="<?php echo $isLoggedIn ? 'index.php?page=my-orders' : 'pages/not-logged-in.php'; ?>">
               <i class="bi bi-truck me-1"></i> <span class="nav-label">Orders</span>
             </a>
           </li>

@@ -14,6 +14,8 @@ $allowedPages = [
     'product-detail' => 'pages/product-detail.php',
     'news' => 'pages/news.php',
     'order' => 'pages/order.php',
+    'my-orders' => 'pages/my-orders.php',
+    'order-detail' => 'pages/order-detail.php',
     'order-confirmation' => 'pages/order-confirmation.php',
     'profile' => 'pages/profile.php',
     'login' => 'pages/login.php',
@@ -56,18 +58,22 @@ $pageContent = preg_replace('/<head>.*?<\/head>/is', '', $pageContent);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Sticky footer styles -->
     <style>
-        html, body {
+        html,
+        body {
             height: 100%;
             margin: 0;
         }
+
         body {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
+
         .main-content {
             flex: 1 0 auto;
         }
+
         footer {
             flex-shrink: 0;
         }

@@ -189,8 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <a href="#profile" class="list-group-item list-group-item-action side-nav-item active" data-bs-toggle="list">
                         <i class="bi bi-person-circle me-2"></i> Personal Information
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
-                    </a>
-                    <a href="index.php?page=order" class="list-group-item list-group-item-action side-nav-item">
+                    </a>                    <a href="index.php?page=my-orders" class="list-group-item list-group-item-action side-nav-item">
                         <i class="bi bi-box-seam me-2"></i> My Orders
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
                     </a>
@@ -440,11 +439,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         transition: transform var(--transition-speed);
         animation: fadeInLeft 0.6s;
     }
-
-    .profile-sidebar:hover {
-        transform: translateY(-5px);
-    }
-
 
     .side-nav-item {
         border: none !important;
