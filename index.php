@@ -15,7 +15,9 @@ $allowedPages = [
     'news' => 'pages/news.php',
     'order' => 'pages/order.php',
     'order-confirmation' => 'pages/order-confirmation.php',
-
+    'profile' => 'pages/profile.php',
+    'login' => 'pages/login.php',
+    'register' => 'pages/register.php',
     // Add more pages here as needed
 ];
 
