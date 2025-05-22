@@ -18,7 +18,13 @@ $sortDirection = isset($_GET['sortDirection']) ? trim($_GET['sortDirection']) : 
 
 // API Endpoints
 $productsApiUrl = "http://localhost:5000/api/products?pageIndex={$pageIndex}&pageSize={$pageSize}";
-$brandsApiUrl = "http://localhost:5000/api/brands/get_select";
+
+// Determine which brands API to use based on whether a category is selected
+if ($categoryCode) {
+    $brandsApiUrl = "http://localhost:5000/api/brands/by-category/{$categoryCode}";
+} else {
+    $brandsApiUrl = "http://localhost:5000/api/brands/get_select";
+}
 
 // Add filters to API URL if provided
 if ($categoryCode)
@@ -104,11 +110,6 @@ function calculateDiscount($original, $current)
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-
-        .filter-section {
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-        }
         
         .filter-heading {
             font-size: 1.1rem;
@@ -141,29 +142,17 @@ function calculateDiscount($original, $current)
             color: #6c757d;
         }
         
-        /* Styling for the sort dropdown */
-        .sort-options .form-select {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .sort-options .form-select:hover {
-            border-color: #ff9620;
-        }
-        
         .brand-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
             gap: 12px;
         }
 
-        /* First row of brands only */
+        /* First row of brands (for collapsible section) */
         .brand-grid-first-row {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            grid-template-rows: 1fr;
             gap: 12px;
-            overflow: hidden;
         }
 
         /* View More Brands Button */
@@ -185,7 +174,6 @@ function calculateDiscount($original, $current)
 
         .btn-view-more-brands:hover {
             background-color: #2d2d2d;
-            border-color: #ff9620;
         }
 
         .btn-view-more-brands i {
@@ -215,7 +203,6 @@ function calculateDiscount($original, $current)
             background-color: #2d2d2d;
             color: #ff9620;
             transform: translateY(-3px);
-            border-color: #ff9620;
         }
 
         .brand-item.active {
@@ -250,7 +237,6 @@ function calculateDiscount($original, $current)
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
-            height: 2.5rem;
         }
 
         .all-brands.active {
@@ -301,6 +287,100 @@ function calculateDiscount($original, $current)
                 grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             }
         }
+
+        /* Horizontal filters styling */
+        .horizontal-filters {
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .filter-label {
+            color: #1e1e1e;
+            font-weight: 600;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-label i {
+            margin-right: 0.5rem;
+        }
+        
+        /* Hide number input arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        
+        .price-inputs-horizontal {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .price-inputs-horizontal .input-group {
+            width: 120px;
+        }
+        
+        .price-filter-btn {
+            background-color: #ff9620;
+            border: none;
+            color: #000;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .price-filter-btn:hover {
+            background-color: #e68a1c;
+            transform: translateY(-2px);
+        }
+        
+        .sort-select-horizontal {
+            width: 200px;
+        }
+        
+        @media (max-width: 768px) {
+            .horizontal-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+            
+            .price-inputs-horizontal {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .price-inputs-horizontal .input-group {
+                width: 45%;
+            }
+            
+            .sort-select-horizontal {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -310,63 +390,8 @@ function calculateDiscount($original, $current)
             <div class="col-12 mb-4">
                 <div class="filters-container">
                     <div class="row">
-                        <!-- Price Range Filter -->
-                        <div class="col-md-4 mb-3">
-                            <div class="filter-section">
-                                <h5 class="filter-heading"><i class="bi bi-cash"></i> Price Range</h5>
-                                <div class="price-range-container">
-                                    <div class="row g-2">
-                                        <div class="col">
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-dark text-light border-secondary">Min</span>
-                                                <input type="number" class="form-control bg-dark text-light border-secondary"
-                                                    id="minPrice" placeholder="0"
-                                                    value="<?= $minPrice !== null ? $minPrice : '' ?>">
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-dark text-light border-secondary">Max</span>
-                                                <input type="number" class="form-control bg-dark text-light border-secondary"
-                                                    id="maxPrice" placeholder="Max"
-                                                    value="<?= $maxPrice !== null ? $maxPrice : '' ?>">
-                                            </div>
-                                        </div>
-                                        <div class="col-12 mt-2">
-                                            <button id="apply-price-filter" class="btn btn-sm btn-outline-light w-100 apply-filter-btn">Apply
-                                                Filter</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sorting Options -->
-                        <div class="col-md-4 mb-3">
-                            <div class="filter-section">
-                                <h5 class="filter-heading"><i class="bi bi-sort-alpha-down"></i> Sort By</h5>
-                                <div class="sort-options">
-                                    <select id="sort-options" class="form-select bg-dark text-light border-secondary">
-                                        <option value="" <?= $sortBy === '' ? 'selected' : '' ?>>Default sorting</option>
-                                        <option value="price-asc" <?= ($sortBy === 'currentPrice' && $sortDirection === 'asc') ? 'selected' : '' ?>>
-                                            Price: Low to High
-                                        </option>
-                                        <option value="price-desc" <?= ($sortBy === 'currentPrice' && $sortDirection === 'desc') ? 'selected' : '' ?>>
-                                            Price: High to Low
-                                        </option>
-                                        <option value="name-asc" <?= ($sortBy === 'name' && $sortDirection === 'asc') ? 'selected' : '' ?>>
-                                            Name: A to Z
-                                        </option>
-                                        <option value="name-desc" <?= ($sortBy === 'name' && $sortDirection === 'desc') ? 'selected' : '' ?>>
-                                            Name: Z to A
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Brands Filter -->
-                        <div class="col-md-4">
+                        <div class="col-md-12">
                             <div class="filter-section">
                                 <h5 class="filter-heading"><i class="bi bi-tags"></i> Brands</h5>
                                 <!-- First row of brands (always visible) -->
@@ -379,57 +404,58 @@ function calculateDiscount($original, $current)
                                         <div class="brand-name">All Brands</div>
                                     </a>
 
-                                    <?php
-                                    // Calculate how many brands fit in the first row (based on typical screen width)
-                                    $brandsInFirstRow = min(10, count($brands)); // Show max 10 brands in first row
-                                    $firstRowBrands = array_slice($brands, 0, $brandsInFirstRow - 1);
-                                    $remainingBrands = array_slice($brands, $brandsInFirstRow - 1);
-
+                                    <?php 
+                                    // Calculate brands to show in the first row - show approximately 50% of the brands
+                                    $brandsCount = count($brands);
+                                    $brandsInFirstRow = ceil(10);
+                                    $firstRowBrands = array_slice($brands, 0, $brandsInFirstRow);
+                                    $remainingBrands = array_slice($brands, $brandsInFirstRow);
+                                    
                                     // Display first row brands
-                                    foreach ($firstRowBrands as $brand):
+                                    foreach ($firstRowBrands as $brand): 
                                         if (empty($brand['code']) || empty($brand['name'])) continue;
                                     ?>
-                                    <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
-                                        class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
-                                        <div class="brand-img-container">
-                                            <?php if (!empty($brand['imageUrl'])): ?>
-                                            <img src="<?= htmlspecialchars($brand['imageUrl']) ?>"
-                                                alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
-                                            <?php else: ?>
-                                            <i class="bi bi-building" style="font-size:24px;color:#666;"></i>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="brand-name"><?= htmlspecialchars($brand['name']) ?></div>
-                                    </a>
+                                        <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
+                                            class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
+                                            <div class="brand-img-container">
+                                                <?php if (!empty($brand['imageUrl'])): ?>
+                                                    <img src="<?= htmlspecialchars($brand['imageUrl']) ?>"
+                                                        alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
+                                                <?php else: ?>
+                                                    <i class="bi bi-building" style="font-size:24px;color:#666;"></i>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="brand-name"><?= htmlspecialchars($brand['name']) ?></div>
+                                        </a>
                                     <?php endforeach; ?>
                                 </div>
-
+                                
                                 <?php if (count($remainingBrands) > 0): ?>
                                 <!-- Collapsible Brands Container -->
                                 <div class="collapse mt-3" id="moreBrandsCollapse">
                                     <div class="brand-grid">
                                         <?php foreach ($remainingBrands as $brand): ?>
-                                        <?php if (empty($brand['code']) || empty($brand['name'])) continue; ?>
-                                        <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
-                                            class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
-                                            <div class="brand-img-container">
-                                                <?php if (!empty($brand['imageUrl'])): ?>
-                                                <img src="<?= htmlspecialchars($brand['imageUrl']) ?>"
-                                                    alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
-                                                <?php else: ?>
-                                                <i class="bi bi-building" style="font-size:24px;color:#666;"></i>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div class="brand-name"><?= htmlspecialchars($brand['name']) ?></div>
-                                        </a>
+                                            <?php if (empty($brand['code']) || empty($brand['name'])) continue; ?>
+                                            <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
+                                                class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
+                                                <div class="brand-img-container">
+                                                    <?php if (!empty($brand['imageUrl'])): ?>
+                                                        <img src="<?= htmlspecialchars($brand['imageUrl']) ?>"
+                                                            alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
+                                                    <?php else: ?>
+                                                        <i class="bi bi-building" style="font-size:24px;color:#666;"></i>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="brand-name"><?= htmlspecialchars($brand['name']) ?></div>
+                                            </a>
                                         <?php endforeach; ?>
                                     </div>
                                 </div>
                                 <!-- View More Brands Button -->
                                 <button class="btn-view-more-brands"
-                                    type="button"
+                                    type="button" 
                                     id="viewMoreBrandsBtn"
-                                    aria-expanded="false"
+                                    aria-expanded="false" 
                                     aria-controls="moreBrandsCollapse">
                                     <div>
                                         <span>View more brands</span>
@@ -442,6 +468,51 @@ function calculateDiscount($original, $current)
                     </div>
                 </div>
             </div>
+            
+            <!-- Horizontal Filters above Products Grid -->
+            <div class="col-12 mb-3">
+                <div class="horizontal-filters">
+                    <!-- Price Range Filter -->
+                    <div class="filter-group">
+                        <div class="filter-label">
+                            <i class="bi bi-cash"></i> Price Range:
+                        </div>
+                        <div class="price-inputs-horizontal">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-dark border-secondary border-2 border-end-0">Min</span>
+                                <input type="number" class="form-control bg-white text-dark border-secondary border-2"
+                                    id="minPrice" placeholder="0"
+                                    value="<?= $minPrice !== null ? $minPrice : '' ?>">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-dark border-secondary border-2 border-end-0">Max</span>
+                                <input type="number" class="form-control bg-white text-dark border-secondary border-2"
+                                    id="maxPrice" placeholder="Max"
+                                    value="<?= $maxPrice !== null ? $maxPrice : '' ?>">
+                            </div>
+                            <button id="apply-price-filter" class="price-filter-btn">
+                                <i class="bi bi-funnel"></i> Apply
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Sort Options -->
+                    <div class="filter-group">
+                        <div class="filter-label">
+                            <i class="bi bi-sort-alpha-down"></i> Sort By:
+                        </div>
+                        <select id="sortSelect" class="form-select bg-white text-dark border-secondary border-2 sort-select-horizontal">
+                            <option value="" <?= $sortBy === '' ? 'selected' : '' ?>>Default</option>
+                            <option value="DiscountPercentageDescending" <?= $sortBy === 'DiscountPercentageDescending' ? 'selected' : '' ?>>Best Deals</option>
+                            <option value="NameAscending" <?= $sortBy === 'NameAscending' ? 'selected' : '' ?>>Name A-Z</option>
+                            <option value="NameDescending" <?= $sortBy === 'NameDescending' ? 'selected' : '' ?>>Name Z-A</option>
+                            <option value="PriceAscending" <?= $sortBy === 'PriceAscending' ? 'selected' : '' ?>>Price Low to High</option>
+                            <option value="PriceDescending" <?= $sortBy === 'PriceDescending' ? 'selected' : '' ?>>Price High to Low</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Product Grid -->
             <div class="col-12">
                 <?php if (!$products): ?>
@@ -548,27 +619,20 @@ function calculateDiscount($original, $current)
                 });
             }
 
-            // Sorting options change
-            const sortOptions = document.getElementById('sort-options');
-            if (sortOptions) {
-                sortOptions.addEventListener('change', function () {
-                    const selectedOption = this.value.split('-');
-                    const sortBy = selectedOption[0] === 'price' ? 'currentPrice' : selectedOption[0];
-                    const sortDirection = selectedOption[1] || 'asc';
+            // Sort select change event
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function () {
+                    const selectedSort = this.value;
 
-                    // Get current price filter values
-                    const minPrice = document.getElementById('minPrice').value;
-                    const maxPrice = document.getElementById('maxPrice').value;
-
-                    // Redirect to the same page with updated sortBy and sortDirection
+                    // Redirect to the same page with updated sort parameter
                     window.location.href = 'index.php?page=products' +
                         '<?= $categoryCode ? '&category=' . urlencode($categoryCode) : '' ?>' +
                         '<?= $brandCode ? '&brand=' . urlencode($brandCode) : '' ?>' +
                         '<?= $searchQuery ? '&q=' . urlencode($searchQuery) : '' ?>' +
-                        (minPrice !== '' ? '&minPrice=' + encodeURIComponent(minPrice) : '') +
-                        (maxPrice !== '' ? '&maxPrice=' + encodeURIComponent(maxPrice) : '') +
-                        '&sortBy=' + encodeURIComponent(sortBy) +
-                        '&sortDirection=' + encodeURIComponent(sortDirection);
+                        '<?= $minPrice !== null ? '&minPrice=' . $minPrice : '' ?>' +
+                        '<?= $maxPrice !== null ? '&maxPrice=' . $maxPrice : '' ?>' +
+                        (selectedSort ? '&sortBy=' + encodeURIComponent(selectedSort) : '');
                 });
             }
         });
@@ -598,16 +662,12 @@ function calculateDiscount($original, $current)
             if (minPrice) apiUrl += `&minPrice=${encodeURIComponent(minPrice)}`;
             if (maxPrice) apiUrl += `&maxPrice=${encodeURIComponent(maxPrice)}`;
             
-            // Add sorting options
-            const sortOptions = document.getElementById('sort-options');
-            if (sortOptions && sortOptions.value) {
-                const selectedOption = sortOptions.value.split('-');
-                const sortBy = selectedOption[0] === 'price' ? 'currentPrice' : selectedOption[0];
-                const sortDirection = selectedOption[1] || 'asc';
-                
-                apiUrl += `&sortBy=${encodeURIComponent(sortBy)}&sortDirection=${encodeURIComponent(sortDirection)}`;
+            // Add sort parameter
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect && sortSelect.value) {
+                apiUrl += `&sortBy=${encodeURIComponent(sortSelect.value)}`;
             }
-
+            
             // Fetch additional products
             fetch(apiUrl)
                 .then(response => response.json())

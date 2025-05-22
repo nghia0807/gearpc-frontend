@@ -74,7 +74,6 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
     }
 
     .form-control {
-      border-right: none !important;
       background-color: #363636 !important;
       border-color: #363636 !important;
       color: #fff !important;
@@ -212,82 +211,38 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
     }
 
     .header-search-flex {
-      flex: 1 1 0%;
+      flex: 0 1 500px; /* This allows the search to be centered but with max width */
+      margin: 0 15px;
+    }
+
+    .navbar-right {
       display: flex;
-      justify-content: center;
-      min-width: 0;
-      max-width: 100%;
+      justify-content: flex-end;
     }
 
-    .header-search-flex form {
-      width: 100%;
-      max-width: 500px;
-      min-width: 80px;
-    }
-
-    .input-group {
-      width: 100%;
-      min-width: 0;
-      max-width: 100%;
-      transition: width 0.2s;
-    }
-
-    .form-control {
-      min-width: 0;
-      width: 100%;
-      transition: width 0.2s;
-    }
-
-    .navbar-nav {
-      margin-bottom: 0 !important;
-      flex-direction: row !important;
+    .container-fluid {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
-      flex-wrap: nowrap !important;
-      white-space: nowrap;
+      width: 100%;
+      padding: 0 15px;
     }
-
-    .navbar-nav>.nav-item {
-      margin-bottom: 0 !important;
-      white-space: nowrap;
-      flex-shrink: 0;
+    
+    .navbar-header {
+      display: flex;
+      align-items: center;
     }
-
-    /* Responsive: shrink search, hide text, never wrap logo/buttons */
-    @media (max-width: 1400px) {
-      .header-search-flex form {
-        max-width: 400px;
-      }
-    }
-
-    @media (max-width: 1200px) {
-      .header-search-flex form {
-        max-width: 300px;
-      }
-    }
-
+    
+    /* Responsive adjustments */
     @media (max-width: 992px) {
-      .header-search-flex form {
-        max-width: 180px;
+      .header-search-flex {
+        flex: 0 1 300px;
       }
     }
-
-    @media (max-width: 800px) {
-      .header-search-flex form {
-        max-width: 80px;
-      }
-
-      .form-control::placeholder {
-        font-size: 0;
-      }
-
-      .nav-label {
-        display: none !important;
-      }
-
-      .navbar-nav .nav-link.header-items {
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
+    
+    @media (max-width: 768px) {
+      .header-search-flex {
+        flex: 0 1 200px;
       }
     }
 
@@ -395,42 +350,45 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
 
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-black">
-    <div class="container me-4">
-      <!-- Logo -->
-      <a class="navbar-brand" href="index.php">
-        <img src="assets/img/logo.png" alt="Site Logo" width="50px" height="50px" />
-      </a>
+    <div class="container-fluid">
+      <!-- Left: Logo -->
+      <div class="navbar-header">
+        <a class="navbar-brand d-flex align-items-center" href="index.php">
+          <img src="assets/img/logo.png" alt="Site Logo" width="50px" height="50px" class="me-2" />
+          <span class="my-auto">Tech Zone</span>
+        </a>
+      </div>
 
-      <!-- Remove collapse wrapper, keep content always visible -->
-      <div class="navbar-collapse" id="navbarContent" style="display: flex !important;">
-        <!-- Centered search bar, flexes to fill space between logo and right buttons -->
-        <div class="header-search-flex">
-          <form action="index.php" method="get" class="mx-auto position-relative">
-            <div class="input-group">
-              <input class="form-control" type="search" name="q" id="searchInput" placeholder="Search Tech Zone!"
-                aria-label="Search" autocomplete="off" />
-              <button class="btn btn-search" type="submit">
-                <i class="bi bi-search text-white"></i>
-                <div class="spinner-border spinner-border-sm text-light search-spinner" role="status"
-                  style="display:none">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-              </button>
-            </div>
-            <div class="search-suggestions" id="searchSuggestions">
-              <div class="suggestion-group" id="recentSearches">
-                <h6>Recent Searches</h6>
-                <div class="suggestions-list" id="recentSearchesList"></div>
+      <!-- Center: Search bar -->
+      <div class="header-search-flex">
+        <form action="index.php" method="get" class="position-relative">
+          <div class="input-group">
+            <input class="form-control border-end-0" type="search" name="q" id="searchInput" placeholder="Search Tech Zone!"
+              aria-label="Search" autocomplete="off" />
+            <button class="btn btn-search" type="submit">
+              <i class="bi bi-search text-white"></i>
+              <div class="spinner-border spinner-border-sm text-light search-spinner" role="status"
+                style="display:none">
+                <span class="visually-hidden">Loading...</span>
               </div>
-              <!-- Add dedicated section for product suggestions -->
-              <div class="suggestion-group" id="suggestedProducts">
-                <h6>Products</h6>
-                <div class="suggestions-list" id="suggestedProductsList"></div>
-              </div>
+            </button>
+          </div>
+          <div class="search-suggestions" id="searchSuggestions">
+            <div class="suggestion-group" id="recentSearches">
+              <h6>Recent Searches</h6>
+              <div class="suggestions-list" id="recentSearchesList"></div>
             </div>
-          </form>
-        </div>
-        <!-- Right side: Cart, Login/Register/User -->
+            <!-- Add dedicated section for product suggestions -->
+            <div class="suggestion-group" id="suggestedProducts">
+              <h6>Products</h6>
+              <div class="suggestions-list" id="suggestedProductsList"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right: Navigation links -->
+      <div class="navbar-right">
         <ul class="navbar-nav"
           style="flex-direction: row !important; align-items: center; flex-wrap: nowrap !important;">
           <li class="nav-item me-3">
@@ -438,7 +396,8 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
               href="<?php echo $isLoggedIn ? 'index.php?page=my-orders' : 'pages/not-logged-in.php'; ?>">
               <i class="bi bi-truck me-1"></i> <span class="nav-label">Orders</span>
             </a>
-          </li>          <li class="nav-item me-3">
+          </li>
+          <li class="nav-item me-3">
             <a class="nav-link header-items position-relative"
               href="<?php echo $isLoggedIn ? 'index.php?page=cart' : 'pages/not-logged-in.php'; ?>">
               <i class="bi bi-cart"></i> <span class="nav-label">Cart</span>
@@ -476,6 +435,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
       </div>
     </div>
   </nav>
+  
   <script>
     // Custom popover logic for hover with delayed show
     (function () {

@@ -18,7 +18,7 @@
 
     .navbar-items .nav-link {
       color: #fff !important;
-      font-size: 14px !important;
+      font-size: 16px !important;
       font-weight: bold !important;
     }
 
@@ -28,14 +28,6 @@
 
     .navbar-items .nav-item:hover .nav-link {
       text-decoration: underline;
-    }
-
-    .dropdown-item {
-      color: white !important;
-      padding-top: 10px !important;
-      padding-bottom: 10px !important;
-      padding-left: 15px !important;
-      padding-right: 15px !important;
     }
 
     .blue-text:hover {
@@ -57,6 +49,7 @@
       border-radius: 4px;
       color: #fff;
       font-weight: bold;
+      font-size: 16px;
       transition: background-color 0.2s;
     }
 
@@ -139,7 +132,7 @@
       <div class="navbar-collapse" id="navbarContent" style="display: flex !important;">
         <ul class="navbar-nav me-auto mb-0">
           <li class="nav-item" style="display: flex; align-items: center;">
-            <a class="nav-link pe-0" href="index.php?page=products&sort="
+            <a class="nav-link" href="index.php?page=products&sortBy=DiscountPercentageDescending"
               style="color: yellow !important; font-size: 14px; font-weight: bold;">
               Best Deals
             </a>

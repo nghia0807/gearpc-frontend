@@ -166,6 +166,12 @@ if (!isset($product) || empty($product)) {
                     <span class="product-price-current"><?= formatCurrency($product['currentPrice']) ?></span>
                     <?php if (!empty($product['originalPrice']) && $product['originalPrice'] > $product['currentPrice']): ?>
                         <span class="product-price-original"><?= formatCurrency($product['originalPrice']) ?></span>
+                        <?php 
+                        $discountPercentage = calculateDiscount($product['originalPrice'], $product['currentPrice']);
+                        if ($discountPercentage > 0):
+                        ?>
+                        <span class="discount-badge">-<?= $discountPercentage ?>%</span>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
                 <div class="product-description">
