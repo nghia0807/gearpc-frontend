@@ -143,9 +143,9 @@
               style="color: yellow !important; font-size: 14px; font-weight: bold;">
               Best Deals
             </a>
-          </li>          
+          </li>     
           <li class="nav-item">
-            <a class="nav-link" href="#">PC Builder</a>
+            <a class="nav-link" href="index.php?page=build">PC Builder</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="index.php?page=news">News</a>
