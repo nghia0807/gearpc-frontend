@@ -89,7 +89,7 @@ $items = $order['items'];
                         </p>
                         <div class="d-grid gap-2 d-md-block">
                             <a href="index.php" class="btn btn-outline-success me-md-2">Continue Shopping</a>
-                            <a href="#" class="btn btn-success">My Orders</a>
+                            <a href="index.php?page=my-orders" class="btn btn-success">My Orders</a>
                         </div>
                     </div>
                 </div>

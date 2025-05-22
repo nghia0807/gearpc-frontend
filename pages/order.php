@@ -265,9 +265,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($httpCode === 200 || $httpCode === 201) {
             $responseData = json_decode($response, true);
-            $orderSuccess = true;
-
-            // Store order information in session for confirmation page
+            $orderSuccess = true;            // Store order information in session for confirmation page
+            // Set timezone to UTC+7 (Vietnam timezone)
+            date_default_timezone_set('Asia/Ho_Chi_Minh');
             $_SESSION['lastOrder'] = [
                 'orderId' => $responseData['data']['orderId'] ?? '',
                 'orderDate' => date('Y-m-d H:i:s'),
