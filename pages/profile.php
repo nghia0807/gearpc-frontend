@@ -421,9 +421,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             opacity: 1;
             transform: translateX(0);
         }
+    }    /* Responsive adjustments */
+    @media (max-width: 991px) {
+        .profile-sidebar {
+            min-width: 100% !important;
+            width: 100% !important;
+            margin-bottom: 20px;
+        }
+        
+        .side-nav-item {
+            padding: 10px 16px;
+        }
+        
+        .profile-card-body {
+            padding: 20px;
+        }
     }
-
-    /* Responsive adjustments */
+    
     @media (max-width: 767px) {
         .profile-title {
             font-size: 1.5rem;
@@ -432,6 +446,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .profile-subtitle {
             text-align: center;
+        }
+        
+        .profile-banner {
+            padding: 15px 0;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .profile-content {
+            padding: 15px 10px;
+        }
+        
+        .profile-card-body {
+            padding: 15px;
+        }
+        
+        .password-section {
+            padding: 15px;
+        }
+        
+        .save-profile-btn {
+            width: 100%;
         }
     }
 
