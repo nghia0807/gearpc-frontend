@@ -774,10 +774,14 @@ require_once __DIR__ . '/../includes/session_init.php';
                 components: cleanedComponents,
                 totalPrice: window.pcBuilderState.totalPrice
             };
-        }
-
-        addToCartBtn.addEventListener('click', async () => {            
+        }        addToCartBtn.addEventListener('click', async () => {            
             try {
+                // Check if user is logged in
+                if (!isUserLoggedIn()) {
+                    showLoginConfirmModal();
+                    return;
+                }
+                
                 const validComponentsData = getValidComponents();
                 if (!validComponentsData) return;
                 
@@ -920,6 +924,37 @@ require_once __DIR__ . '/../includes/session_init.php';
                 const bsModal = new bootstrap.Modal(modal);
                 bsModal.show();
             }
+        }
+
+        // Function to show toast notifications
+        function showToast(message, type = 'success') {
+            // Create toast container if it doesn't exist
+            const toastContainer = document.getElementById('toastContainer');
+            
+            // Create toast element
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            toastEl.setAttribute('data-bs-delay', '5000');
+
+            toastEl.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+
+            toastContainer.appendChild(toastEl);
+
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+
+            // Auto-remove toast after it's hidden
+            toastEl.addEventListener('hidden.bs.toast', function () {
+                toastEl.remove();
+            });
         }
     });
 </script>
