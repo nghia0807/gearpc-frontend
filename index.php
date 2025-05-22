@@ -18,6 +18,7 @@ $allowedPages = [
     'order-detail' => 'pages/order-detail.php',
     'order-confirmation' => 'pages/order-confirmation.php',
     'profile' => 'pages/profile.php',
+    'build' => 'pages/build-pc.php',
     // Add more pages here as needed
 ];
 
