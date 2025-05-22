@@ -28,7 +28,8 @@ function fetchCategories() {
                     'Memory (RAM)',
                     'Power Supply Unit (PSU)',
                     'CPU Cooler',
-                    'Hard Drives & Storage Devices',
+                    'HDD',
+                    'SSD',
                     'PC Cases',
                     // Peripherals
                     'Monitors',
@@ -72,7 +73,8 @@ $icons = [
     'Memory (RAM)' => 'bi bi-memory',
     'Power Supply Unit (PSU)' => 'bi bi-lightning-charge-fill',
     'CPU Cooler' => 'bi bi-fan',
-    'Hard Drives & Storage Devices' => 'bi bi-device-hdd-fill',
+    'HDD' => 'bi bi-device-hdd-fill',
+    'SSD' => 'bi bi-device-ssd-fill',
     'PC Cases' => 'bi bi-pc-display',
     // Peripherals
     'Monitors' => 'bi bi-display-fill',
@@ -124,6 +126,8 @@ if (!isset($sidebarData)) {
         border: none !important;
         border-radius: 10px !important;
         background-color: #414141 !important;
+        padding-top: 1px !important;
+        padding-bottom: 1px !important;
     }
 
     /* Icon spacing */
@@ -186,13 +190,11 @@ if (!isset($sidebarData)) {
         }
         
         popup.style.display = 'block';
-        document.body.style.overflow = 'hidden'; // Prevent scrolling behind popup
     }
 
     function closeSidebar() {
         const popup = document.getElementById('sidebarPopup');
         popup.style.display = 'none';
-        document.body.style.overflow = 'auto'; // Restore scrolling
     }
 
     // Close sidebar when clicking outside of it

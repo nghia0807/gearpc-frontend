@@ -8,10 +8,17 @@ $searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
 $pageIndex = isset($_GET['pageIndex']) ? max(0, intval($_GET['pageIndex'])) : 0;
 $pageSize = 12; // Set fixed page size to 12 products (3 columns x 4 rows)
 
+// Price range filtering
+$minPrice = isset($_GET['minPrice']) ? floatval($_GET['minPrice']) : null;
+$maxPrice = isset($_GET['maxPrice']) ? floatval($_GET['maxPrice']) : null;
+
+// Sorting
+$sortBy = isset($_GET['sortBy']) ? trim($_GET['sortBy']) : '';
+$sortDirection = isset($_GET['sortDirection']) ? trim($_GET['sortDirection']) : 'asc';
+
 // API Endpoints
 $productsApiUrl = "http://localhost:5000/api/products?pageIndex={$pageIndex}&pageSize={$pageSize}";
 $brandsApiUrl = "http://localhost:5000/api/brands/get_select";
-$categoriesApiUrl = "http://localhost:5000/api/categories/get?pageIndex=0&pageSize=100";
 
 // Add filters to API URL if provided
 if ($categoryCode)
@@ -20,6 +27,14 @@ if ($brandCode)
     $productsApiUrl .= "&brandCode=" . urlencode($brandCode);
 if ($searchQuery)
     $productsApiUrl .= "&productName=" . urlencode($searchQuery);
+if ($minPrice !== null)
+    $productsApiUrl .= "&minPrice=" . urlencode($minPrice);
+if ($maxPrice !== null)
+    $productsApiUrl .= "&maxPrice=" . urlencode($maxPrice);
+if ($sortBy) {
+    $productsApiUrl .= "&sortBy=" . urlencode($sortBy);
+    $productsApiUrl .= "&sortDirection=" . urlencode($sortDirection);
+}
 
 // Helper: Make API requests
 function makeApiRequest($url)
@@ -35,16 +50,14 @@ function makeApiRequest($url)
     return json_decode($response, true);
 }
 
-// Fetch products, brands, and categories
+// Fetch products, brands
 $productsResponse = makeApiRequest($productsApiUrl);
 $brandsResponse = makeApiRequest($brandsApiUrl);
-$categoriesResponse = makeApiRequest($categoriesApiUrl);
 
 // Extract data from responses
 $products = [];
 $totalProducts = 0;
 $brands = [];
-$categories = [];
 
 if (!empty($productsResponse['success']) && isset($productsResponse['data']['data'])) {
     $products = $productsResponse['data']['data'];
@@ -52,27 +65,6 @@ if (!empty($productsResponse['success']) && isset($productsResponse['data']['dat
 }
 if (!empty($brandsResponse['success']) && isset($brandsResponse['data'])) {
     $brands = $brandsResponse['data'];
-}
-if (!empty($categoriesResponse['success']) && isset($categoriesResponse['data']['data'])) {
-    $categories = $categoriesResponse['data']['data'];
-    // Sort categories for display
-    $customOrder = [
-        'Laptops',
-        'PCs',
-        'Main, CPU, VGA',
-        'Monitors',
-        'Keyboards',
-        'Mouse + Mouse Pad',
-        'Earphones',
-        'Sounds'
-    ];
-    usort($categories, function ($a, $b) use ($customOrder) {
-        $posA = array_search($a['name'], $customOrder);
-        $posB = array_search($b['name'], $customOrder);
-        $posA = $posA === false ? PHP_INT_MAX : $posA;
-        $posB = $posB === false ? PHP_INT_MAX : $posB;
-        return $posA - $posB;
-    });
 }
 
 // Helper: Format currency
@@ -88,29 +80,6 @@ function calculateDiscount($original, $current)
         return 0;
     return round((($original - $current) / $original) * 100);
 }
-
-// Icon mapping for categories
-$categoryIcons = [
-    'Laptops' => 'bi bi-laptop',
-    'PCs' => 'bi bi-pc-display',
-    'Main, CPU, VGA' => 'bi bi-cpu',
-    'Mouse + Mouse Pad' => 'bi bi-mouse',
-    'Sounds' => 'bi bi-speaker',
-    'Monitors' => 'bi bi-display',
-    'Earphones' => 'bi bi-headphones',
-    'Keyboards' => 'bi bi-keyboard',
-];
-
-// Get active category name for display
-$activeCategoryName = "";
-if ($categoryCode) {
-    foreach ($categories as $cat) {
-        if (!empty($cat['code']) && $cat['code'] === $categoryCode) {
-            $activeCategoryName = $cat['name'];
-            break;
-        }
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -118,7 +87,6 @@ if ($categoryCode) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $activeCategoryName ? htmlspecialchars($activeCategoryName) : 'All Products' ?> - GearPC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -126,12 +94,6 @@ if ($categoryCode) {
         body {
             background-color: #121212;
             color: #ffffff;
-        }
-
-        .page-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
         }
 
         .filters-container {
@@ -143,20 +105,96 @@ if ($categoryCode) {
             margin-bottom: 1.5rem;
         }
 
+        .filter-section {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+        }
+        
         .filter-heading {
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 1rem;
+            color: #ff9620;
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-heading i {
+            margin-right: 0.5rem;
         }
 
-        .filter-section {
-            margin-bottom: 1.5rem;
+        .price-range-container .form-control:focus,
+        .sort-options .form-select:focus {
+            border-color: #ff9620;
+            box-shadow: 0 0 0 0.25rem rgba(255, 150, 32, 0.25);
         }
-
+        
+        /* Custom styling for price inputs */
+        .price-inputs {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .price-divider {
+            margin: 0 10px;
+            color: #6c757d;
+        }
+        
+        /* Styling for the sort dropdown */
+        .sort-options .form-select {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .sort-options .form-select:hover {
+            border-color: #ff9620;
+        }
+        
         .brand-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
             gap: 12px;
+        }
+
+        /* First row of brands only */
+        .brand-grid-first-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            grid-template-rows: 1fr;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        /* View More Brands Button */
+        .btn-view-more-brands {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: white;
+            background: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #2d2d2d;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 10px;
+        }
+
+        .btn-view-more-brands:hover {
+            background-color: #2d2d2d;
+            border-color: #ff9620;
+        }
+
+        .btn-view-more-brands i {
+            transition: transform 0.3s ease;
+            margin-left: 5px;
+        }
+
+        .btn-view-more-brands[aria-expanded="true"] i {
+            transform: rotate(180deg);
         }
 
         .brand-item {
@@ -170,12 +208,14 @@ if ($categoryCode) {
             color: #ffffff;
             text-align: center;
             transition: all 0.2s;
+            border: 1px solid transparent;
         }
 
         .brand-item:hover {
             background-color: #2d2d2d;
             color: #ff9620;
             transform: translateY(-3px);
+            border-color: #ff9620;
         }
 
         .brand-item.active {
@@ -184,8 +224,8 @@ if ($categoryCode) {
         }
 
         .brand-img-container {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background-color: #ffffff;
             border-radius: 50%;
             display: flex;
@@ -213,73 +253,23 @@ if ($categoryCode) {
             height: 2.5rem;
         }
 
-        .filter-item {
-            display: block;
-            padding: 0.75rem 1rem;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            transition: background-color 0.2s;
+        .all-brands.active {
+            background-color: #ff9620;
+            border-color: #ff9620;
+            color: black;
         }
 
-        .filter-item:hover {
-            background-color: #2d2d2d;
-            color: #ffffff;
+        .apply-filter-btn {
+            background-color: #ff9620;
+            color: #000;
+            border: none;
+            transition: all 0.3s;
+            font-weight: 500;
         }
-
-        .filter-item.active {
-            background-color: #6694ea;
-            color: #ffffff;
-        }
-
-        .filter-item i {
-            margin-right: 0.75rem;
-            width: 1.25rem;
-            text-align: center;
-        }
-
-        .filter-select {
-            background-color: #2d2d2d;
-            color: #ffffff;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-        }
-
-        .filter-select:focus {
-            border-color: #6694ea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 148, 234, 0.25);
-            background-color: #2d2d2d;
-            color: #ffffff;
-        }
-
-        .pagination-container {
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .page-link {
-            background-color: #2d2d2d;
-            color: #ffffff;
-            border-color: #444;
-        }
-
-        .page-link:hover {
-            background-color: #444;
-            color: #ffffff;
-            border-color: #555;
-        }
-
-        .page-item.active .page-link {
-            background-color: #6694ea;
-            border-color: #6694ea;
-        }
-
-        .page-item.disabled .page-link {
-            background-color: #222;
-            color: #777;
-            border-color: #333;
+        
+        .apply-filter-btn:hover {
+            background-color: #e68a1c;
+            transform: translateY(-2px);
         }
 
         .no-products {
@@ -295,47 +285,18 @@ if ($categoryCode) {
             color: #ffa33a;
             margin-bottom: 1rem;
         }
-
-        .all-brands.active {
-            background-color: #ff9620;
-            border-color: #ff9620;
-            color: black;
-        }
-
-        /* View More Button */
-        #view-more-btn {
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-
-        #view-more-btn:hover {
-            color: #1e1e1e;
-            transform: translateY(-2px);
-        }
-
-        #view-more-btn:active {
-            transform: translateY(0);
-        }
-
-        #view-more-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        #loading-indicator {
-            color: #1e1e1e;
-        }
-
+        
+        /* Improved responsive layout for filters */
         @media (max-width: 768px) {
             .filters-container {
-                margin-bottom: 1rem;
+                padding: 1rem;
             }
-
-            .page-title {
-                font-size: 1.5rem;
-                margin-bottom: 1rem;
+            
+            .filter-section {
+                padding-bottom: 0.75rem;
             }
-
+            
+            .brand-grid-first-row,
             .brand-grid {
                 grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             }
@@ -349,35 +310,133 @@ if ($categoryCode) {
             <div class="col-12 mb-4">
                 <div class="filters-container">
                     <div class="row">
-                        <!-- Brands Filter -->
-                        <div class="col-md-12">
+                        <!-- Price Range Filter -->
+                        <div class="col-md-4 mb-3">
                             <div class="filter-section">
-                                <h5 class="filter-heading">Brands</h5>
-                                <div class="brand-grid">
-                                    <a href="<?= 'index.php?page=products' . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') ?>"
+                                <h5 class="filter-heading"><i class="bi bi-cash"></i> Price Range</h5>
+                                <div class="price-range-container">
+                                    <div class="row g-2">
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-dark text-light border-secondary">Min</span>
+                                                <input type="number" class="form-control bg-dark text-light border-secondary"
+                                                    id="minPrice" placeholder="0"
+                                                    value="<?= $minPrice !== null ? $minPrice : '' ?>">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-dark text-light border-secondary">Max</span>
+                                                <input type="number" class="form-control bg-dark text-light border-secondary"
+                                                    id="maxPrice" placeholder="Max"
+                                                    value="<?= $maxPrice !== null ? $maxPrice : '' ?>">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 mt-2">
+                                            <button id="apply-price-filter" class="btn btn-sm btn-outline-light w-100 apply-filter-btn">Apply
+                                                Filter</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sorting Options -->
+                        <div class="col-md-4 mb-3">
+                            <div class="filter-section">
+                                <h5 class="filter-heading"><i class="bi bi-sort-alpha-down"></i> Sort By</h5>
+                                <div class="sort-options">
+                                    <select id="sort-options" class="form-select bg-dark text-light border-secondary">
+                                        <option value="" <?= $sortBy === '' ? 'selected' : '' ?>>Default sorting</option>
+                                        <option value="price-asc" <?= ($sortBy === 'currentPrice' && $sortDirection === 'asc') ? 'selected' : '' ?>>
+                                            Price: Low to High
+                                        </option>
+                                        <option value="price-desc" <?= ($sortBy === 'currentPrice' && $sortDirection === 'desc') ? 'selected' : '' ?>>
+                                            Price: High to Low
+                                        </option>
+                                        <option value="name-asc" <?= ($sortBy === 'name' && $sortDirection === 'asc') ? 'selected' : '' ?>>
+                                            Name: A to Z
+                                        </option>
+                                        <option value="name-desc" <?= ($sortBy === 'name' && $sortDirection === 'desc') ? 'selected' : '' ?>>
+                                            Name: Z to A
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Brands Filter -->
+                        <div class="col-md-4">
+                            <div class="filter-section">
+                                <h5 class="filter-heading"><i class="bi bi-tags"></i> Brands</h5>
+                                <!-- First row of brands (always visible) -->
+                                <div class="brand-grid-first-row">
+                                    <a href="<?= 'index.php?page=products' . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
                                         class="brand-item all-brands <?= !$brandCode ? 'active' : '' ?>">
                                         <div class="brand-img-container">
                                             <i class="bi bi-grid-3x3-gap" style="font-size:24px;color:#666;"></i>
                                         </div>
                                         <div class="brand-name">All Brands</div>
                                     </a>
-                                    <?php foreach ($brands as $brand): ?>
-                                        <?php if (empty($brand['code']) || empty($brand['name']))
-                                            continue; ?>
-                                        <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') ?>"
+
+                                    <?php
+                                    // Calculate how many brands fit in the first row (based on typical screen width)
+                                    $brandsInFirstRow = min(10, count($brands)); // Show max 10 brands in first row
+                                    $firstRowBrands = array_slice($brands, 0, $brandsInFirstRow - 1);
+                                    $remainingBrands = array_slice($brands, $brandsInFirstRow - 1);
+
+                                    // Display first row brands
+                                    foreach ($firstRowBrands as $brand):
+                                        if (empty($brand['code']) || empty($brand['name'])) continue;
+                                    ?>
+                                    <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
+                                        class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
+                                        <div class="brand-img-container">
+                                            <?php if (!empty($brand['imageUrl'])): ?>
+                                            <img src="<?= htmlspecialchars($brand['imageUrl']) ?>"
+                                                alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
+                                            <?php else: ?>
+                                            <i class="bi bi-building" style="font-size:24px;color:#666;"></i>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="brand-name"><?= htmlspecialchars($brand['name']) ?></div>
+                                    </a>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <?php if (count($remainingBrands) > 0): ?>
+                                <!-- Collapsible Brands Container -->
+                                <div class="collapse mt-3" id="moreBrandsCollapse">
+                                    <div class="brand-grid">
+                                        <?php foreach ($remainingBrands as $brand): ?>
+                                        <?php if (empty($brand['code']) || empty($brand['name'])) continue; ?>
+                                        <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
                                             class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
                                             <div class="brand-img-container">
                                                 <?php if (!empty($brand['imageUrl'])): ?>
-                                                    <img src="<?= htmlspecialchars($brand['imageUrl']) ?>"
-                                                        alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
+                                                <img src="<?= htmlspecialchars($brand['imageUrl']) ?>"
+                                                    alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
                                                 <?php else: ?>
-                                                    <i class="bi bi-building" style="font-size:24px;color:#666;"></i>
+                                                <i class="bi bi-building" style="font-size:24px;color:#666;"></i>
                                                 <?php endif; ?>
                                             </div>
                                             <div class="brand-name"><?= htmlspecialchars($brand['name']) ?></div>
                                         </a>
-                                    <?php endforeach; ?>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
+                                <!-- View More Brands Button -->
+                                <button class="btn-view-more-brands"
+                                    type="button"
+                                    id="viewMoreBrandsBtn"
+                                    aria-expanded="false"
+                                    aria-controls="moreBrandsCollapse">
+                                    <div>
+                                        <span>View more brands</span>
+                                        <i class="bi bi-chevron-down"></i>
+                                    </div>
+                                </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -386,81 +445,131 @@ if ($categoryCode) {
             <!-- Product Grid -->
             <div class="col-12">
                 <?php if (!$products): ?>
-                    <div class="no-products">
-                        <div class="no-products-icon">
-                            <i class="bi bi-search"></i>
-                        </div>
-                        <h4>No products found</h4>
-                        <p>Try adjusting your search or filter criteria</p>
-                        <a href="products.php" class="btn btn-view-product mt-3">View All Products</a>
+                <div class="no-products">
+                    <div class="no-products-icon">
+                        <i class="bi bi-search"></i>
                     </div>
+                    <h4>No products found</h4>
+                    <p>Try adjusting your search or filter criteria</p>
+                    <a href="products.php" class="btn btn-view-product mt-3">View All Products</a>
+                </div>
                 <?php else: ?>
-                    <!-- Product card -->
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="products-container">
-                        <?php foreach ($products as $product): ?>
-                            <?php include 'components/product-card.php'; ?>
-                        <?php endforeach; ?>
-                    </div>
+                <!-- Product card -->
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="products-container">
+                    <?php foreach ($products as $product): ?>
+                    <?php include 'components/product-card.php'; ?>
+                    <?php endforeach; ?>
+                </div>
 
-                    <!-- View More Button (replaces pagination) -->
-                    <?php if ($totalProducts > $pageSize): ?>
-                        <div class="text-center mt-5 mb-4">
-                            <button id="view-more-btn" class="btn px-4 py-2" data-current-page="<?= $pageIndex ?>"
-                                data-total-pages="<?= ceil($totalProducts / $pageSize) ?>"
-                                data-category="<?= htmlspecialchars($categoryCode) ?>"
-                                data-brand="<?= htmlspecialchars($brandCode) ?>"
-                                data-search="<?= htmlspecialchars($searchQuery) ?>">
-                                <i class="bi bi-plus-circle me-1"></i>
-                                <span>View more products</span>
-                            </button>
+                <!-- View More Button (replaces pagination) -->
+                <?php if ($totalProducts > $pageSize): ?>
+                <div class="text-center mt-5 mb-4">
+                    <button id="view-more-btn" class="btn px-4 py-2" data-current-page="<?= $pageIndex ?>"
+                        data-total-pages="<?= ceil($totalProducts / $pageSize) ?>"
+                        data-category="<?= htmlspecialchars($categoryCode) ?>"
+                        data-brand="<?= htmlspecialchars($brandCode) ?>"
+                        data-search="<?= htmlspecialchars($searchQuery) ?>">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        <span>View more products</span>
+                    </button>
 
-                            <div id="loading-indicator" class="d-none mt-4">
-                                <div class="spinner-border text-light" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <div class="mt-2">Loading more products...</div>
-                            </div>
+                    <div id="loading-indicator" class="d-none mt-4">
+                        <div class="spinner-border text-light" role="status">
+                            <span class="visually-hidden">Loading...</span>
                         </div>
-                    <?php endif; ?>
+                        <div class="mt-2">Loading more products...</div>
+                    </div>
+                </div>
+                <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Define the jumpToPage function globally -->
-    <script>
-        window.jumpToPage = function (e) {
-            e.preventDefault();
-            const input = document.getElementById('jumpToPage');
-            if (!input) return false;
-
-            const page = parseInt(input.value) - 1;
-            <?php if (isset($totalPages)): ?>
-                const maxPage = <?= $totalPages - 1 ?>;
-
-                if (isNaN(page) || page < 0 || page > maxPage) {
-                    alert(`Please enter a valid page number between 1 and ${maxPage + 1}`);
-                    return false;
-                }
-
-                const paginationUrl = "<?= $paginationUrl ?? 'index.php?page=products&' ?>";
-                window.location.href = `${paginationUrl}pageIndex=${page}`;
-            <?php else: ?>
-                if (isNaN(page) || page < 0) {
-                    alert("Please enter a valid page number");
-                    return false;
-                }
-                window.location.href = `index.php?page=products&pageIndex=${page}`;
-            <?php endif; ?>
-            return false;
-        }
-    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Products view more functionality
             const viewMoreBtn = document.getElementById('view-more-btn');
             if (viewMoreBtn) {
                 viewMoreBtn.addEventListener('click', loadMoreProducts);
+            }
+
+            // Brands view more button text update
+            const viewMoreBrandsBtn = document.getElementById('viewMoreBrandsBtn');
+            if (viewMoreBrandsBtn) {
+                const moreBrandsCollapse = document.getElementById('moreBrandsCollapse');
+
+                // Initialize Bootstrap collapse instance
+                const bsCollapse = new bootstrap.Collapse(moreBrandsCollapse, {
+                    toggle: false
+                });
+
+                // Add direct click handler to manually toggle collapse state
+                viewMoreBrandsBtn.addEventListener('click', function () {
+                    if (moreBrandsCollapse.classList.contains('show')) {
+                        bsCollapse.hide();
+                    } else {
+                        bsCollapse.show();
+                    }
+                });
+
+                // Update button text on collapse/expand
+                moreBrandsCollapse.addEventListener('hidden.bs.collapse', function () {
+                    viewMoreBrandsBtn.querySelector('span').textContent = 'View more brands';
+                });
+
+                moreBrandsCollapse.addEventListener('shown.bs.collapse', function () {
+                    viewMoreBrandsBtn.querySelector('span').textContent = 'View less';
+                });
+
+                // Check if a hidden brand is active
+                const activeBrandInHidden = moreBrandsCollapse.querySelector('.brand-item.active');
+                if (activeBrandInHidden) {
+                    // If there's an active brand in the hidden section, show it automatically
+                    bsCollapse.show();
+                }
+            }
+
+            // Price filter apply button
+            const applyPriceFilterBtn = document.getElementById('apply-price-filter');
+            if (applyPriceFilterBtn) {
+                applyPriceFilterBtn.addEventListener('click', function () {
+                    const minPrice = document.getElementById('minPrice').value;
+                    const maxPrice = document.getElementById('maxPrice').value;
+
+                    // Redirect to the same page with updated minPrice and maxPrice
+                    window.location.href = 'index.php?page=products' +
+                        '<?= $categoryCode ? '&category=' . urlencode($categoryCode) : '' ?>' +
+                        '<?= $brandCode ? '&brand=' . urlencode($brandCode) : '' ?>' +
+                        '<?= $searchQuery ? '&q=' . urlencode($searchQuery) : '' ?>' +
+                        (minPrice !== '' ? '&minPrice=' + encodeURIComponent(minPrice) : '') +
+                        (maxPrice !== '' ? '&maxPrice=' + encodeURIComponent(maxPrice) : '') +
+                        '<?= $sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '' ?>';
+                });
+            }
+
+            // Sorting options change
+            const sortOptions = document.getElementById('sort-options');
+            if (sortOptions) {
+                sortOptions.addEventListener('change', function () {
+                    const selectedOption = this.value.split('-');
+                    const sortBy = selectedOption[0] === 'price' ? 'currentPrice' : selectedOption[0];
+                    const sortDirection = selectedOption[1] || 'asc';
+
+                    // Get current price filter values
+                    const minPrice = document.getElementById('minPrice').value;
+                    const maxPrice = document.getElementById('maxPrice').value;
+
+                    // Redirect to the same page with updated sortBy and sortDirection
+                    window.location.href = 'index.php?page=products' +
+                        '<?= $categoryCode ? '&category=' . urlencode($categoryCode) : '' ?>' +
+                        '<?= $brandCode ? '&brand=' . urlencode($brandCode) : '' ?>' +
+                        '<?= $searchQuery ? '&q=' . urlencode($searchQuery) : '' ?>' +
+                        (minPrice !== '' ? '&minPrice=' + encodeURIComponent(minPrice) : '') +
+                        (maxPrice !== '' ? '&maxPrice=' + encodeURIComponent(maxPrice) : '') +
+                        '&sortBy=' + encodeURIComponent(sortBy) +
+                        '&sortDirection=' + encodeURIComponent(sortDirection);
+                });
             }
         });
 
@@ -482,6 +591,22 @@ if ($categoryCode) {
             if (btn.dataset.category) apiUrl += `&categoryCode=${encodeURIComponent(btn.dataset.category)}`;
             if (btn.dataset.brand) apiUrl += `&brandCode=${encodeURIComponent(btn.dataset.brand)}`;
             if (btn.dataset.search) apiUrl += `&productName=${encodeURIComponent(btn.dataset.search)}`;
+            
+            // Add price range filters
+            const minPrice = document.getElementById('minPrice').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+            if (minPrice) apiUrl += `&minPrice=${encodeURIComponent(minPrice)}`;
+            if (maxPrice) apiUrl += `&maxPrice=${encodeURIComponent(maxPrice)}`;
+            
+            // Add sorting options
+            const sortOptions = document.getElementById('sort-options');
+            if (sortOptions && sortOptions.value) {
+                const selectedOption = sortOptions.value.split('-');
+                const sortBy = selectedOption[0] === 'price' ? 'currentPrice' : selectedOption[0];
+                const sortDirection = selectedOption[1] || 'asc';
+                
+                apiUrl += `&sortBy=${encodeURIComponent(sortBy)}&sortDirection=${encodeURIComponent(sortDirection)}`;
+            }
 
             // Fetch additional products
             fetch(apiUrl)
