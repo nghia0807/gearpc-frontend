@@ -1,10 +1,13 @@
 <?php
 require_once __DIR__ . '/session_init.php';
+require_once __DIR__ . '/../components/cart-badge.php';
 
 // --- Session check for login state and expiration ---
 $isLoggedIn = false;
 $userFullName = '';
 $userRole = '';
+$cartItemCount = 0;
+
 if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
   $now = time();
   // Support both timestamp and string expiration
@@ -13,6 +16,10 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
     $isLoggedIn = true;
     $userFullName = htmlspecialchars($_SESSION['user']['fullName'] ?? $_SESSION['user']['username']);
     $userRole = $_SESSION['user']['role'] ?? '';
+    
+    // Get cart item count for the badge
+    $cartResult = getCartItemCount($_SESSION['token']);
+    $cartItemCount = $cartResult['count'];
   } else {
     // Session expired
     $_SESSION = [];
@@ -133,9 +140,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
       width: 20px;
       height: 10px;
       overflow: hidden;
-    }
-
-    .user-popover-arrow::after {
+    }    .user-popover-arrow::after {
       content: "";
       display: block;
       margin: auto;
@@ -147,6 +152,21 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
       top: 4px;
       left: 2px;
       box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Cart badge styling */
+    .cart-badge {
+      font-size: 0.65rem;
+      transform: translate(25%, -25%) !important;
+      animation: scaleInOut 0.5s;
+      background-color: #ffa33a !important;
+      font-weight: bold;
+    }
+    
+    @keyframes scaleInOut {
+      0% { transform: translate(25%, -25%) scale(0); }
+      50% { transform: translate(25%, -25%) scale(1.2); }
+      100% { transform: translate(25%, -25%) scale(1); }
     }
 
     .user-popover .dropdown-item {
@@ -418,11 +438,11 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
               href="<?php echo $isLoggedIn ? 'index.php?page=my-orders' : 'pages/not-logged-in.php'; ?>">
               <i class="bi bi-truck me-1"></i> <span class="nav-label">Orders</span>
             </a>
-          </li>
-          <li class="nav-item me-3">
-            <a class="nav-link header-items"
+          </li>          <li class="nav-item me-3">
+            <a class="nav-link header-items position-relative"
               href="<?php echo $isLoggedIn ? 'index.php?page=cart' : 'pages/not-logged-in.php'; ?>">
               <i class="bi bi-cart"></i> <span class="nav-label">Cart</span>
+              <?php echo $isLoggedIn ? renderCartBadge($cartItemCount) : ''; ?>
             </a>
           </li>
           <?php if ($isLoggedIn): ?>

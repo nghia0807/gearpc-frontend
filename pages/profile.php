@@ -60,8 +60,42 @@ function getUserProfile($token)
     return $result;
 }
 
+// Function to get user's order count
+function getUserOrderCount($token)
+{
+    $apiUrl = "http://localhost:5000/api/orders/user?pageIndex=0&pageSize=1";
+    $ch = curl_init($apiUrl);
+
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $token,
+        'Content-Type: application/json'
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+
+    curl_close($ch);
+
+    if ($error || $httpCode !== 200) {
+        return 0; // Return 0 if there's an error
+    }
+
+    $result = json_decode($response, true);
+    
+    if (!$result || !isset($result['success']) || !$result['success']) {
+        return 0;
+    }
+
+    return $result['data']['totalCount'] ?? 0;
+}
+
 // Get user information
 $profileResponse = getUserProfile($token);
+
+// Get user's order count
+$orderCount = getUserOrderCount($token);
 
 if ($profileResponse['success'] && isset($profileResponse['data'])) {
     $user = $profileResponse['data'];
@@ -243,12 +277,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     .stat-item:hover {
         transform: translateY(-5px);
-    }
-
-    .stat-number {
+    }    .stat-number {
         font-size: 1.8rem;
         font-weight: bold;
-        color: var(--primary-color);
+        color: #ffa33a;
+        animation: fadeInUp 0.8s;
     }
 
     /* Profile Card - keeping animations */
@@ -485,10 +518,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="card-body">
                     <h5 class="card-title mb-4">
                         <i class="bi bi-graph-up me-2"></i>Activity
-                    </h5>
-                    <div class="d-flex justify-content-around text-center">
+                    </h5>                    <div class="d-flex justify-content-around text-center">
                         <div class="stat-item">
-                            <div class="stat-number">0</div>
+                            <div class="stat-number"><?php echo $orderCount; ?></div>
                             <div class="stat-label">Orders</div>
                         </div>
                         <div class="stat-item">
