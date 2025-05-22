@@ -13,11 +13,11 @@ $allowedPages = [
     'products' => 'pages/products.php',
     'product-detail' => 'pages/product-detail.php',
     'news' => 'pages/news.php',
+    'order' => 'pages/order.php',
+    'order-confirmation' => 'pages/order-confirmation.php',
     'profile' => 'pages/profile.php',
     'login' => 'pages/login.php',
     'register' => 'pages/register.php',
-    'order' => 'pages/order.php',
-
     // Add more pages here as needed
 ];
 

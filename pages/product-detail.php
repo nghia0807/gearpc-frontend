@@ -1161,17 +1161,13 @@ function getProductImages($product)
                         console.error('Error:', error);
                         showToast('An error occurred while processing your request.', 'danger');
                     });
-            };
-            // Buy now button
+            };            // Buy now button
             document.getElementById('buyNowBtn').addEventListener('click', function () {
-                const quantity = document.getElementById('quantity').value;
+                const quantity = parseInt(document.getElementById('quantity').value) || 1;
                 const productId = '<?= htmlspecialchars($product['productInfo']['id']) ?>';
 
-                // Store selected product and quantity in session storage
-                sessionStorage.setItem('checkout_items', JSON.stringify([{ productId, quantity }]));
-
-                // Redirect to checkout page
-                window.location.href = 'index.php?page=checkout';
+                // Redirect to order page with 'Buy Now' parameters
+                window.location.href = 'index.php?page=order&buyNow=true&itemId=' + productId + '&quantity=' + quantity;
             });
             // Function to display toast
             function showToast(message, type = 'info') {
