@@ -122,7 +122,8 @@ if (isset($_GET['buyNow']) && $_GET['buyNow'] === 'true' && isset($_GET['itemId'
      * @param string $token The user's authentication token  
      * @return array Result with success status and items or error message
      */
-    function handleCartCheckout($itemIds, $requestedQuantity, $token) {
+    function handleCartCheckout($itemIds, $requestedQuantity, $token): array
+    {
         $result = [
             'success' => false,
             'items' => [],
@@ -263,8 +264,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
+        $responseData = json_decode($response, true);
         if ($httpCode === 200 || $httpCode === 201) {
-            $responseData = json_decode($response, true);
             $orderSuccess = true;            // Store order information in session for confirmation page
             // Set timezone to UTC+7 (Vietnam timezone)
             date_default_timezone_set('Asia/Ho_Chi_Minh');
@@ -279,7 +280,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: index.php?page=order-confirmation');
             exit;
         } else {
-            $responseData = json_decode($response, true);
             $orderError = $responseData['message'] ?? 'Failed to create order. Please try again.';
         }
     }

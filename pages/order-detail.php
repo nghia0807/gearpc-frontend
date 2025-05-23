@@ -60,7 +60,7 @@ function getOrderDetail($token, $orderId)
 }
 
 // Helper function to get order status badge class
-function getOrderStatusBadgeClass($status)
+function getOrderStatusBadgeClass($status): string
 {
     switch (strtolower($status)) {
         case 'pending':
@@ -79,7 +79,7 @@ function getOrderStatusBadgeClass($status)
 }
 
 // Helper function to get payment status badge class
-function getPaymentStatusBadgeClass($status)
+function getPaymentStatusBadgeClass($status): string
 {
     switch (strtolower($status)) {
         case 'paid':
@@ -94,7 +94,7 @@ function getPaymentStatusBadgeClass($status)
 }
 
 // Format date helper
-function formatOrderDate($dateString)
+function formatOrderDate($dateString): string
 {
     try {
         $date = new DateTime($dateString);
@@ -140,17 +140,11 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
     $orderItems = $order['orderItems'] ?? $order['items'] ?? [];
 
     // Get customer information with fallbacks
-    $customerName = isset($order['customer']) && isset($order['customer']['fullName'])
-        ? $order['customer']['fullName']
-        : ($order['customerName'] ?? 'N/A');
+    $customerName = $order['customer']['fullName'] ?? ($order['customerName'] ?? 'N/A');
 
-    $customerPhone = isset($order['customer']) && isset($order['customer']['phone'])
-        ? $order['customer']['phone']
-        : ($order['customerPhone'] ?? $order['phone'] ?? 'N/A');
+    $customerPhone = $order['customer']['phone'] ?? ($order['customerPhone'] ?? $order['phone'] ?? 'N/A');
 
-    $customerEmail = isset($order['customer']) && isset($order['customer']['email'])
-        ? $order['customer']['email']
-        : ($order['customerEmail'] ?? $order['email'] ?? 'N/A');
+    $customerEmail = $order['customer']['email'] ?? ($order['customerEmail'] ?? $order['email'] ?? 'N/A');
 
     $shippingAddress = $order['deliveryAddress'] ?? $order['shippingAddress'] ?? $order['address'] ?? 'N/A';
     $paymentMethod = $order['paymentMethod'] ?? $order['payment'] ?? 'N/A';
@@ -322,7 +316,7 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-12 d-flex align-items-center">
-                <a href="index.php?page=my-orders" class="text-white me-3">
+                <a href="/index.php?page=my-orders" class="text-white me-3">
                     <i class="bi bi-arrow-left-circle-fill fs-4"></i>
                 </a>
                 <div>
@@ -347,11 +341,11 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
                     </h5>
                 </div>
                 <div class="list-group list-group-flush profile-nav">
-                    <a href="index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
+                    <a href="/index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
                         <i class="bi bi-person-circle me-2"></i> Personal Information
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
                     </a>
-                    <a href="index.php?page=my-orders"
+                    <a href="/index.php?page=my-orders"
                         class="list-group-item list-group-item-action side-nav-item active">
                         <i class="bi bi-box-seam me-2"></i> My Orders
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
@@ -462,7 +456,7 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($orderItems as $item): ?>
+                                    <?php foreach (($orderItems ?? []) as $item): ?>
                                         <?php                                        // Get the item name
                                                 $itemName = $item['productName'] ?? $item['name'] ?? 'N/A';
                                                 // Get the item quantity
