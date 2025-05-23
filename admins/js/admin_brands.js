@@ -43,8 +43,8 @@ document.querySelectorAll('.editBtn').forEach(btn => {
         document.getElementById('edit_code').value = this.dataset.code;
         document.getElementById('edit_name').value = this.dataset.name;
         document.getElementById('edit_imageBase64').value = '';
-        var preview = document.getElementById('editImgPreview');
-        var image = this.dataset.image;
+        const preview = document.getElementById("editImgPreview");
+        const image = this.dataset.image;
         if (image && image.length > 0) {
             if (image.startsWith('http') || image.startsWith('data:image')) {
                 preview.src = image;
@@ -55,7 +55,7 @@ document.querySelectorAll('.editBtn').forEach(btn => {
             preview.src = 'https://via.placeholder.com/80x80?text=No+Image';
         }
         document.getElementById('edit_image').value = '';
-        var editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        const editModal = new bootstrap.Modal(document.getElementById("editModal"));
         editModal.show();
     });
 });
@@ -150,9 +150,9 @@ document.querySelectorAll('form').forEach(form => {
 
 // Show all toasts on page load
 document.addEventListener('DOMContentLoaded', function() {
-    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    const toastElList = [].slice.call(document.querySelectorAll(".toast"));
     toastElList.forEach(function(toastEl) {
-        var toast = new bootstrap.Toast(toastEl);
+        const toast = new bootstrap.Toast(toastEl);
         toast.show();
     });
 });
