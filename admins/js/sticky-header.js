@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const originalOffset = stickyHeader.offsetTop;
         
         function handleScroll() {
-            if (window.pageYOffset > originalOffset) {
+            if (window.scrollY > originalOffset) {
                 stickyHeader.classList.add('is-sticky');
             } else {
                 stickyHeader.classList.remove('is-sticky');

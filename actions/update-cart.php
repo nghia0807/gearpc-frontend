@@ -20,12 +20,11 @@ if (!isset($_SESSION['token'])) {
     $message = "You are not logged in.";
     if ($isAjax) {
         echo json_encode(['success' => false, 'message' => $message]);
-        exit;
     } else {
         $_SESSION['message'] = $message;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit;
     }
+    exit;
 }
 
 // Validate input data
@@ -33,12 +32,11 @@ if (!isset($postData['oldItemId'], $postData['newItemId'], $postData['quantity']
     $message = "Invalid input data.";
     if ($isAjax) {
         echo json_encode(['success' => false, 'message' => $message]);
-        exit;
     } else {
         $_SESSION['message'] = $message;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit;
     }
+    exit;
 }
 
 $oldItemId = htmlspecialchars($postData['oldItemId'], ENT_QUOTES, 'UTF-8');
@@ -87,9 +85,8 @@ if ($curlErr) {
 
 if ($isAjax) {
     echo json_encode(['success' => $success, 'message' => $message]);
-    exit;
 } else {
     $_SESSION['message'] = $message;
     header('Location: ' . $_SERVER['HTTP_REFERER']);
-    exit;
 }
+exit;

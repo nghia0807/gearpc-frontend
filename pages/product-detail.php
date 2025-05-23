@@ -80,13 +80,13 @@ if (!empty($product['productInfo']['code'])) {
 }
 
 // Helper: Format currency
-function formatCurrency($amount)
+function formatCurrency($amount): string
 {
     return '$' . number_format($amount, 2);
 }
 
 // Helper: Get product images (main + detail)
-function getProductImages($product)
+function getProductImages($product): array
 {
     $images = [];
     if (!empty($product['productInfo']['imageUrl'])) {
@@ -108,7 +108,7 @@ function getProductImages($product)
     <title><?= $product ? htmlspecialchars($product['productInfo']['name']) : 'Product Details' ?> - GearPC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <style>
         body {
             background-color: #121212;
@@ -764,7 +764,7 @@ function getProductImages($product)
                 <div class="error-icon"><i class="bi bi-exclamation-circle"></i></div>
                 <h3>Unable to load product information</h3>
                 <p class="mb-4"><?= htmlspecialchars($errorMsg) ?></p>
-                <a href="index.php?page=products" class="btn btn-add-cart">
+                <a href="/index.php?page=products" class="btn btn-add-cart">
                     <i class="bi bi-arrow-left"></i> Back to product list
                 </a>
             </div>
@@ -963,7 +963,7 @@ function getProductImages($product)
                         <div class="related-products" id="relatedProductsSlider">
                             <?php foreach ($relatedProducts as $relatedProduct): ?>
                                 <div class="related-product-card">
-                                    <a href="index.php?page=product-detail&id=<?= htmlspecialchars($relatedProduct['id']) ?>"
+                                    <a href="/index.php?page=product-detail&id=<?= htmlspecialchars($relatedProduct['id']) ?>"
                                         class="text-decoration-none">
                                         <div class="related-product-image">
                                             <img src="<?= htmlspecialchars($relatedProduct['imageUrl']) ?>"
@@ -1025,7 +1025,7 @@ function getProductImages($product)
                     <p>Please login to use this fearture.</p>
                 </div>
                 <div class="modal-footer border-top border-secondary">
-                    <a href="pages/login.php" class="btn"
+                    <a href="./login.php" class="btn"
                         style="background-color: #ffa33a; color: #000000; font-weight: 600;">Login</a>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
