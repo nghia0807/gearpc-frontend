@@ -90,7 +90,7 @@ if ($ordersResponse['success'] && isset($ordersResponse['data'])) {
 }
 
 // Helper function to get order status badge class
-function getOrderStatusBadgeClass($status)
+function getOrderStatusBadgeClass($status): string
 {
     switch (strtolower($status)) {
         case 'pending':
@@ -109,7 +109,7 @@ function getOrderStatusBadgeClass($status)
 }
 
 // Helper function to get payment status badge class
-function getPaymentStatusBadgeClass($status)
+function getPaymentStatusBadgeClass($status): string
 {
     switch (strtolower($status)) {
         case 'paid':
@@ -124,7 +124,7 @@ function getPaymentStatusBadgeClass($status)
 }
 
 // Format date helper
-function formatOrderDate($dateString)
+function formatOrderDate($dateString): string
 {
     try {
         $date = new DateTime($dateString);
@@ -446,11 +446,11 @@ function formatOrderDate($dateString)
                     </h5>
                 </div>
                 <div class="list-group list-group-flush profile-nav">
-                    <a href="index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
+                    <a href="/index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
                         <i class="bi bi-person-circle me-2"></i> Personal Information
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
                     </a>
-                    <a href="index.php?page=my-orders"
+                    <a href="/index.php?page=my-orders"
                         class="list-group-item list-group-item-action side-nav-item active">
                         <i class="bi bi-box-seam me-2"></i> My Orders
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
@@ -502,7 +502,7 @@ function formatOrderDate($dateString)
                                 <i class="bi bi-bag-x" style="font-size: 3rem; color: #ccc;"></i>
                                 <h5 class="mt-3">No Orders Found</h5>
                                 <p class="text-muted">You haven't placed any orders yet.</p>
-                                <a href="index.php?page=products" class="btn btn-primary mt-2">
+                                <a href="/index.php?page=products" class="btn btn-primary mt-2">
                                     <i class="bi bi-cart-plus me-2"></i>Start Shopping
                                 </a>
                             </div>
@@ -607,7 +607,7 @@ function formatOrderDate($dateString)
                                                             <h5 class="mb-0 text-success">
                                                                 $<?= number_format((float) $totalAmount, 2) ?></h5>
                                                         </div>
-                                                        <a href="index.php?page=order-detail&id=<?= $orderId ?>"
+                                                        <a href="/index.php?page=order-detail&id=<?= $orderId ?>"
                                                             class="btn btn-outline-dark">
                                                             <i class="bi bi-eye me-1"></i>View Details
                                                         </a>
