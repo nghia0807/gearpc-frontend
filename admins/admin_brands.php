@@ -121,7 +121,8 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
 $totalPages = ceil($totalCount / $pageSize);
 
 // Helper: image placeholder
-function brandImage($img) {
+function brandImage($img): string
+{
     if (!$img) {
         return '<img src="https://via.placeholder.com/60x60?text=No+Image" class="img-thumbnail" width="60" height="60">';
     }
