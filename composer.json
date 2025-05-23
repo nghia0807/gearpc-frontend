@@ -1,0 +1,10 @@
+{
+    "name": "mingle/gearpc-frontend",
+    "require": {
+      "ext-curl": "*",
+      "ext-json": "*",
+      "ext-simplexml": "*",
+      "ext-mbstring": "*",
+      "ext-fileinfo": "*"
+    }
+}
