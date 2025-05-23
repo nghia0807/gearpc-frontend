@@ -183,13 +183,13 @@ $(function() {
         <?php
         $expiration = isset($_SESSION['expiration']) ? (int)$_SESSION['expiration'] : 0;
         ?>
-        var expiration = <?= $expiration ?> * 1000;
+        const expiration = <?= $expiration ?> * 1000;
         if (Date.now() > expiration) {
             $('#managerAlert').html('<div class="alert alert-danger">Session expired. Please log in again.</div>');
             return;
         }
         // Prepare data
-        var data = {
+        const data = {
             username: username,
             password: password,
             email: email,
@@ -209,7 +209,7 @@ $(function() {
                 $('#createManagerForm')[0].reset();
             },
             error: function(xhr) {
-                var msg = 'Failed to create manager account.';
+                let msg = "Failed to create manager account.";
                 if (xhr.responseJSON && xhr.responseJSON.message) {
                     msg = $('<div>').text(xhr.responseJSON.message).html();
                 }
