@@ -50,9 +50,9 @@ function fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, &$alerts, &$t
     curl_close($ch);
 
     $data = json_decode($response, true);
-    $success = isset($data['success']) ? $data['success'] : false;
+    $success = $data['success'] ?? false;
     if (!$data || !$success || $httpCode !== 200) {
-        $alerts[] = ['type' => 'danger', 'msg' => isset($data['message']) ? $data['message'] : 'Unable to load products, please try again'];
+        $alerts[] = ['type' => 'danger', 'msg' => $data['message'] ?? 'Unable to load products, please try again'];
         return [];
     }
     $totalCount = $data['data']['totalCount'];
@@ -70,7 +70,7 @@ function fetchAll($url, $token) {
     $response = curl_exec($ch);
     curl_close($ch);
     $data = json_decode($response, true);
-    $success = isset($data['success']) ? $data['success'] : false;
+    $success = $data['success'] ?? false;
     if (!$data || !$success) return [];
     return $data['data']['data'] ?? [];
 }
@@ -78,7 +78,8 @@ function fetchAll($url, $token) {
 // --- API Handler Functions ---
 
 // Delete products by codes
-function deleteProducts($codes, $token) {
+function deleteProducts($codes, $token): array
+{
     $url = 'http://localhost:5000/api/products/delete';
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -95,12 +96,13 @@ function deleteProducts($codes, $token) {
     $data = json_decode($response, true);
     return [
         'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
-        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+        'message' => $data['message'] ?? 'Unknown error occurred'
     ];
 }
 
 // Add a new product
-function addProduct($productData, $token) {
+function addProduct($productData, $token): array
+{
     $url = 'http://localhost:5000/api/products/add';
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -117,12 +119,13 @@ function addProduct($productData, $token) {
     $data = json_decode($response, true);
     return [
         'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
-        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+        'message' => $data['message'] ?? 'Unknown error occurred'
     ];
 }
 
 // Update product name
-function updateProductName($productCode, $name, $token) {
+function updateProductName($productCode, $name, $token): array
+{
     $url = "http://localhost:5000/api/products/updateProductName?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -139,12 +142,13 @@ function updateProductName($productCode, $name, $token) {
     $data = json_decode($response, true);
     return [
         'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
-        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+        'message' => $data['message'] ?? 'Unknown error occurred'
     ];
 }
 
 // Update product brand
-function updateProductBrand($productCode, $brandCode, $token) {
+function updateProductBrand($productCode, $brandCode, $token): array
+{
     $url = "http://localhost:5000/api/products/updateProductBrand?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -161,12 +165,13 @@ function updateProductBrand($productCode, $brandCode, $token) {
     $data = json_decode($response, true);
     return [
         'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
-        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+        'message' => $data['message'] ?? 'Unknown error occurred'
     ];
 }
 
 // Update product categories
-function updateProductCategories($productCode, $categoriesCodes, $token) {
+function updateProductCategories($productCode, $categoriesCodes, $token): array
+{
     $url = "http://localhost:5000/api/products/updateProductCategories?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -183,12 +188,13 @@ function updateProductCategories($productCode, $categoriesCodes, $token) {
     $data = json_decode($response, true);
     return [
         'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
-        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+        'message' => $data['message'] ?? 'Unknown error occurred'
     ];
 }
 
 // Update product gifts
-function updateProductGifts($productCode, $giftCodes, $token) {
+function updateProductGifts($productCode, $giftCodes, $token): array
+{
     $url = "http://localhost:5000/api/products/updateProductGift?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -205,12 +211,13 @@ function updateProductGifts($productCode, $giftCodes, $token) {
     $data = json_decode($response, true);
     return [
         'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
-        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+        'message' => $data['message'] ?? 'Unknown error occurred'
     ];
 }
 
 // Update product main image
-function updateProductMainImage($productCode, $imageBase64, $token) {
+function updateProductMainImage($productCode, $imageBase64, $token): array
+{
     $url = "http://localhost:5000/api/products/updateProductMainImage?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -227,12 +234,13 @@ function updateProductMainImage($productCode, $imageBase64, $token) {
     $data = json_decode($response, true);
     return [
         'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'],
-        'message' => isset($data['message']) ? $data['message'] : 'Unknown error occurred'
+        'message' => $data['message'] ?? 'Unknown error occurred'
     ];
 }
 
 // Get product details by ID
-function getProductDetail($productId, $token) {
+function getProductDetail($productId, $token): array
+{
     $url = "http://localhost:5000/api/products/$productId";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -247,7 +255,7 @@ function getProductDetail($productId, $token) {
     $data = json_decode($response, true);
     return [
         'success' => ($httpCode >= 200 && $httpCode < 300) && isset($data['success']) && $data['success'], 
-        'data' => isset($data['data']) ? $data['data'] : null
+        'data' => $data['data'] ?? null
     ];
 }
 
@@ -343,7 +351,7 @@ $totalPages = ceil($totalCount / $pageSize);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Cập nhật đường dẫn đến file CSS -->
-    <link rel="stylesheet" href="product/css/admin_products.css">
+    <link rel="stylesheet" href="./product/css/admin_products.css">
     <style>
         .sticky-header {
             position: sticky;
