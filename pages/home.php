@@ -255,7 +255,7 @@ $rss = simplexml_load_file($rss_url);
         $categoryCode = "cpu";
         $sortBy = "discountPercentage";
         $sortOrder = "desc";
-        include(__DIR__ . '/../components/slider-products.php');
+        include(__DIR__ . '/../components/slider-products/slider-products.php');
         ?>
         
         <?php 
@@ -263,7 +263,7 @@ $rss = simplexml_load_file($rss_url);
         $categoryCode = "mouse";
         $sortBy = "discountPercentage";
         $sortOrder = "desc";
-        include(__DIR__ . '/../components/slider-products.php');
+        include(__DIR__ . '/../components/slider-products/slider-products.php');
         ?>
         
         <?php 
@@ -271,7 +271,7 @@ $rss = simplexml_load_file($rss_url);
         $categoryCode = "laptop";
         $sortBy = "discountPercentage";
         $sortOrder = "desc";
-        include(__DIR__ . '/../components/slider-products.php');
+        include(__DIR__ . '/../components/slider-products/slider-products.php');
         ?>
         <!-- Latest News Slider -->
         <div class="news-slider-container">
