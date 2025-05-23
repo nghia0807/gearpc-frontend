@@ -458,7 +458,7 @@ function calculateDiscount($original, $current)
                                     aria-expanded="false" 
                                     aria-controls="moreBrandsCollapse">
                                     <div>
-                                        <span>View more brands</span>
+                                        <span>View more</span>
                                         <i class="bi bi-chevron-down"></i>
                                     </div>
                                 </button>
@@ -584,13 +584,17 @@ function calculateDiscount($original, $current)
                     }
                 });
 
-                // Update button text on collapse/expand
+                // Update button text and icon on collapse/expand
                 moreBrandsCollapse.addEventListener('hidden.bs.collapse', function () {
-                    viewMoreBrandsBtn.querySelector('span').textContent = 'View more brands';
+                    viewMoreBrandsBtn.querySelector('span').textContent = 'View more';
+                    viewMoreBrandsBtn.querySelector('i').classList.remove('bi-chevron-up');
+                    viewMoreBrandsBtn.querySelector('i').classList.add('bi-chevron-down');
                 });
 
                 moreBrandsCollapse.addEventListener('shown.bs.collapse', function () {
                     viewMoreBrandsBtn.querySelector('span').textContent = 'View less';
+                    viewMoreBrandsBtn.querySelector('i').classList.remove('bi-chevron-down');
+                    viewMoreBrandsBtn.querySelector('i').classList.add('bi-chevron-up');
                 });
 
                 // Check if a hidden brand is active
