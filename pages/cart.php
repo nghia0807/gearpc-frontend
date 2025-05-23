@@ -524,7 +524,7 @@ $cartItems = $data['data']['items'] ?? [];
             <i class="bi bi-cart-x"></i>
             <h3>Your cart is empty</h3>
             <p>Looks like you haven't added anything to your cart yet.</p>
-            <a href="index.php?page=products" class="btn btn-primary">Continue Shopping</a>
+            <a href="/index.php?page=products" class="btn btn-primary">Continue Shopping</a>
         </div>
         <script>
             // Hide cart actions when cart is empty
