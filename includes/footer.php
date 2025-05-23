@@ -9,7 +9,7 @@
     <!-- Bootstrap Icons (optional) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
 
     <style>
         /* Scoped styles for the footer */
@@ -51,17 +51,17 @@
                     <p class="mb-2">
                         We provide top-notch PCs, laptops, and gaming gear to tech enthusiasts.
                     </p>
-                    <a href="../about.php">Learn More</a>
+                    <a href="/pages/about.php">Learn More</a>
                 </div>
 
                 <!-- Customer Support -->
                 <div class="col-md-4 mb-3">
                     <h5 class="text-uppercase">Customer Support</h5>
                     <ul class="list-unstyled">
-                        <li><a href="../contact.php">Contact Us</a></li>
-                        <li><a href="../faqs.php">FAQs</a></li>
-                        <li><a href="../return-policy.php">Return Policy</a></li>
-                        <li><a href="../shipping-info.php">Shipping Info</a></li>
+                        <li><a href="/pages/contact.php">Contact Us</a></li>
+                        <li><a href="/pages/faqs.php">FAQs</a></li>
+                        <li><a href="/pages/return-policy.php">Return Policy</a></li>
+                        <li><a href="/pages/shipping-info.php">Shipping Info</a></li>
                     </ul>
                 </div>
 
