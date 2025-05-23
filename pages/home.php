@@ -243,12 +243,129 @@ $rss = simplexml_load_file($rss_url);
         .toast.info {
             background: #2196F3;
         }
+
+        /* Banner Grid Layout */
+        .banner-grid {
+            max-width: 1200px;
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .banner-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            /* Thêm aspect-ratio để cố định tỷ lệ */
+            aspect-ratio: 5/4;
+        }
+
+        .banner-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .banner-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Đảm bảo ảnh không bị méo */
+            object-position: center;
+        }
+
+        .banner-item .banner-content {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        /* Main banner spans 2 columns and 2 rows */
+        .banner-item.main {
+            grid-column: span 2;
+            grid-row: span 2;
+            /* Loại bỏ height cố định, sử dụng aspect-ratio */
+        }
+
+        /* Sub banners - không cần height cố định nữa */
+        .banner-item.sub {
+            /* height đã được controlled bởi aspect-ratio */
+        }
+
+        @media (max-width: 992px) {
+            .banner-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .banner-item.main {
+                /* Loại bỏ height cố định */
+            }
+
+            .banner-item.sub {
+                /* Loại bỏ height cố định */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .banner-grid {
+                grid-template-columns: 1fr;
+                padding: 0 15px;
+            }
+
+            .banner-item.main {
+                grid-column: 1;
+                grid-row: 1;
+                /* Loại bỏ height cố định */
+            }
+
+            .banner-item.sub {
+                /* Loại bỏ height cố định */
+            }
+
+            .banner-item .banner-content h3 {
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 
 <body>
     <!-- Main content -->
     <main>
+        <!-- Banner Grid -->
+        <div class="banner-grid">
+            <!-- Main Banner -->
+            <div class="banner-item main">
+                <img src="/PHP/gearpc-frontend/assets/img/banners/gpu-nvidia.jpg">
+                <div class="banner-content">
+                    <h3>GeForce RTX 5060 Out Now</h3>
+                    <a href="index.php?page=products&brand=nvidia&category=gpu" class="btn btn-light">Shop Now</a>
+                </div>
+            </div>
+            
+            <!-- Sub Banners -->
+            <a href="index.php?page=products&brand=intel&category=cpu" class="banner-item sub">
+                <img src="/PHP/gearpc-frontend/assets/img/banners/cpu-intel.jpg">
+            </a>
+            
+            <a href="index.php?page=products&category=laptop" class="banner-item sub">
+                <img src="/PHP/gearpc-frontend/assets/img/banners/laptop.jpg">
+            </a>
+
+            <a href="index.php?page=products&category=keyboard" class="banner-item sub">
+                <img src="/PHP/gearpc-frontend/assets/img/banners/keyboard.jpg">
+            </a>
+            
+            <a href="index.php?page=products&brand=razer&category=mouse" class="banner-item sub">
+                <img src="/PHP/gearpc-frontend/assets/img/banners/mouse-razer.jpg">
+            </a>
+        </div>
+
         <!-- Featured Products Slider -->
         <?php 
         $title = "Keyboard Best Deals";

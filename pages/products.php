@@ -148,13 +148,6 @@ function calculateDiscount($original, $current)
             gap: 12px;
         }
 
-        /* First row of brands (for collapsible section) */
-        .brand-grid-first-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 12px;
-        }
-
         /* View More Brands Button */
         .btn-view-more-brands {
             text-align: center;
@@ -282,7 +275,6 @@ function calculateDiscount($original, $current)
                 padding-bottom: 0.75rem;
             }
             
-            .brand-grid-first-row,
             .brand-grid {
                 grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             }
@@ -394,8 +386,8 @@ function calculateDiscount($original, $current)
                         <div class="col-md-12">
                             <div class="filter-section">
                                 <h5 class="filter-heading"><i class="bi bi-tags"></i> Brands</h5>
-                                <!-- First row of brands (always visible) -->
-                                <div class="brand-grid-first-row">
+                                <div class="brand-grid" id="brandsGrid">
+                                    <!-- All Brands option -->
                                     <a href="<?= 'index.php?page=products' . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
                                         class="brand-item all-brands <?= !$brandCode ? 'active' : '' ?>">
                                         <div class="brand-img-container">
@@ -405,18 +397,15 @@ function calculateDiscount($original, $current)
                                     </a>
 
                                     <?php 
-                                    // Calculate brands to show in the first row - show approximately 50% of the brands
-                                    $brandsCount = count($brands);
-                                    $brandsInFirstRow = ceil(10);
-                                    $firstRowBrands = array_slice($brands, 0, $brandsInFirstRow);
-                                    $remainingBrands = array_slice($brands, $brandsInFirstRow);
-                                    
-                                    // Display first row brands
-                                    foreach ($firstRowBrands as $brand): 
+                                    $brandsToShow = 10; // Number of brands to show initially
+                                    foreach ($brands as $index => $brand): 
                                         if (empty($brand['code']) || empty($brand['name'])) continue;
+                                        $isHidden = $index >= $brandsToShow;
                                     ?>
                                         <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
-                                            class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
+                                            class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?> <?= $isHidden ? 'collapse' : '' ?>"
+                                            <?= $isHidden ? 'data-bs-parent="#brandsGrid"' : '' ?>
+                                            <?= $isHidden ? 'id="brand-' . $index . '"' : '' ?>>
                                             <div class="brand-img-container">
                                                 <?php if (!empty($brand['imageUrl'])): ?>
                                                     <img src="<?= htmlspecialchars($brand['imageUrl']) ?>"
@@ -429,34 +418,15 @@ function calculateDiscount($original, $current)
                                         </a>
                                     <?php endforeach; ?>
                                 </div>
-                                
-                                <?php if (count($remainingBrands) > 0): ?>
-                                <!-- Collapsible Brands Container -->
-                                <div class="collapse mt-3" id="moreBrandsCollapse">
-                                    <div class="brand-grid">
-                                        <?php foreach ($remainingBrands as $brand): ?>
-                                            <?php if (empty($brand['code']) || empty($brand['name'])) continue; ?>
-                                            <a href="<?= 'index.php?page=products&brand=' . urlencode($brand['code']) . ($categoryCode ? '&category=' . urlencode($categoryCode) : '') . ($searchQuery ? '&q=' . urlencode($searchQuery) : '') . ($minPrice !== null ? '&minPrice=' . $minPrice : '') . ($maxPrice !== null ? '&maxPrice=' . $maxPrice : '') . ($sortBy ? '&sortBy=' . urlencode($sortBy) . '&sortDirection=' . urlencode($sortDirection) : '') ?>"
-                                                class="brand-item <?= $brandCode === $brand['code'] ? 'active' : '' ?>">
-                                                <div class="brand-img-container">
-                                                    <?php if (!empty($brand['imageUrl'])): ?>
-                                                        <img src="<?= htmlspecialchars($brand['imageUrl']) ?>"
-                                                            alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-img">
-                                                    <?php else: ?>
-                                                        <i class="bi bi-building" style="font-size:24px;color:#666;"></i>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="brand-name"><?= htmlspecialchars($brand['name']) ?></div>
-                                            </a>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </div>
+
+                                <?php if (count($brands) > $brandsToShow): ?>
                                 <!-- View More Brands Button -->
                                 <button class="btn-view-more-brands"
                                     type="button" 
                                     id="viewMoreBrandsBtn"
-                                    aria-expanded="false" 
-                                    aria-controls="moreBrandsCollapse">
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target=".brand-item.collapse"
+                                    aria-expanded="false">
                                     <div>
                                         <span>View more</span>
                                         <i class="bi bi-chevron-down"></i>
@@ -568,40 +538,21 @@ function calculateDiscount($original, $current)
             // Brands view more button text update
             const viewMoreBrandsBtn = document.getElementById('viewMoreBrandsBtn');
             if (viewMoreBrandsBtn) {
-                const moreBrandsCollapse = document.getElementById('moreBrandsCollapse');
+                const collapsibleBrands = document.querySelectorAll('.brand-item.collapse');
+                let isExpanded = false;
 
-                // Initialize Bootstrap collapse instance
-                const bsCollapse = new bootstrap.Collapse(moreBrandsCollapse, {
-                    toggle: false
+                viewMoreBrandsBtn.addEventListener('click', function() {
+                    isExpanded = !isExpanded;
+                    viewMoreBrandsBtn.querySelector('span').textContent = isExpanded ? 'View less' : 'View more';
+                    viewMoreBrandsBtn.querySelector('i').classList.toggle('bi-chevron-up');
+                    viewMoreBrandsBtn.querySelector('i').classList.toggle('bi-chevron-down');
                 });
 
-                // Add direct click handler to manually toggle collapse state
-                viewMoreBrandsBtn.addEventListener('click', function () {
-                    if (moreBrandsCollapse.classList.contains('show')) {
-                        bsCollapse.hide();
-                    } else {
-                        bsCollapse.show();
-                    }
-                });
-
-                // Update button text and icon on collapse/expand
-                moreBrandsCollapse.addEventListener('hidden.bs.collapse', function () {
-                    viewMoreBrandsBtn.querySelector('span').textContent = 'View more';
-                    viewMoreBrandsBtn.querySelector('i').classList.remove('bi-chevron-up');
-                    viewMoreBrandsBtn.querySelector('i').classList.add('bi-chevron-down');
-                });
-
-                moreBrandsCollapse.addEventListener('shown.bs.collapse', function () {
-                    viewMoreBrandsBtn.querySelector('span').textContent = 'View less';
-                    viewMoreBrandsBtn.querySelector('i').classList.remove('bi-chevron-down');
-                    viewMoreBrandsBtn.querySelector('i').classList.add('bi-chevron-up');
-                });
-
-                // Check if a hidden brand is active
-                const activeBrandInHidden = moreBrandsCollapse.querySelector('.brand-item.active');
+                // Check if any hidden brand is active
+                const activeBrandInHidden = Array.from(collapsibleBrands).find(brand => brand.classList.contains('active'));
                 if (activeBrandInHidden) {
-                    // If there's an active brand in the hidden section, show it automatically
-                    bsCollapse.show();
+                    // Trigger click to expand if there's an active hidden brand
+                    viewMoreBrandsBtn.click();
                 }
             }
 
