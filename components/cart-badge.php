@@ -19,7 +19,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'getCartCount') {
     echo json_encode($result);
     exit;
 }
-function getCartItemCount($token) {
+function getCartItemCount($token): array
+{
     if (!$token) {
         return ['success' => false, 'count' => 0];
     }
@@ -65,7 +66,8 @@ function getCartItemCount($token) {
  * @param int $count The number of items in the cart
  * @return string The HTML for the cart badge
  */
-function renderCartBadge($count) {
+function renderCartBadge($count): string
+{
     if ($count <= 0) {
         return '';
     }
@@ -74,4 +76,4 @@ function renderCartBadge($count) {
            $count . 
            '<span class="visually-hidden">items in cart</span></span>';
 }
-?>
+

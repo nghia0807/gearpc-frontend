@@ -1,5 +1,5 @@
 <?php
-function formatCurrency($amount)
+function formatCurrency($amount): string
 {
     return '$' . number_format($amount, 2);
 }
@@ -13,12 +13,12 @@ function renderCartItem($item)
             <input type="checkbox" class="custom-checkbox item-checkbox" data-id="<?= htmlspecialchars($item['itemId']) ?>">
         </div>
         <div class="cart-item-image">
-            <a href="index.php?page=product-detail&id=<?= htmlspecialchars($item['itemId']) ?>">
+            <a href="/index.php?page=product-detail&id=<?= htmlspecialchars($item['itemId']) ?>">
                 <img src="<?= htmlspecialchars($item['imageUrl']) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
             </a>
         </div>
         <div class="cart-item-name">
-            <a href="index.php?page=product-detail&id=<?= htmlspecialchars($item['itemId']) ?>"
+            <a href="/index.php?page=product-detail&id=<?= htmlspecialchars($item['itemId']) ?>"
                 style="text-decoration: none; color: inherit;">
                 <?= htmlspecialchars($item['name']) ?>
             </a>
