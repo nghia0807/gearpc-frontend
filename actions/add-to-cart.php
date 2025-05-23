@@ -20,12 +20,11 @@ if (isset($_SESSION['last_add_time']) && time() - $_SESSION['last_add_time'] < 1
     $message = "Please wait a few seconds before adding more.";
     if ($isAjax) {
         echo json_encode(['success' => false, 'message' => $message]);
-        exit;
     } else {
         $_SESSION['message'] = $message;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit;
     }
+    exit;
 }
 
 // Check login and product data
@@ -33,11 +32,10 @@ if (!isset($_SESSION['token'])) {
     $message = "You are not logged in.";
     if ($isAjax) {
         echo json_encode(['success' => false, 'message' => $message, 'redirect' => '../pages/not-logged-in.php']);
-        exit;
     } else {
         $_SESSION['message'] = $message;
-        exit;
     }
+    exit;
 }
 
 // Check if it's a PC component build or a single product
@@ -71,12 +69,11 @@ if ($isAjax && isset($postData['components'])) {
     $message = "Missing product information.";
     if ($isAjax) {
         echo json_encode(['success' => false, 'message' => $message]);
-        exit;
     } else {
         $_SESSION['message'] = $message;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit;
     }
+    exit;
 }
 
 $_SESSION['last_add_time'] = time();
