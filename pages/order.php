@@ -286,6 +286,166 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
+<!-- Bootstrap CSS from CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons CSS from CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+    /* CSS color variables and parameters */
+    :root {
+        /* Essential custom variables - keep only what Bootstrap doesn't provide */
+        --border-radius: 8px;
+        --transition-speed: 0.25s;
+    }
+
+    /* Banner profile - match with profile.php */
+    .profile-banner {
+        background: linear-gradient(135deg, #000000 0%, #333333 70%, #555555 100%);
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .profile-title {
+        font-weight: 700;
+        font-size: 2rem;
+    }
+
+    .profile-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    /* Profile content container */
+    .profile-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Sidebar menu - match with profile.php */
+    .profile-sidebar {
+        overflow: hidden;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform var(--transition-speed);
+        animation: fadeInLeft 0.6s;
+        width: 100%; /* Changed from fit-content to 100% */
+        min-width: 100%;
+    }
+
+    .side-nav-item {
+        border: none !important;
+        padding: 12px 16px;
+        position: relative;
+        transition: all var(--transition-speed);
+    }
+
+    .side-nav-item:hover {
+        background-color: rgba(52, 152, 219, 0.1) !important;
+        color: var(--primary-color) !important;
+    }
+
+    .side-nav-item.active {
+        background-color: white !important;
+        color: black !important;
+        font-weight: 600;
+    }
+
+    .side-nav-arrow {
+        opacity: 0;
+        transition: transform var(--transition-speed), opacity var(--transition-speed);
+    }
+
+    .side-nav-item:hover .side-nav-arrow {
+        opacity: 1;
+        transform: translateX(5px);
+    }
+
+    /* Stats Card - matching profile.php */
+    .profile-stats {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.8s;
+        width: 100% !important; 
+    }
+
+    .stat-item {
+        padding: 10px;
+        transition: transform var(--transition-speed);
+    }
+
+    .stat-item:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #ffa33a;
+        animation: fadeInUp 0.8s;
+    }
+
+    /* Alert custom styling */
+    .alert-custom {
+        border-radius: var(--border-radius);
+        animation: fadeInDown 0.5s;
+    }
+
+    .alert-content {
+        display: flex;
+        align-items: center;
+    }
+
+    .alert-icon {
+        font-size: 1.5rem;
+        margin-right: 15px;
+    }
+
+    /* Animations - matching profile.php */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+</style>
+
+<div class="profile-banner bg-dark text-white py-4 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-12">
+                <h1 class="mb-0 profile-title">
+                    Complete Your Order
+                </h1>
+                <p class="profile-subtitle mb-0">
+                    <i class="bi bi-cart-check me-1"></i>
+                    Review and confirm your purchase
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container my-5">
     <div class="row">
         <div class="col-lg-8">

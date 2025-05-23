@@ -164,26 +164,26 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
 <style>
     /* CSS color variables and parameters */
     :root {
+        /* Essential custom variables - keep only what Bootstrap doesn't provide */
         --border-radius: 8px;
         --transition-speed: 0.25s;
     }
 
-    /* Profile banner styling */
+    /* Profile banner styling - matching profile.php */
     .profile-banner {
-        background: linear-gradient(135deg, #414345, #232526);
+        background: linear-gradient(135deg, #000000 0%, #333333 70%, #555555 100%);
         border-radius: 0 0 var(--border-radius) var(--border-radius);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        margin-top: -20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     .profile-title {
-        font-size: 2.5rem;
         font-weight: 700;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        font-size: 2rem;
     }
 
     .profile-subtitle {
-        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        opacity: 0.9;
     }
 
     /* Profile content container */
@@ -193,14 +193,14 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
         padding: 20px;
     }
 
-    /* Sidebar navigation styling */
+    /* Sidebar menu - matching profile.php */
     .profile-sidebar {
         overflow: hidden;
         border-radius: var(--border-radius);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         transition: transform var(--transition-speed);
         animation: fadeInLeft 0.6s;
-        width: fit-content;
+        width: 100%; /* Changed from fit-content to 100% */
         min-width: 100%;
     }
 
@@ -240,9 +240,8 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
 
     /* Alert styling */
     .alert-custom {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-radius: var(--border-radius);
+        animation: fadeInDown 0.5s;
     }
 
     .alert-content {
@@ -253,6 +252,32 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
     .alert-icon {
         font-size: 1.5rem;
         margin-right: 15px;
+    }
+
+    /* Animations - matching profile.php */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
     }
 </style>
 

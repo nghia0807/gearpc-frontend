@@ -230,7 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         transition: transform var(--transition-speed);
         animation: fadeInLeft 0.6s;
-        width: fit-content;
+        width: 100%; /* Changed from fit-content to 100% */
         min-width: 100%;
     }
 
@@ -268,6 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         overflow: hidden;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         animation: fadeIn 0.8s;
+        width: 100% !important; /* Changed from fit-content to 100% */
     }
 
     .stat-item {
@@ -296,6 +297,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     .profile-card-body {
         padding: 25px;
+    }
+
+    .card-title {
+        width: fit-content !important;
+    }
+
+    .card-body {
+        width: fit-content !important;
     }
 
     /* Form styling */
@@ -516,18 +525,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- User stats card -->
             <div class="card profile-stats mt-4">
                 <div class="card-body">
-                    <h5 class="card-title mb-4">
-                        <i class="bi bi-graph-up me-2"></i>Activity
-                    </h5>                    <div class="d-flex justify-content-around text-center">
-                        <div class="stat-item">
-                            <div class="stat-number"><?php echo $orderCount; ?></div>
-                            <div class="stat-label">Orders</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">0</div>
-                            <div class="stat-label">Reviews</div>
-                        </div>
-                    </div>
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Total Oders: 
+                        <?php echo $orderCount; ?>
+                    </h5>                    
                 </div>
             </div>
         </div>

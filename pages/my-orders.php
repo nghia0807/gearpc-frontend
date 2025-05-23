@@ -147,22 +147,21 @@ function formatOrderDate($dateString)
         --transition-speed: 0.25s;
     }
 
-    /* Profile banner styling */
+    /* Profile banner styling - matching profile.php */
     .profile-banner {
-        background: linear-gradient(135deg, #414345, #232526);
-        border-radius: 0 0 10px 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        margin-top: -20px;
+        background: linear-gradient(135deg, #000000 0%, #333333 70%, #555555 100%);
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     .profile-title {
-        font-size: 2.5rem;
         font-weight: 700;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        font-size: 2rem;
     }
 
     .profile-subtitle {
-        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        opacity: 0.9;
     }
 
     /* Profile content container */
@@ -172,12 +171,12 @@ function formatOrderDate($dateString)
         padding: 20px;
     }
 
-    /* Sidebar navigation styling */
+    /* Sidebar navigation styling - match with profile.php */
     .profile-sidebar {
         overflow: hidden;
         border-radius: var(--border-radius);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        width: fit-content;
+        width: 100%;
         min-width: 100%;
         transition: transform var(--transition-speed);
         animation: fadeInLeft 0.6s;
