@@ -963,10 +963,10 @@ require_once __DIR__ . '/../includes/session_init.php';
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <p>Please login to use this feature.</p>
+                                <p>Please log in to use this feature.</p>
                             </div>
                             <div class="modal-footer border-top border-secondary">
-                                <a href="pages/login.php" class="btn" style="background-color: #ffa33a; color: #000000; font-weight: 600;">Login</a>
+                                <a href="/pages/login.php" class="btn" style="background-color: #ffa33a; color: #000000; font-weight: 600;">Login</a>
                                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                         </div>
