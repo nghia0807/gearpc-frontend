@@ -95,8 +95,7 @@ if (!isset($sidebarData)) {
 ?>
 
 <!-- Sidebar Menu CSS -->
-<style>
-    .sidebar-menu {
+<style>    .category-sidebar.sidebar-menu {
         background-color: #414141;
         min-height: auto;
         min-width: auto !important;
@@ -107,7 +106,7 @@ if (!isset($sidebarData)) {
         /* Removed max-height and overflow-y properties to prevent scrolling */
     }
 
-    .sidebar-menu a {
+    .category-sidebar.sidebar-menu a {
         color: white;
         transition: background-color 0.2s;
         display: flex;
@@ -117,21 +116,19 @@ if (!isset($sidebarData)) {
         text-overflow: ellipsis;
     }
 
-    .sidebar-menu a:hover {
+    .category-sidebar.sidebar-menu a:hover {
         background-color: #303030 !important;
         color: white;
     }
 
-    .list-group-item {
+    .category-sidebar .list-group-item {
         border: none !important;
         border-radius: 10px !important;
         background-color: #414141 !important;
         padding-top: 1px !important;
         padding-bottom: 1px !important;
-    }
-
-    /* Icon spacing */
-    .sidebar-menu i {
+    }    /* Icon spacing */
+    .category-sidebar.sidebar-menu i {
         margin-right: 10px;
         width: 20px;
         text-align: center;
@@ -140,7 +137,7 @@ if (!isset($sidebarData)) {
 
 </style>
 
-<nav class="sidebar-menu col-12 p-3 mt-3">
+<nav class="sidebar-menu category-sidebar col-12 p-3 mt-3">
     <?php if (isset($errorMsg) && $errorMsg): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($errorMsg) ?></div>
     <?php elseif (isset($categories) && $categories): ?>
