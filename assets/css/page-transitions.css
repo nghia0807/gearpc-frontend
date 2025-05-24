@@ -1,0 +1,37 @@
+/* Page transition effects */
+body {
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+body.fade-in {
+    animation: fadeInAnimation 0.5s ease-in-out;
+}
+
+body.fade-out {
+    opacity: 0.7;
+}
+
+body.loaded {
+    animation: none;
+}
+
+@keyframes fadeInAnimation {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Make loading spinner transitions smoother */
+.loading-spinner .gear-icon {
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Ensure content doesn't shift during page transitions */
+.main-content {
+    min-height: 60vh;
+}

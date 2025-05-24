@@ -566,9 +566,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <span>Total:</span>
                             <span>$<?= number_format($total, 2) ?></span>
                         </div>
-                    </div>
-
-                    <!-- Submit Button -->
+                    </div>                    <!-- Submit Button -->
                     <div class="d-grid gap-2">
                         <button type="submit" form="orderForm" class="btn btn-success btn-lg">Place Order</button>
                     </div>
@@ -580,9 +578,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const orderForm = document.getElementById('orderForm');
-
-        orderForm.addEventListener('submit', function (e) {
+        const orderForm = document.getElementById('orderForm');        orderForm.addEventListener('submit', function (e) {
             const requiredFields = ['customerName', 'customerEmail', 'customerPhone', 'shippingAddress'];
             let valid = true;
 
@@ -600,6 +596,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 e.preventDefault();
                 alert('Please fill in all required fields.');
             }
+        });
+        
+        // Test loading spinner functionality
+        const testLoadingBtn = document.getElementById('testLoadingBtn');
+        const testAjaxBtn = document.getElementById('testAjaxBtn');
+          // Test loading spinner with a timeout
+        testLoadingBtn.addEventListener('click', function() {
+            // Show loading spinner
+            window.loadingSpinner.showLoading();
+            
+            // Hide loading after 2 seconds
+            setTimeout(() => {
+                window.loadingSpinner.hideLoading();
+            }, 2000);
+        });
+        
+        // Test loading spinner with a fake AJAX request
+        testAjaxBtn.addEventListener('click', function() {
+            // Create a new XMLHttpRequest to test the automatic interception
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'index.php?page=home&t=' + Date.now(), true);
+            xhr.onload = function() {
+                console.log('AJAX request completed');
+            };
+            xhr.send();
         });
     });
 </script>
