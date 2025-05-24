@@ -44,7 +44,7 @@ $successCount = 0;
 $errorCount = 0;
 
 // Delete products with new API
-$apiUrl = 'http://localhost:5000/api/carts/delete';
+$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/delete';
 
 // Data has been properly formatted from the client
 $data = [

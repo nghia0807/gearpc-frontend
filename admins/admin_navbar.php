@@ -197,7 +197,7 @@ $(function() {
         };
         // API call
         $.ajax({
-            url: 'http://localhost:5000/api/admin/create-manager',
+            url: 'http://tamcutephomaique.ddns.net:5001/api/admin/create-manager',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),

@@ -45,7 +45,7 @@ $quantity = intval($postData['quantity']);
 
 $token = $_SESSION['token'];
 
-$apiUrl = 'http://localhost:5000/api/carts/update';
+$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/update';
 
 $data = [
     'oldItemId' => $oldItemId,

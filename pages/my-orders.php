@@ -35,7 +35,7 @@ if (isset($_SESSION['orders_error'])) {
 // Call API to get user's orders
 function getUserOrders($token, $pageIndex, $pageSize)
 {
-    $apiUrl = "http://localhost:5000/api/orders/user?pageIndex={$pageIndex}&pageSize={$pageSize}";
+    $apiUrl = "http://tamcutephomaique.ddns.net:5001/api/orders/user?pageIndex={$pageIndex}&pageSize={$pageSize}";
     $ch = curl_init($apiUrl);
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

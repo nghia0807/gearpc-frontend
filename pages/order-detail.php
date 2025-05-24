@@ -27,7 +27,7 @@ $errorMessage = "";
 // Call API to get the order details
 function getOrderDetail($token, $orderId)
 {
-    $apiUrl = "http://localhost:5000/api/orders/{$orderId}";
+    $apiUrl = "http://tamcutephomaique.ddns.net:5001/api/orders/{$orderId}";
     $ch = curl_init($apiUrl);
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

@@ -25,7 +25,7 @@ function getCartItemCount($token): array
         return ['success' => false, 'count' => 0];
     }
     
-    $apiUrl = 'http://localhost:5000/api/carts/get';
+    $apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/get';
     $ch = curl_init($apiUrl);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,

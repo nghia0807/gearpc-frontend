@@ -82,7 +82,7 @@ $sliderProducts = isset($products) ? $products : [];
 $title = isset($title) ? $title : 'Sản phẩm nổi bật';
 $limit = isset($limit) ? $limit : 10;
 $sliderId = isset($categoryCode) ? 'productSlider_' . $categoryCode : 'productSlider_' . uniqid();
-$apiEndpoint = isset($apiEndpoint) ? $apiEndpoint : "http://localhost:5000/api/products?pageIndex=0&pageSize=$limit";
+$apiEndpoint = isset($apiEndpoint) ? $apiEndpoint : "http://tamcutephomaique.ddns.net:5001/api/products?pageIndex=0&pageSize=$limit";
 $sortBy = isset($sortBy) ? $sortBy : 'discountPercentage';
 $sortOrder = isset($sortOrder) ? $sortOrder : 'desc';
 
