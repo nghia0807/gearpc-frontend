@@ -88,6 +88,11 @@ $pageContent = preg_replace('/<head>.*?<\/head>/is', '', $pageContent);
     </div>
     <?php include 'includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+            chatbot_id="6831799165bbe4fa81026adb"
+            data-type="default"
+            src="https://app.thinkstack.ai/bot/thinkstackai-loader.min.js"
+    ></script>
 </body>
 
 </html>
