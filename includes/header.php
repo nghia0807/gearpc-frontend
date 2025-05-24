@@ -180,6 +180,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
 
     .user-popover .dropdown-item:hover {
       background: #313131 !important;
+      color: #fff !important;
     }
 
     .navbar-toggler {
@@ -404,7 +405,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
             </a>
           </li>
           <?php if ($isLoggedIn): ?>
-            <li class="nav-item dropdown position-relative" style="z-index:1060;">
+            <li class="nav-item dropdown position-relative" style="z-index:1;">
               <button type="button" class="nav-link header-items userMenu" id="userDropdownBtn" aria-expanded="false"
                 autocomplete="off">
                 <i class="bi bi-person"></i> <span class="nav-label"><?php echo $userFullName; ?></span>

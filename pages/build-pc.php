@@ -486,7 +486,7 @@ require_once __DIR__ . '/../includes/session_init.php';
                         <button class="btn btn-primary flex-grow-1" id="add-to-cart-btn" disabled>
                             <i class="bi bi-cart-plus me-2"></i>Add to Cart
                         </button>
-                        <button class="btn btn-success flex-grow-1" id="buy-now-btn" disabled>
+                        <button class="btn btn-dark flex-grow-1" id="buy-now-btn" disabled>
                             <i class="bi bi-bag-check me-2"></i>Buy Now
                         </button>
                     </div>
@@ -566,8 +566,8 @@ require_once __DIR__ . '/../includes/session_init.php';
                 cpu: { name: 'Processor', code: 'cpu' },
                 motherboard: { name: 'Motherboard', code: 'motherboard' },
                 ram: { name: 'Memory', code: 'ram' },
-                ssd: { name: 'SSD Storage', code: 'storage-ssd' },
-                hdd: { name: 'HDD Storage', code: 'storage-hdd' },
+                ssd: { name: 'SSD Storage', code: 'ssd' },
+                hdd: { name: 'HDD Storage', code: 'hdd' },
                 gpu: { name: 'Graphics Card', code: 'gpu' },
                 case: { name: 'Case', code: 'case' },
                 psu: { name: 'Power Supply', code: 'psu' },

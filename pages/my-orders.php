@@ -147,22 +147,21 @@ function formatOrderDate($dateString): string
         --transition-speed: 0.25s;
     }
 
-    /* Profile banner styling */
+    /* Profile banner styling - matching profile.php */
     .profile-banner {
-        background: linear-gradient(135deg, #414345, #232526);
-        border-radius: 0 0 10px 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        margin-top: -20px;
+        background: linear-gradient(135deg, #000000 0%, #333333 70%, #555555 100%);
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     .profile-title {
-        font-size: 2.5rem;
         font-weight: 700;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        font-size: 2rem;
     }
 
     .profile-subtitle {
-        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        opacity: 0.9;
     }
 
     /* Profile content container */
@@ -170,15 +169,15 @@ function formatOrderDate($dateString): string
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
-    /* Sidebar navigation styling */
+    /* Sidebar navigation styling - match with profile.php */
     .profile-sidebar {
         overflow: hidden;
         border-radius: var(--border-radius);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        width: fit-content;
-        min-width: 100%;
         transition: transform var(--transition-speed);
         animation: fadeInLeft 0.6s;
     }
@@ -345,22 +344,23 @@ function formatOrderDate($dateString): string
         border-color: #dee2e6 !important;
     }
 
-    /* Media queries for responsive design */    @media (max-width: 991px) {
+    /* Media queries for responsive design */
+    @media (max-width: 991px) {
         .profile-sidebar {
             min-width: 100% !important;
             width: 100% !important;
             margin-bottom: 20px;
         }
-        
+
         .side-nav-item {
             padding: 10px 16px;
         }
-        
+
         .order-card .card-body {
             padding: 15px 10px;
         }
     }
-    
+
     @media (max-width: 767px) {
         .order-item-preview {
             width: 100px;
@@ -381,34 +381,34 @@ function formatOrderDate($dateString): string
             justify-content: space-between !important;
             margin-top: 15px;
         }
-        
+
         .profile-title {
             font-size: 2rem;
         }
-        
+
         .order-items-preview {
             margin-bottom: 15px;
         }
     }
-    
+
     @media (max-width: 576px) {
         .order-card .card-header {
             flex-direction: column;
             align-items: flex-start !important;
         }
-        
+
         .order-card .card-header div:last-child {
             margin-top: 10px;
         }
-        
+
         .profile-content {
             padding: 15px 10px;
         }
-        
+
         .order-item-preview {
             width: 80px;
         }
-        
+
         .order-item-image {
             height: 80px;
             width: 80px;
@@ -436,7 +436,7 @@ function formatOrderDate($dateString): string
 </div>
 
 <div class="container-fluid profile-content mb-5">
-    <div class="row">
+    <div class="row w-100">
         <div class="col-lg-3 mb-4">
             <!-- Sidebar menu with hover and active effects -->
             <div class="card profile-sidebar">
@@ -462,7 +462,8 @@ function formatOrderDate($dateString): string
                     </a>
                 </div>
             </div>
-        </div>                <div class="col-lg-9">
+        </div>
+        <div class="col-lg-9">
             <!-- Show alerts if available -->
             <?php if ($errorMessage): ?>
                 <div class="alert alert-danger alert-dismissible fade show alert-custom" role="alert">

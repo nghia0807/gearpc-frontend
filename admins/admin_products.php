@@ -34,6 +34,15 @@ include '../components/toasts.php';
 function fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, &$alerts, &$totalCount)
 {
     $url = $apiBaseUrl . "?pageIndex=$pageIndex&pageSize=$pageSize";
+
+    // Add filters if provided
+    if (isset($_GET['category'])) {
+        $url .= "&categoryCode=" . urlencode($_GET['category']);
+    }
+    if (isset($_GET['brand'])) {
+        $url .= "&brandCode=" . urlencode($_GET['brand']);
+    }
+
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -408,6 +417,46 @@ $totalPages = ceil($totalCount / $pageSize);
     </div>
 
     <div class="main-card">
+        <!-- Add filters section -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <form class="row g-3" method="GET">
+                    <div class="col-md-4">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-select">
+                            <option value="">All Categories</option>
+                            <?php foreach ($categoriesList as $cat): ?>
+                                <option value="<?= htmlspecialchars($cat['code']) ?>" 
+                                    <?= (isset($_GET['category']) && $_GET['category'] === $cat['code']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($cat['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Brand</label>
+                        <select name="brand" class="form-select">
+                            <option value="">All Brands</option>
+                            <?php foreach ($brandsList as $brand): ?>
+                                <option value="<?= htmlspecialchars($brand['code']) ?>"
+                                    <?= (isset($_GET['brand']) && $_GET['brand'] === $brand['code']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($brand['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                        <a href="admin_products.php" class="btn btn-outline-secondary">
+                            <i class="fas fa-sync"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
         <div class="card shadow-sm">
             <div class="table-responsive">
                 <table class="table table-bordered align-middle mb-0">
