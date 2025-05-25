@@ -566,7 +566,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
         abortController = new AbortController();
 
         try {
-          const apiUrl = `http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}&pageSize=5`;
+          const apiUrl = `http://phpbe_app_service:5000/api/products/search?q=${encodeURIComponent(query)}&pageSize=5`;
 
           const response = await fetch(apiUrl, {
             signal: abortController.signal,

@@ -24,7 +24,7 @@ function getCartItemCount($token) {
         return ['success' => false, 'count' => 0];
     }
     
-    $apiUrl = 'http://localhost:5000/api/carts/get';
+    $apiUrl = 'http://phpbe_app_service:5000/api/carts/get';
     $ch = curl_init($apiUrl);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,

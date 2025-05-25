@@ -27,7 +27,7 @@ $selectedItems = [];
  */
 function handleBuyNow($itemId, $quantity, $token) {
     // Call API to get product details directly
-    $apiUrl = 'http://localhost:5000/api/products/' . $itemId;
+    $apiUrl = 'http://phpbe_app_service:5000/api/products/' . $itemId;
     $ch = curl_init($apiUrl);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -130,7 +130,7 @@ if (isset($_GET['buyNow']) && $_GET['buyNow'] === 'true' && isset($_GET['itemId'
         ];
         
         // Call API to get cart to retrieve selected items details
-        $apiUrl = 'http://localhost:5000/api/carts/get';
+        $apiUrl = 'http://phpbe_app_service:5000/api/carts/get';
         $ch = curl_init($apiUrl);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
@@ -246,7 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         // Submit order to API
-        $orderApiUrl = 'http://localhost:5000/api/orders/create';
+        $orderApiUrl = 'http://phpbe_app_service:5000/api/orders/create';
         $ch = curl_init($orderApiUrl);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,

@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // If valid, call the authentication API
   if ($isValid) {
-    $apiUrl = 'http://localhost:5000/api/auth/login';
+    $apiUrl = 'http://phpbe_app_service:5000/api/auth/login';
     $postData = json_encode(['username' => $username, 'password' => $password]);
 
     $ch = curl_init($apiUrl);

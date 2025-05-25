@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // If valid, call the registration API
   if ($isValid) {
-    $apiUrl = 'http://localhost:5000/api/auth/register';
+    $apiUrl = 'http://phpbe_app_service:5000/api/auth/register';
     $postData = json_encode([
       'username' => $username,
       'password' => $password,

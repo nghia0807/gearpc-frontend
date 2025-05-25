@@ -10,7 +10,7 @@ if (!$productId) {
 }
 
 // Fetch product details from API
-$apiUrl = "http://localhost:5000/api/products/{$productId}";
+$apiUrl = "http://phpbe_app_service:5000/api/products/{$productId}";
 $product = null;
 $errorMsg = '';
 
@@ -37,7 +37,7 @@ try {
 $relatedProducts = [];
 if ($product && !empty($product['productInfo']['code'])) {
     $productCode = $product['productInfo']['code'];
-    $relatedApiUrl = "http://localhost:5000/api/products/related?productCode={$productCode}&count=5";
+    $relatedApiUrl = "http://phpbe_app_service:5000/api/products/related?productCode={$productCode}&count=5";
     try {
         $ch = curl_init($relatedApiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -57,7 +57,7 @@ if ($product && !empty($product['productInfo']['code'])) {
 // Fetch variant combinations for this product (if any)
 $variantCombinations = [];
 if (!empty($product['productInfo']['code'])) {
-    $variantApiUrl = "http://localhost:5000/api/products/{$product['productInfo']['code']}/variants";
+    $variantApiUrl = "http://phpbe_app_service:5000/api/products/{$product['productInfo']['code']}/variants";
     try {
         $ch = curl_init($variantApiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1098,7 +1098,7 @@ function getProductImages($product)
                         document.body.appendChild(loadingOverlay);
                         const currentUrl = new URL(window.location.href);
                         currentUrl.searchParams.set('id', optionId);
-                        fetch(`http://localhost:5000/api/products/${optionId}`)
+                        fetch(`http://phpbe_app_service:5000/api/products/${optionId}`)
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success && data.data) {

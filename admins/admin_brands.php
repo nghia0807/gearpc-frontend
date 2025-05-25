@@ -9,7 +9,7 @@ if (!isset($_SESSION['token'])) {
 }
 
 $token = $_SESSION['token'];
-$apiBase = 'http://localhost:5000/api/brands';
+$apiBase = 'http://phpbe_app_service:5000/api/brands';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];

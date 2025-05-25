@@ -47,7 +47,7 @@ $quantity = intval($postData['quantity']);
 
 $token = $_SESSION['token'];
 
-$apiUrl = 'http://localhost:5000/api/carts/update';
+$apiUrl = 'http://phpbe_app_service:5000/api/carts/update';
 
 $data = [
     'oldItemId' => $oldItemId,

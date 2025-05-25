@@ -9,7 +9,7 @@ if (!isset($_SESSION['token'])) {
 }
 
 $token = $_SESSION['token'];
-$apiBaseUrl = 'http://localhost:5000/api/products';
+$apiBaseUrl = 'http://phpbe_app_service:5000/api/products';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];
@@ -88,7 +88,7 @@ function fetchAll($url, $token) {
 
 // Delete products by codes
 function deleteProducts($codes, $token) {
-    $url = 'http://localhost:5000/api/products/delete';
+    $url = 'http://phpbe_app_service:5000/api/products/delete';
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
@@ -110,7 +110,7 @@ function deleteProducts($codes, $token) {
 
 // Add a new product
 function addProduct($productData, $token) {
-    $url = 'http://localhost:5000/api/products/add';
+    $url = 'http://phpbe_app_service:5000/api/products/add';
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
@@ -132,7 +132,7 @@ function addProduct($productData, $token) {
 
 // Update product name
 function updateProductName($productCode, $name, $token) {
-    $url = "http://localhost:5000/api/products/updateProductName?productCode=$productCode";
+    $url = "http://phpbe_app_service:5000/api/products/updateProductName?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -154,7 +154,7 @@ function updateProductName($productCode, $name, $token) {
 
 // Update product brand
 function updateProductBrand($productCode, $brandCode, $token) {
-    $url = "http://localhost:5000/api/products/updateProductBrand?productCode=$productCode";
+    $url = "http://phpbe_app_service:5000/api/products/updateProductBrand?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -176,7 +176,7 @@ function updateProductBrand($productCode, $brandCode, $token) {
 
 // Update product categories
 function updateProductCategories($productCode, $categoriesCodes, $token) {
-    $url = "http://localhost:5000/api/products/updateProductCategories?productCode=$productCode";
+    $url = "http://phpbe_app_service:5000/api/products/updateProductCategories?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -198,7 +198,7 @@ function updateProductCategories($productCode, $categoriesCodes, $token) {
 
 // Update product gifts
 function updateProductGifts($productCode, $giftCodes, $token) {
-    $url = "http://localhost:5000/api/products/updateProductGift?productCode=$productCode";
+    $url = "http://phpbe_app_service:5000/api/products/updateProductGift?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -220,7 +220,7 @@ function updateProductGifts($productCode, $giftCodes, $token) {
 
 // Update product main image
 function updateProductMainImage($productCode, $imageBase64, $token) {
-    $url = "http://localhost:5000/api/products/updateProductMainImage?productCode=$productCode";
+    $url = "http://phpbe_app_service:5000/api/products/updateProductMainImage?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -242,7 +242,7 @@ function updateProductMainImage($productCode, $imageBase64, $token) {
 
 // Get product details by ID
 function getProductDetail($productId, $token) {
-    $url = "http://localhost:5000/api/products/$productId";
+    $url = "http://phpbe_app_service:5000/api/products/$productId";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -334,9 +334,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$brandsList = fetchAll('http://localhost:5000/api/brands/get', $token);
-$categoriesList = fetchAll('http://localhost:5000/api/categories/get', $token);
-$giftsList = fetchAll('http://localhost:5000/api/gifts/get', $token);
+$brandsList = fetchAll('http://phpbe_app_service:5000/api/brands/get', $token);
+$categoriesList = fetchAll('http://phpbe_app_service:5000/api/categories/get', $token);
+$giftsList = fetchAll('http://phpbe_app_service:5000/api/gifts/get', $token);
 
 // --- Fetch products for current page ---
 $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $totalCount);
