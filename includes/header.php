@@ -775,6 +775,8 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
       loadRecentSearches();
     })();
   </script>
+  <!-- Fix for browser history navigation -->
+<script src="/gearpc-frontend/assets/js/history-fix.js"></script>
 </body>
 
 </html>

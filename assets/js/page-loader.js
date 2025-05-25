@@ -19,10 +19,22 @@ window.addEventListener('load', function() {
     document.body.classList.remove('page-loading');
 });
 
-// Show loading spinner only when navigating between pages
-window.addEventListener('beforeunload', function() {
-    if (window.loadingSpinner) {
-        window.loadingSpinner.showLoading();
+// Modified: Don't show loading spinner on beforeunload (causes issues with back button)
+// window.addEventListener('beforeunload', function() {
+//     if (window.loadingSpinner) {
+//         window.loadingSpinner.showLoading();
+//     }
+// });
+
+// Hide loading spinner when using browser back/forward buttons
+window.addEventListener('pageshow', function(event) {
+    // The persisted property indicates if the page is loaded from cache (browser back/forward)
+    if (event.persisted) {
+        if (window.loadingSpinner) {
+            window.loadingSpinner.hideLoading();
+        }
+        document.body.classList.remove('page-loading');
+        console.log('Page loaded from cache (back/forward navigation)');
     }
 });
 

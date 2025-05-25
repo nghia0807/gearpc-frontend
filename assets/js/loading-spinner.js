@@ -19,12 +19,37 @@ class LoadingSpinner {    constructor() {
             // Setup AJAX request interception
             this.setupAjaxInterception();
         });
+        
+        // Handle back/forward browser navigation
+        window.addEventListener('popstate', () => {
+            // Immediately hide the loading spinner when using browser back/forward
+            this.hideLoading();
+            console.log('Back/forward navigation detected - hiding spinner');
+        });
+        
+        // Monitor page visibility changes - hide spinner when page becomes visible again
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.hideLoading();
+                console.log('Page visibility changed to visible - hiding spinner');
+            }
+        });
     }    /**
-     * Show loading overlay
+     * Show loading overlay with auto-hide fallback
      */
     showLoading() {
         if (!this.loadingOverlay) return;
         this.loadingOverlay.classList.add('active');
+        
+        // Safety timeout - automatically hide spinner after 8 seconds
+        // This prevents spinner being stuck if navigation is interrupted
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+        }
+        this.hideTimeout = setTimeout(() => {
+            this.hideLoading();
+            console.log('Loading spinner auto-hidden after timeout');
+        }, 8000);
     }
 
     /**
@@ -33,6 +58,12 @@ class LoadingSpinner {    constructor() {
     hideLoading() {
         if (!this.loadingOverlay) return;
         this.loadingOverlay.classList.remove('active');
+        
+        // Clear any existing timeout
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+            this.hideTimeout = null;
+        }
     }
 
     /**
@@ -69,12 +100,11 @@ class LoadingSpinner {    constructor() {
             
             // Show loading when form is submitted
             this.showLoading();
-        });
-
-        // Handle history navigation (back/forward)
-        window.addEventListener('beforeunload', () => {
-            this.showLoading();
-        });
+        });        // Modified: Don't show loading on beforeunload anymore (causes issues with back button)
+        // This prevents the spinner from showing when the user navigates back
+        // window.addEventListener('beforeunload', () => {
+        //     this.showLoading();
+        // });
     }    /**
      * Use this when starting an AJAX request
      */

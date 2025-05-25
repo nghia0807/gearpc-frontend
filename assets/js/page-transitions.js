@@ -27,8 +27,7 @@ function initPageTransitions() {
       document.body.classList.remove('fade-in');
     }, 500);
   });
-  
-  // Add transition effects for navigation
+    // Add transition effects for navigation - modified to prevent unwanted fade
   document.addEventListener('click', function(e) {
     const link = e.target.closest('a');
     
@@ -42,8 +41,11 @@ function initPageTransitions() {
       // Don't apply transitions to download links or anchor links
       if (link.getAttribute('download') || link.getAttribute('href').startsWith('#')) return;
       
-      // Add smooth exit transition before navigating
-      document.body.classList.add('fade-out');
+      // Only show loading spinner, skip the fade-out effect
+      if (window.loadingSpinner) {
+        window.loadingSpinner.showLoading();
+      }
+      // Removed fade-out class to prevent the gray screen effect
     }
   });
 }

@@ -1,15 +1,16 @@
-/* Page transition effects */
+/* Page transition effects - modified to remove unwanted fade effect */
 body {
     opacity: 1;
-    transition: opacity 0.3s ease-in-out;
+    transition: none; /* Remove transition to avoid unwanted fade */
 }
 
 body.fade-in {
-    animation: fadeInAnimation 0.5s ease-in-out;
+    animation: fadeInAnimation 0.3s ease-in-out;
 }
 
+/* Removed opacity change from fade-out to prevent gray screen during navigation */
 body.fade-out {
-    opacity: 0.7;
+    opacity: 1;
 }
 
 body.loaded {
