@@ -9,7 +9,7 @@ if (!isset($_SESSION['token'])) {
 }
 $token = $_SESSION['token'];
 
-$apiBase = 'http://tamcutephomaique.ddns.net:5001/api/categories';
+$apiBase = 'http://localhost:5000/api/categories';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];

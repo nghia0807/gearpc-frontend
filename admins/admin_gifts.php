@@ -11,7 +11,7 @@ $token = $_SESSION['token'];
 // Add pagination parameters
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
-$apiUrl = "http://tamcutephomaique.ddns.net:5001/api/gifts/get?pageIndex=$pageIndex&pageSize=$pageSize";
+$apiUrl = "http://localhost:5000/api/gifts/get?pageIndex=$pageIndex&pageSize=$pageSize";
 $alerts = [];
 
 // Toast component
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_gift'])) {
             'name' => $name,
             'imageBase64' => $imageBase64
         ];
-        $ch = curl_init('http://tamcutephomaique.ddns.net:5001/api/gifts/add');
+        $ch = curl_init('http://localhost:5000/api/gifts/add');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_gift'])) {
             'name' => $name,
             'imageBase64' => $imageBase64
         ];
-        $ch = curl_init('http://tamcutephomaique.ddns.net:5001/api/gifts/update');
+        $ch = curl_init('http://localhost:5000/api/gifts/update');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_gift'])) {
         if (!is_array($codes)) $codes = [];
     }
     if (!empty($codes)) {
-        $ch = curl_init('http://tamcutephomaique.ddns.net:5001/api/gifts/delete');
+        $ch = curl_init('http://localhost:5000/api/gifts/delete');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [

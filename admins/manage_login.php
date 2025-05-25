@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter both username and password.';
     } else {
         // Call backend API for authentication
-        $ch = curl_init('http://tamcutephomaique.ddns.net:5001/api/auth/login');
+        $ch = curl_init('http://localhost:5000/api/auth/login');
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,

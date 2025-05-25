@@ -12,7 +12,7 @@ if (!$token) {
 }
 
 // Call API to get cart
-$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/get';
+$apiUrl = 'http://localhost:5000/api/carts/get';
 $ch = curl_init($apiUrl);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,

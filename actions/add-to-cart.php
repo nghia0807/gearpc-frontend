@@ -79,7 +79,7 @@ if ($isAjax && isset($postData['components'])) {
 $_SESSION['last_add_time'] = time();
 $token = $_SESSION['token'];
 
-$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/add';
+$apiUrl = 'http://localhost:5000/api/carts/add';
 
 // Process single product or multiple components
 if ($isComponentBuild) {
