@@ -35,6 +35,6 @@ RUN chown -R www-data:www-data /var/www/html && \
     chmod -R 755 /var/www/html
 
 # Expose port 80
-EXPOSE 80
+EXPOSE 3000
 
 # Apache is started by the base image's CMD
