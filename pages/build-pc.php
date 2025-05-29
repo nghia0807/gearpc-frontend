@@ -220,8 +220,8 @@ require_once __DIR__ . '/../includes/session_init.php';
     /* Floating button styles */
     .scroll-to-top {
         position: fixed;
-        bottom: 20px;
-        right: 20px;
+        bottom: 80px;
+        right: 18px;
         background-color: #ff9620;
         color: white;
         border: none;
