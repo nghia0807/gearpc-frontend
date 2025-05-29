@@ -171,6 +171,22 @@ function formatOrderDate($dateString): string
         width: 100%;
         box-sizing: border-box;
     }
+    
+    /* New container layout without Bootstrap columns */
+    .profile-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .profile-sidebar-container {
+        flex: 0 0 250px;
+    }
+    
+    .profile-content-container {
+        flex: 1;
+        min-width: 0; /* Prevents content from overflowing */
+    }
 
     /* Sidebar navigation styling - match with profile.php */
     .profile-sidebar {
@@ -343,12 +359,20 @@ function formatOrderDate($dateString): string
         border-color: #dee2e6 !important;
     }
 
-    /* Media queries for responsive design */
-    @media (max-width: 991px) {
-        .profile-sidebar {
-            min-width: 100% !important;
-            width: 100% !important;
+    /* Media queries for responsive design */    @media (max-width: 991px) {
+        .profile-container {
+            flex-direction: column;
+        }
+        
+        .profile-sidebar-container {
+            flex: 0 0 100%;
+            width: 100%;
             margin-bottom: 20px;
+        }
+        
+        .profile-content-container {
+            flex: 0 0 100%;
+            width: 100%;
         }
 
         .side-nav-item {
@@ -435,15 +459,16 @@ function formatOrderDate($dateString): string
 </div>
 
 <div class="container-fluid profile-content mb-5">
-    <div class="row w-100">
-        <div class="col-lg-3 mb-4">
+    <div class="profile-container">
+        <div class="profile-sidebar-container">
             <!-- Sidebar menu with hover and active effects -->
             <div class="card profile-sidebar">
                 <div class="card-header bg-dark profile-sidebar-header">
                     <h5 class="mb-0 text-white">
                         <i class="bi bi-person-lines-fill me-2"></i>Account
                     </h5>
-                </div>                <div class="list-group list-group-flush profile-nav">
+                </div>
+                <div class="list-group list-group-flush profile-nav">
                     <a href="index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
                         <i class="bi bi-person-circle me-2"></i> Personal Information
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
@@ -457,11 +482,10 @@ function formatOrderDate($dateString): string
                         data-bs-target="#logoutConfirmModal">
                         <i class="bi bi-box-arrow-right me-2"></i> Sign Out
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
-                    </a>
-                </div>
+                    </a>                </div>
             </div>
         </div>
-        <div class="col-lg-9">
+        <div class="profile-content-container">
             <!-- Show alerts if available -->
             <?php if ($errorMessage): ?>
                 <div class="alert alert-danger alert-dismissible fade show alert-custom" role="alert">

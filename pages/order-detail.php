@@ -187,6 +187,22 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
         margin: 0 auto;
         padding: 20px;
     }
+    
+    /* New container layout without Bootstrap columns */
+    .profile-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .profile-sidebar-container {
+        flex: 0 0 250px;
+    }
+    
+    .profile-content-container {
+        flex: 1;
+        min-width: 0; /* Prevents content from overflowing */
+    }
 
     /* Sidebar menu - matching profile.php */
     .profile-sidebar {
@@ -233,10 +249,19 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
     
     /* Responsive styles */
     @media (max-width: 991px) {
-        .profile-sidebar {
-            min-width: 100% !important;
-            width: 100% !important;
+        .profile-container {
+            flex-direction: column;
+        }
+        
+        .profile-sidebar-container {
+            flex: 0 0 100%;
+            width: 100%;
             margin-bottom: 20px;
+        }
+        
+        .profile-content-container {
+            flex: 0 0 100%;
+            width: 100%;
         }
         
         .side-nav-item {
@@ -356,15 +381,16 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
 </div>
 
 <div class="container-fluid profile-content mb-5">
-    <div class="row">
-        <div class="col-lg-3 mb-4">
+    <div class="profile-container">
+        <div class="profile-sidebar-container">
             <!-- Sidebar menu with hover and active effects -->
             <div class="card profile-sidebar">
                 <div class="card-header bg-dark profile-sidebar-header">
                     <h5 class="mb-0 text-white">
                         <i class="bi bi-person-lines-fill me-2"></i>Account
                     </h5>
-                </div>                <div class="list-group list-group-flush profile-nav">
+                </div>
+                <div class="list-group list-group-flush profile-nav">
                     <a href="index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
                         <i class="bi bi-person-circle me-2"></i> Personal Information
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
@@ -383,7 +409,7 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
             </div>
         </div>
 
-        <div class="col-lg-9">
+        <div class="profile-content-container">
             <!-- Show error alert if available -->
             <?php if ($errorMessage): ?>
                 <div class="alert alert-danger alert-dismissible fade show alert-custom" role="alert">
@@ -530,8 +556,7 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
                                 </tfoot>
                             </table>
                         </div>
-                    </div>
-                </div>
+                    </div>                </div>
             <?php endif; ?>
         </div>
     </div>
