@@ -97,14 +97,14 @@ function getPaymentStatusBadgeClass($status): string
 function formatOrderDate($dateString): string
 {
     try {
+        if (empty($dateString)) {
+            return 'N/A';
+        }
+        
         $date = new DateTime($dateString);
-        // Set timezone to UTC+7 (Vietnam timezone)
-        $date->setTimezone(new DateTimeZone('Asia/Ho_Chi_Minh'));
-        // Vietnamese date format: DD/MM/YYYY HH:MM
-        return $date->format('d/m/Y H:i');
+        return $date->format('d/m/Y H:i:s'); // Thêm hiển thị giây (:s)
     } catch (Exception $e) {
-        // If date parsing fails, return a fallback
-        return 'N/A';
+        return !empty($dateString) ? $dateString : 'N/A';
     }
 }
 
@@ -112,9 +112,10 @@ function formatOrderDate($dateString): string
 $orderResponse = getOrderDetail($token, $orderId);
 
 if ($orderResponse['success'] && isset($orderResponse['data'])) {
-    $order = $orderResponse['data'];    // Extract order properties with fallback values
-    $orderId = $order['id'] ?? $order['orderId'] ?? 'N/A';
-    $orderDate = $order['createdAt'] ?? $order['orderDate'] ?? date('Y-m-d H:i:s');
+    $order = $orderResponse['data'];
+      // Extract order properties with fallback values
+    $orderId = $order['id'] ?? 'N/A';
+    $orderDate = $order['confirmedDate']  ?? 'N/A';
     $orderStatus = $order['status'] ?? 'pending';
     $paymentStatus = $order['paymentStatus'] ?? 'pending';
 

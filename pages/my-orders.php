@@ -127,14 +127,13 @@ function getPaymentStatusBadgeClass($status): string
 function formatOrderDate($dateString): string
 {
     try {
+        if (empty($dateString)) {
+            return 'N/A';
+        }
         $date = new DateTime($dateString);
-        // Set timezone to UTC+7 (Vietnam timezone)
-        $date->setTimezone(new DateTimeZone('Asia/Ho_Chi_Minh'));
-        // Vietnamese date format: DD/MM/YYYY HH:MM
-        return $date->format('d/m/Y H:i');
+        return $date->format('d/m/Y H:i:s'); // Thêm hiển thị giây (:s)
     } catch (Exception $e) {
-        // If date parsing fails, return a fallback
-        return 'N/A';
+        return !empty($dateString) ? $dateString : 'N/A';
     }
 }
 ?>
@@ -512,7 +511,7 @@ function formatOrderDate($dateString): string
                                 <?php foreach ($orders as $order): ?>
                                     <?php                                    // Get order properties with fallback values
                                             $orderId = $order['id'] ?? $order['orderId'] ?? 'N/A';
-                                            $orderDate = $order['createdAt'] ?? $order['orderDate'] ?? date('Y-m-d H:i:s');
+                                            $orderDate = $order['createdDate'] ?? $order['createdAt'] ?? $order['orderDate'] ?? date('Y-m-d H:i:s');
                                             $orderStatus = $order['status'] ?? 'pending';
                                             $paymentStatus = $order['paymentStatus'] ?? 'pending';
 
@@ -683,11 +682,10 @@ function formatOrderDate($dateString): string
 </div>
 
 <!-- Order Detail Modals -->
-<?php foreach ($orders as $order): ?>
-    <?php    // Get the order ID using fallback logic
-        $orderId = $order['id'] ?? $order['orderId'] ?? 'no-id';
-        // Get the order date using fallback logic
-        $orderDate = $order['createdAt'] ?? $order['orderDate'] ?? date('Y-m-d H:i:s');
+<?php foreach ($orders as $order): ?>    <?php    // Get the order ID using fallback logic
+        $orderId = $order['id'] ?? 'no-id';
+        // Get the order date using fallback logic with multiple options
+        $orderDate = $order['createdDate'];
         // Get the order status using fallback logic
         $orderStatus = $order['status'] ?? 'pending';
         // Get the payment status using fallback logic
