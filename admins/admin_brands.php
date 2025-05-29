@@ -9,7 +9,7 @@ if (!isset($_SESSION['token'])) {
 }
 
 $token = $_SESSION['token'];
-$apiBase = 'http://localhost:5000/api/brands';
+$apiBase = 'http://tamcutephomaique.ddns.net:5001/api/brands';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];
@@ -121,7 +121,8 @@ if (!empty($res['success']) && !empty($res['data']['data'])) {
 $totalPages = ceil($totalCount / $pageSize);
 
 // Helper: image placeholder
-function brandImage($img) {
+function brandImage($img): string
+{
     if (!$img) {
         return '<img src="https://via.placeholder.com/60x60?text=No+Image" class="img-thumbnail" width="60" height="60">';
     }

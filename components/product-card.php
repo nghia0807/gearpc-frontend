@@ -3,7 +3,7 @@
  * Component: Product Card
  * @param array $product
  */
-if (!isset($product) || empty($product)) {
+if (empty($product)) {
     return;
 }
 
@@ -149,7 +149,7 @@ if (!isset($product) || empty($product)) {
 </style>
 <div class="col">
     <div class="product-card">
-        <a href="index.php?page=product-detail&id=<?= htmlspecialchars($product['id']) ?>" class="text-decoration-none">
+        <a href="/index.php?page=product-detail&id=<?= htmlspecialchars($product['id']) ?>" class="text-decoration-none">
             <div class="product-img-container">
                 <img src="<?= htmlspecialchars($product['imageUrl'] ?? '') ?>"
                     alt="<?= htmlspecialchars($product['name']) ?>" class="product-img"
@@ -208,7 +208,7 @@ if (!isset($product) || empty($product)) {
                 <p>Please login to use this fearture.</p>
             </div>
             <div class="modal-footer border-top border-secondary">
-                <a href="pages/login.php" class="btn"
+                <a href="/pages/login.php" class="btn"
                     style="background-color: #ffa33a; color: #000000; font-weight: 600;">Login</a>
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>

@@ -13,7 +13,7 @@ $alertType = '';
 $errors = ['username' => '', 'password' => ''];
 
 // Sanitize input to prevent XSS
-function sanitize($data)
+function sanitize($data): string
 {
   return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // If valid, call the authentication API
   if ($isValid) {
-    $apiUrl = 'http://localhost:5000/api/auth/login';
+    $apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/auth/login';
     $postData = json_encode(['username' => $username, 'password' => $password]);
 
     $ch = curl_init($apiUrl);
@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Login</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
   <style>
     body {
       background-color: #121212;
@@ -172,8 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
   <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
-    <a href="../index.php" class="mb-4">
-      <img src="../assets/img/logo.png" alt="Logo" />
+    <a href="/index.php" class="mb-4">
+      <img src="/assets/img/logo.png" alt="Logo" />
     </a>
     <h5 class="mb-4 fw-bold">Sign In</h5>
     <!-- Alert for API or validation messages -->

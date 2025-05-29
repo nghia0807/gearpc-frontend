@@ -341,49 +341,49 @@ $rss = simplexml_load_file($rss_url);
         <div class="banner-grid">
             <!-- Main Banner -->
             <div class="banner-item main">
-                <img src="/PHP/gearpc-frontend/assets/img/banners/gpu-nvidia.jpg">
+                <img src="/assets/img/banners/gpu-nvidia.jpg">
                 <div class="banner-content">
                     <h3>GeForce RTX 5060 Out Now</h3>
-                    <a href="index.php?page=products&brand=nvidia&category=gpu" class="btn btn-light">Shop Now</a>
+                    <a href="/index.php?page=products&brand=nvidia&category=gpu" class="btn btn-light">Shop Now</a>
                 </div>
             </div>
-            
+
             <!-- Sub Banners -->
-            <a href="index.php?page=products&brand=intel&category=cpu" class="banner-item sub">
-                <img src="/PHP/gearpc-frontend/assets/img/banners/cpu-intel.jpg">
-            </a>
-            
-            <a href="index.php?page=products&category=laptop" class="banner-item sub">
-                <img src="/PHP/gearpc-frontend/assets/img/banners/laptop.jpg">
+            <a href="/index.php?page=products&brand=intel&category=cpu" class="banner-item sub">
+                <img src="/assets/img/banners/cpu-intel.jpg">
             </a>
 
-            <a href="index.php?page=products&category=keyboard" class="banner-item sub">
-                <img src="/PHP/gearpc-frontend/assets/img/banners/keyboard.jpg">
+            <a href="/index.php?page=products&category=laptop" class="banner-item sub">
+                <img src="/assets/img/banners/laptop.jpg">
             </a>
-            
-            <a href="index.php?page=products&brand=razer&category=mouse" class="banner-item sub">
-                <img src="/PHP/gearpc-frontend/assets/img/banners/mouse-razer.jpg">
+
+            <a href="/index.php?page=products&category=keyboard" class="banner-item sub">
+                <img src="/assets/img/banners/keyboard.jpg">
+            </a>
+
+            <a href="/index.php?page=products&brand=razer&category=mouse" class="banner-item sub">
+                <img src="/assets/img/banners/mouse-razer.jpg">
             </a>
         </div>
 
         <!-- Featured Products Slider -->
-        <?php 
+        <?php
         $title = "Keyboard Best Deals";
         $categoryCode = "cpu";
         $sortBy = "discountPercentage";
         $sortOrder = "desc";
         include(__DIR__ . '/../components/slider-products/slider-products.php');
         ?>
-        
-        <?php 
+
+        <?php
         $title = "Mouse Best Deals";
         $categoryCode = "mouse";
         $sortBy = "discountPercentage";
         $sortOrder = "desc";
         include(__DIR__ . '/../components/slider-products/slider-products.php');
         ?>
-        
-        <?php 
+
+        <?php
         $title = "Laptop Best Seller";
         $categoryCode = "laptop";
         $sortBy = "discountPercentage";
@@ -435,7 +435,7 @@ $rss = simplexml_load_file($rss_url);
         function slideRight(sliderId) {
             const slider = document.getElementById(sliderId);
             const slideWidth = calculateSlideWidth(slider);
-            
+
             if (slider.scrollLeft + slider.offsetWidth >= slider.scrollWidth - slideWidth) {
                 slider.scrollTo({ left: 0, behavior: 'smooth' });
             } else {
@@ -446,7 +446,7 @@ $rss = simplexml_load_file($rss_url);
         function slideLeft(sliderId) {
             const slider = document.getElementById(sliderId);
             const slideWidth = calculateSlideWidth(slider);
-            
+
             if (slider.scrollLeft <= 0) {
                 slider.scrollTo({ left: slider.scrollWidth - slider.offsetWidth, behavior: 'smooth' });
             } else {
@@ -458,11 +458,11 @@ $rss = simplexml_load_file($rss_url);
         function calculateSlideWidth(slider) {
             const slideElements = slider.querySelectorAll('.news-slide, .product-slide');
             if (slideElements.length === 0) return 0;
-            
+
             const slideElement = slideElements[0];
             const slideWidth = slideElement.offsetWidth;
             const slideMargin = parseInt(window.getComputedStyle(slideElement).marginRight);
-            
+
             return slideWidth + (isNaN(slideMargin) ? 20 : slideMargin); // default gap is 20px
         }
 
@@ -480,7 +480,7 @@ $rss = simplexml_load_file($rss_url);
 
             newsSlider.addEventListener('touchend', function(e) {
                 touchEndX = e.changedTouches[0].screenX;
-                
+
                 if (touchEndX < touchStartX - 50) {
                     // Swipe left to go right
                     slideRight('newsSlider');
@@ -488,7 +488,7 @@ $rss = simplexml_load_file($rss_url);
                     // Swipe right to go left
                     slideLeft('newsSlider');
                 }
-                
+
                 startAutoSlide(); // Resume auto sliding after touch
             }, { passive: true });
 

@@ -12,7 +12,7 @@ if (!$token) {
 }
 
 // Call API to get cart
-$apiUrl = 'http://localhost:5000/api/carts/get';
+$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/get';
 $ch = curl_init($apiUrl);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
@@ -524,7 +524,7 @@ $cartItems = $data['data']['items'] ?? [];
             <i class="bi bi-cart-x"></i>
             <h3>Your cart is empty</h3>
             <p>Looks like you haven't added anything to your cart yet.</p>
-            <a href="index.php?page=products" class="btn btn-primary">Continue Shopping</a>
+            <a href="/index.php?page=products" class="btn btn-primary">Continue Shopping</a>
         </div>
         <script>
             // Hide cart actions when cart is empty

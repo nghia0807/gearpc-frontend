@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/session_init.php';
 
 // Redirect to login page if user decides to log in
-define('LOGIN_PAGE', 'login.php');
+const LOGIN_PAGE = 'login.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +12,7 @@ define('LOGIN_PAGE', 'login.php');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Not Logged In - GearPC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {

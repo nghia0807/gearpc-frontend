@@ -22,12 +22,12 @@
  * @param string $cancelBtnClass Bootstrap class for cancel button
  */
 function renderConfirmModal(
-    $id = 'confirmModal',
-    $title = 'Confirmation',
-    $confirmBtnText = 'Confirm',
-    $cancelBtnText = 'Cancel',
-    $confirmBtnClass = 'btn-danger',
-    $cancelBtnClass = 'btn-secondary'
+    string $id = 'confirmModal',
+    string $title = 'Confirmation',
+    string $confirmBtnText = 'Confirm',
+    string $cancelBtnText = 'Cancel',
+    string $confirmBtnClass = 'btn-danger',
+    string $cancelBtnClass = 'btn-secondary'
 ) {
     ?>
     <!-- Confirmation Modal -->

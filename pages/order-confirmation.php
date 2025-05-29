@@ -27,7 +27,7 @@ $items = $order['items'];
     <div class="row justify-content-center">
         <div class="col-md-auto">
             <div class="card shadow-lg border-0">
-                <div class="card-body p-5 w-100" style="width: fit-content;" :>
+                <div class="card-body p-5 w-100" style="width: fit-content;">
                     <div class="text-center mb-4">
                         <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
                         <h2 class="mt-3">Order Placed Successfully!</h2>
@@ -88,8 +88,8 @@ $items = $order['items'];
                         <p class="mb-4 text-muted">We'll send an email confirmation with details and tracking info.
                         </p>
                         <div class="d-grid gap-2 d-md-block">
-                            <a href="index.php" class="btn btn-outline-success me-md-2">Continue Shopping</a>
-                            <a href="index.php?page=my-orders" class="btn btn-success">My Orders</a>
+                            <a href="/index.php" class="btn btn-outline-success me-md-2">Continue Shopping</a>
+                            <a href="/index.php?page=my-orders" class="btn btn-success">My Orders</a>
                         </div>
                     </div>
                 </div>

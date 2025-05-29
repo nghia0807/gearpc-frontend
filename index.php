@@ -6,6 +6,18 @@
  * It redirects users to the home page in the pages directory.
  */
 
+
+// Redirect HTTPS to HTTP
+if (
+    isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'
+) {
+    $httpUrl = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    header("Location: $httpUrl", true, 301);
+    exit;
+}
+
+
 // List of allowed pages for security
 $allowedPages = [
     'home' => 'pages/home.php',
@@ -43,6 +55,9 @@ $inlineStyles = implode("\n", $styleMatches[0] ?? []);
 $pageContent = preg_replace('/<!DOCTYPE html>.*?<body.*?>/is', '', $pageContent);
 $pageContent = preg_replace('/<\/body>\s*<\/html>/is', '', $pageContent);
 $pageContent = preg_replace('/<head>.*?<\/head>/is', '', $pageContent);
+
+// redirect https to http
+
 
 ?>
 <!DOCTYPE html>
@@ -88,6 +103,11 @@ $pageContent = preg_replace('/<head>.*?<\/head>/is', '', $pageContent);
     </div>
     <?php include 'includes/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+            chatbot_id="6831799165bbe4fa81026adb"
+            data-type="default"
+            src="https://app.thinkstack.ai/bot/thinkstackai-loader.min.js"
+    ></script>
 </body>
 
 </html>

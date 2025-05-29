@@ -38,8 +38,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" />
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="/gearpc-frontend/assets/css/style.css" />
-  <link rel="stylesheet" href="/gearpc-frontend/assets/css/page-transitions.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
   <style>
     input:-webkit-autofill {
       background-color: #363636 !important;
@@ -567,7 +566,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
         abortController = new AbortController();
 
         try {
-          const apiUrl = `http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}&pageSize=5`;
+          const apiUrl = `http://tamcutephomaique.ddns.net:5001/api/products/search?q=${encodeURIComponent(query)}&pageSize=5`;
 
           const response = await fetch(apiUrl, {
             signal: abortController.signal,

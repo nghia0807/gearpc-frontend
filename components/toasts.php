@@ -24,7 +24,7 @@ if (!isset($alerts) || !is_array($alerts)) {
  * @param int $zIndex Z-index for the toast container
  * @param int $delay Delay before toast disappears (in milliseconds)
  */
-function renderToasts($position = 'bottom-0 end-0', $zIndex = 1080, $delay = 3500)
+function renderToasts(string $position = 'bottom-0 end-0', int $zIndex = 1080, int $delay = 3500)
 {
     global $alerts;
 
@@ -74,9 +74,8 @@ function initializeToasts()
  * @param string $type Alert type (success, danger, warning, info)
  * @param string $msg Alert message
  */
-function addAlert($type, $msg)
+function addAlert(string $type, string $msg)
 {
     global $alerts;
     $alerts[] = ['type' => $type, 'msg' => $msg];
 }
-?>

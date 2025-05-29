@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             document.getElementById('edit_id').value = this.dataset.id;
             document.getElementById('edit_name').value = this.dataset.name;
-            var editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            const editModal = new bootstrap.Modal(document.getElementById("editModal"));
             editModal.show();
         });
     });
@@ -102,9 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Show all toasts on page load
-    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    const toastElList = [].slice.call(document.querySelectorAll(".toast"));
     toastElList.forEach(function(toastEl) {
-        var toast = new bootstrap.Toast(toastEl);
+        const toast = new bootstrap.Toast(toastEl);
         toast.show();
     });
     

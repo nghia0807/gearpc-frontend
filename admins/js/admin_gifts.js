@@ -148,9 +148,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Show all toasts on page load
-    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    const toastElList = [].slice.call(document.querySelectorAll(".toast"));
     toastElList.forEach(function(toastEl) {
-        var toast = new bootstrap.Toast(toastEl);
+        const toast = new bootstrap.Toast(toastEl);
         toast.show();
     });
     

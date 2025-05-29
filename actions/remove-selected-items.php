@@ -16,28 +16,26 @@ if (!isset($_SESSION['token'])) {
     $message = "You are not logged in.";
     if ($isAjax) {
         echo json_encode(['success' => false, 'message' => $message]);
-        exit;
     } else {
         $_SESSION['message'] = $message;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit;
     }
+    exit;
 }
 
 // Receive data from request
 $inputData = file_get_contents('php://input');
 $postData = json_decode($inputData, true);
 
-if (!isset($postData['itemInfo']) || !is_array($postData['itemInfo']) || empty($postData['itemInfo'])) {
+if (empty($postData['itemInfo']) || !is_array($postData['itemInfo'])) {
     $message = "No products selected.";
     if ($isAjax) {
         echo json_encode(['success' => false, 'message' => $message]);
-        exit;
     } else {
         $_SESSION['message'] = $message;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit;
     }
+    exit;
 }
 
 $token = $_SESSION['token'];
@@ -46,7 +44,7 @@ $successCount = 0;
 $errorCount = 0;
 
 // Delete products with new API
-$apiUrl = 'http://localhost:5000/api/carts/delete';
+$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/delete';
 
 // Data has been properly formatted from the client
 $data = [
@@ -98,10 +96,9 @@ if ($successCount > 0) {
     $message = "Could not remove the selected products.";
     if ($isAjax) {
         echo json_encode(['success' => false, 'message' => $message]);
-        exit;
     } else {
         $_SESSION['message'] = $message;
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit;
     }
+    exit;
 }

@@ -17,13 +17,13 @@ $sortBy = isset($_GET['sortBy']) ? trim($_GET['sortBy']) : '';
 $sortDirection = isset($_GET['sortDirection']) ? trim($_GET['sortDirection']) : 'asc';
 
 // API Endpoints
-$productsApiUrl = "http://localhost:5000/api/products?pageIndex={$pageIndex}&pageSize={$pageSize}";
+$productsApiUrl = "http://tamcutephomaique.ddns.net:5001/api/products?pageIndex={$pageIndex}&pageSize={$pageSize}";
 
 // Determine which brands API to use based on whether a category is selected
 if ($categoryCode) {
-    $brandsApiUrl = "http://localhost:5000/api/brands/by-category/{$categoryCode}";
+    $brandsApiUrl = "http://tamcutephomaique.ddns.net:5001/api/brands/by-category/{$categoryCode}";
 } else {
-    $brandsApiUrl = "http://localhost:5000/api/brands/get_select";
+    $brandsApiUrl = "http://tamcutephomaique.ddns.net:5001/api/brands/get_select";
 }
 
 // Add filters to API URL if provided
@@ -74,7 +74,7 @@ if (!empty($brandsResponse['success']) && isset($brandsResponse['data'])) {
 }
 
 // Helper: Format currency
-function formatCurrency($amount)
+function formatCurrency($amount): string
 {
     return '$' . number_format($amount, 2);
 }
@@ -95,7 +95,7 @@ function calculateDiscount($original, $current)
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <style>
         body {
             background-color: #121212;
@@ -374,6 +374,7 @@ function calculateDiscount($original, $current)
             }
         }
     </style>
+    <title>Products</title>
 </head>
 
 <body>
@@ -606,7 +607,7 @@ function calculateDiscount($original, $current)
             btn.disabled = true;
 
             // Build API URL with the same filters as current page
-            let apiUrl = `http://localhost:5000/api/products?pageIndex=${currentPage}&pageSize=12`;
+            let apiUrl = `http://tamcutephomaique.ddns.net:5001/api/products?pageIndex=${currentPage}&pageSize=12`;
             if (btn.dataset.category) apiUrl += `&categoryCode=${encodeURIComponent(btn.dataset.category)}`;
             if (btn.dataset.brand) apiUrl += `&brandCode=${encodeURIComponent(btn.dataset.brand)}`;
             if (btn.dataset.search) apiUrl += `&productName=${encodeURIComponent(btn.dataset.search)}`;

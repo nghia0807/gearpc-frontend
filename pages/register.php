@@ -6,7 +6,7 @@ $alertType = '';
 $errors = ['fullname' => '', 'username' => '', 'email' => '', 'password' => ''];
 
 // Sanitize input to prevent XSS
-function sanitize($data)
+function sanitize($data): string
 {
   return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // If valid, call the registration API
   if ($isValid) {
-    $apiUrl = 'http://localhost:5000/api/auth/register';
+    $apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/auth/register';
     $postData = json_encode([
       'username' => $username,
       'password' => $password,
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create Account</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
   <style>
     body {
       background-color: #121212;
@@ -146,8 +146,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
   <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
-    <a href="../index.php" class="mb-4">
-      <img src="../assets/img/logo.png" alt="Logo" />
+    <a href="/index.php" class="mb-4">
+      <img src="/assets/img/logo.png" alt="Logo" />
     </a>
     <h5 class="mb-4 fw-bold">Create Account</h5>
     <!-- Alert for API or validation messages -->
