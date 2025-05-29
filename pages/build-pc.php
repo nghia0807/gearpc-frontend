@@ -534,14 +534,26 @@ require_once __DIR__ . '/../includes/session_init.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // PC Builder Component Functionality
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         // Initialize modal
         const componentModal = new bootstrap.Modal(document.getElementById('componentModal'));
         let currentCategory = null;
         let allComponents = {};
 
+        const categoryConfig = {
+            cpu: { name: 'Processor', code: 'cpu' },
+            motherboard: { name: 'Motherboard', code: 'motherboard' },
+            ram: { name: 'Memory', code: 'ram' },
+            ssd: { name: 'SSD Storage', code: 'ssd' },
+            hdd: { name: 'HDD Storage', code: 'hdd' },
+            gpu: { name: 'Graphics Card', code: 'gpu' },
+            case: { name: 'Case', code: 'case' },
+            psu: { name: 'Power Supply', code: 'psu' },
+            cooler: { name: 'CPU Cooler', code: 'cooler' }
+        };
+
         // Set up buttons to open modal
-        document.querySelectorAll('.select-component-btn').forEach(btn => {
+        document.querySelectorAll('.select-component-btn').forEach(async (btn) => {
             btn.addEventListener('click', () => {
                 const category = btn.dataset.category;
                 showComponentModal(category);
@@ -562,17 +574,6 @@ require_once __DIR__ . '/../includes/session_init.php';
 
         async function showComponentModal(category) {
             currentCategory = category;
-            const categoryConfig = {
-                cpu: { name: 'Processor', code: 'cpu' },
-                motherboard: { name: 'Motherboard', code: 'motherboard' },
-                ram: { name: 'Memory', code: 'ram' },
-                ssd: { name: 'SSD Storage', code: 'ssd' },
-                hdd: { name: 'HDD Storage', code: 'hdd' },
-                gpu: { name: 'Graphics Card', code: 'gpu' },
-                case: { name: 'Case', code: 'case' },
-                psu: { name: 'Power Supply', code: 'psu' },
-                cooler: { name: 'CPU Cooler', code: 'cooler' }
-            };
 
             const modalTitle = document.querySelector('#componentModal .modal-title');
             const modalBody = document.getElementById('modal-components');
@@ -662,6 +663,13 @@ require_once __DIR__ . '/../includes/session_init.php';
         function selectComponent(component, category) {
             // Close modal
             componentModal.hide();
+
+            // update params
+            const params = new URLSearchParams(window.location.search);
+            params.set(category, component.id);
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+
+            window.history.replaceState({}, '', newUrl);
 
             // Update UI to show selected component
             const selectionDiv = document.querySelector(`#${category}-selection`);
@@ -1031,5 +1039,25 @@ require_once __DIR__ . '/../includes/session_init.php';
                 behavior: 'smooth'
             });
         });
+
+        let params = new URLSearchParams(document.location.search);
+        for (item in categoryConfig) {
+            console.log(item, params.get(item));
+            let componentId = params.get(item);
+            if (componentId) {
+                // Fetch component details
+                await fetch(`http://tamcutephomaique.ddns.net:5001/api/products?categoryCode=${encodeURIComponent(categoryConfig[item].code)}&pageIndex=0&pageSize=100`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.data) {
+                            console.log(data.data.data.find(comp => comp.id === componentId));
+                            selectComponent(data.data.data.find(comp => comp.id === componentId), item);
+                        } else {
+                            console.warn(`No component found for ID: ${componentId}`);
+                        }
+                    })
+                    .catch(error => console.error(`Error fetching component ${item} with ID ${componentId}:`, error));
+            }
+        }
     });
 </script>
