@@ -587,7 +587,7 @@ require_once __DIR__ . '/../includes/session_init.php';
             try {
                 // Fetch components if not cached
                 if (!allComponents[category]) {
-                    const response = await fetch(`http://tamcutephomaique.ddns.net:5001/api/products?categoryCode=${encodeURIComponent(categoryConfig[category].code)}&pageIndex=0&pageSize=100`);
+                    const response = await fetch(`https://tamcutephomaique.ddns.net:5001/api/products?categoryCode=${encodeURIComponent(categoryConfig[category].code)}&pageIndex=0&pageSize=100`);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const result = await response.json();
                     allComponents[category] = result.data?.data || [];

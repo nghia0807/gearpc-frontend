@@ -6,6 +6,15 @@
  * It redirects users to the home page in the pages directory.
  */
 
+
+// Redirect HTTPS to HTTP
+if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+    $httpUrl = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    header("Location: $httpUrl", true, 301);
+    exit;
+}
+
+
 // List of allowed pages for security
 $allowedPages = [
     'home' => 'pages/home.php',
@@ -43,6 +52,9 @@ $inlineStyles = implode("\n", $styleMatches[0] ?? []);
 $pageContent = preg_replace('/<!DOCTYPE html>.*?<body.*?>/is', '', $pageContent);
 $pageContent = preg_replace('/<\/body>\s*<\/html>/is', '', $pageContent);
 $pageContent = preg_replace('/<head>.*?<\/head>/is', '', $pageContent);
+
+// redirect https to http
+
 
 ?>
 <!DOCTYPE html>
