@@ -2,6 +2,8 @@
 session_name('user_session');
 session_start();
 
+$api = getenv('API_URL');
+
 // Determine if it's an AJAX request
 $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
@@ -44,7 +46,7 @@ $successCount = 0;
 $errorCount = 0;
 
 // Delete products with new API
-$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/delete';
+$apiUrl = $api . '/api/carts/delete';
 
 // Data has been properly formatted from the client
 $data = [

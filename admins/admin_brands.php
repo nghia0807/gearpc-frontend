@@ -2,6 +2,8 @@
 session_name('admin_session');
 session_start();
 
+$api = getenv('API_URL');
+
 // Check if token exists, otherwise redirect to login page
 if (!isset($_SESSION['token'])) {
     header('Location: manage_login.php');
@@ -9,7 +11,7 @@ if (!isset($_SESSION['token'])) {
 }
 
 $token = $_SESSION['token'];
-$apiBase = 'http://tamcutephomaique.ddns.net:5001/api/brands';
+$apiBase = $api . '/api/brands';
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];

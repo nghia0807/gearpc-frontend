@@ -1,5 +1,6 @@
 <?php
 // Server-side validation and API integration
+$api = getenv('API_URL');
 
 $alert = '';
 $alertType = '';
@@ -48,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // If valid, call the registration API
   if ($isValid) {
-    $apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/auth/register';
+    $apiUrl = $api . '/api/auth/register';
     $postData = json_encode([
       'username' => $username,
       'password' => $password,

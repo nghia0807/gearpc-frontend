@@ -14,6 +14,9 @@
  */
 
 // Định nghĩa hàm formatCurrency nếu chưa tồn tại
+
+$api = getenv('API_URL');
+
 if (!function_exists('formatCurrency')) {
     function formatCurrency($amount)
     {
@@ -82,7 +85,7 @@ $sliderProducts = isset($products) ? $products : [];
 $title = isset($title) ? $title : 'Sản phẩm nổi bật';
 $limit = isset($limit) ? $limit : 10;
 $sliderId = isset($categoryCode) ? 'productSlider_' . $categoryCode : 'productSlider_' . uniqid();
-$apiEndpoint = isset($apiEndpoint) ? $apiEndpoint : "http://tamcutephomaique.ddns.net:5001/api/products?pageIndex=0&pageSize=$limit";
+$apiEndpoint = isset($apiEndpoint) ? $apiEndpoint : $api . "/api/products?pageIndex=0&pageSize=$limit";
 $sortBy = isset($sortBy) ? $sortBy : 'discountPercentage';
 $sortOrder = isset($sortOrder) ? $sortOrder : 'desc';
 

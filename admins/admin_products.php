@@ -8,8 +8,10 @@ if (!isset($_SESSION['token'])) {
     exit;
 }
 
+$api = getenv('API_URL');
+
 $token = $_SESSION['token'];
-$apiBaseUrl = 'http://tamcutephomaique.ddns.net:5001/api/products';
+$apiBaseUrl = $api . '/api/products'; // Sửa lại đường dẫn API
 $pageIndex = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $pageSize = 10;
 $alerts = [];
@@ -89,7 +91,8 @@ function fetchAll($url, $token) {
 // Delete products by codes
 function deleteProducts($codes, $token): array
 {
-    $url = 'http://tamcutephomaique.ddns.net:5001/api/products/delete';
+    global $api;
+    $url = $api . '/api/products/delete';
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
@@ -112,7 +115,8 @@ function deleteProducts($codes, $token): array
 // Add a new product
 function addProduct($productData, $token): array
 {
-    $url = 'http://tamcutephomaique.ddns.net:5001/api/products/add';
+    global $api;
+    $url = $api . '/api/products/add';
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
@@ -135,7 +139,8 @@ function addProduct($productData, $token): array
 // Update product name
 function updateProductName($productCode, $name, $token): array
 {
-    $url = "http://tamcutephomaique.ddns.net:5001/api/products/updateProductName?productCode=$productCode";
+    global $api;
+    $url = $api . "/api/products/updateProductName?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -158,7 +163,8 @@ function updateProductName($productCode, $name, $token): array
 // Update product brand
 function updateProductBrand($productCode, $brandCode, $token): array
 {
-    $url = "http://tamcutephomaique.ddns.net:5001/api/products/updateProductBrand?productCode=$productCode";
+    global $api;
+    $url = $api . "/api/products/updateProductBrand?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -181,7 +187,8 @@ function updateProductBrand($productCode, $brandCode, $token): array
 // Update product categories
 function updateProductCategories($productCode, $categoriesCodes, $token): array
 {
-    $url = "http://tamcutephomaique.ddns.net:5001/api/products/updateProductCategories?productCode=$productCode";
+    global $api;
+    $url = $api . "/api/products/updateProductCategories?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -204,7 +211,8 @@ function updateProductCategories($productCode, $categoriesCodes, $token): array
 // Update product gifts
 function updateProductGifts($productCode, $giftCodes, $token): array
 {
-    $url = "http://tamcutephomaique.ddns.net:5001/api/products/updateProductGift?productCode=$productCode";
+    global $api;
+    $url = $api . "/api/products/updateProductGift?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -227,7 +235,8 @@ function updateProductGifts($productCode, $giftCodes, $token): array
 // Update product main image
 function updateProductMainImage($productCode, $imageBase64, $token): array
 {
-    $url = "http://tamcutephomaique.ddns.net:5001/api/products/updateProductMainImage?productCode=$productCode";
+    global $api;
+    $url = $api . "/api/products/updateProductMainImage?productCode=$productCode";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -250,7 +259,8 @@ function updateProductMainImage($productCode, $imageBase64, $token): array
 // Get product details by ID
 function getProductDetail($productId, $token): array
 {
-    $url = "http://tamcutephomaique.ddns.net:5001/api/products/$productId";
+    global $api;
+    $url = $api . "/api/products/$productId";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -342,9 +352,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$brandsList = fetchAll('http://tamcutephomaique.ddns.net:5001/api/brands/get', $token);
-$categoriesList = fetchAll('http://tamcutephomaique.ddns.net:5001/api/categories/get', $token);
-$giftsList = fetchAll('http://tamcutephomaique.ddns.net:5001/api/gifts/get', $token);
+$brandsList = fetchAll($api . '/api/brands/get', $token);
+$categoriesList = fetchAll($api . '/api/categories/get', $token);
+$giftsList = fetchAll($api . '/api/gifts/get', $token);
 
 // --- Fetch products for current page ---
 $products = fetchProducts($apiBaseUrl, $token, $pageIndex, $pageSize, $alerts, $totalCount);

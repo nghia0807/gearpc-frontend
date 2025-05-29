@@ -2,6 +2,8 @@
 session_name('user_session');
 session_start();
 
+$api = getenv('API_URL');
+
 // Determine if it's an AJAX request
 $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
@@ -45,7 +47,7 @@ $quantity = intval($postData['quantity']);
 
 $token = $_SESSION['token'];
 
-$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/update';
+$apiUrl = $api . '/api/carts/update';
 
 $data = [
     'oldItemId' => $oldItemId,

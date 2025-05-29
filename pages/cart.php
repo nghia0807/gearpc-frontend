@@ -3,6 +3,8 @@ require_once __DIR__ . '/../includes/session_init.php';
 require_once __DIR__ . '/../components/cart-item.php';
 require_once __DIR__ . '/../components/confirm-modal.php';
 
+$api = getenv('API_URL');
+
 // Get token from session
 $token = $_SESSION['token'] ?? null;
 
@@ -12,7 +14,7 @@ if (!$token) {
 }
 
 // Call API to get cart
-$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/get';
+$apiUrl = $api . '/api/carts/get';
 $ch = curl_init($apiUrl);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,

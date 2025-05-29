@@ -2,6 +2,8 @@
 require_once __DIR__ . '/session_init.php';
 require_once __DIR__ . '/../components/cart-badge.php';
 
+$api = getenv('API_URL');
+
 // --- Session check for login state and expiration ---
 $isLoggedIn = false;
 $userFullName = '';
@@ -566,7 +568,7 @@ if (isset($_SESSION['token'], $_SESSION['user'], $_SESSION['expiration'])) {
         abortController = new AbortController();
 
         try {
-          const apiUrl = `http://tamcutephomaique.ddns.net:5001/api/products/search?q=${encodeURIComponent(query)}&pageSize=5`;
+          const apiUrl = $api.`/api/products/search?q=${encodeURIComponent(query)}&pageSize=5`;
 
           const response = await fetch(apiUrl, {
             signal: abortController.signal,

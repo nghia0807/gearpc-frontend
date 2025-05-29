@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/session_init.php';
+$api = getenv('API_URL');
 
 // Get filter parameters from URL
 $categoryCode = isset($_GET['category']) ? trim($_GET['category']) : '';
@@ -17,13 +18,13 @@ $sortBy = isset($_GET['sortBy']) ? trim($_GET['sortBy']) : '';
 $sortDirection = isset($_GET['sortDirection']) ? trim($_GET['sortDirection']) : 'asc';
 
 // API Endpoints
-$productsApiUrl = "http://tamcutephomaique.ddns.net:5001/api/products?pageIndex={$pageIndex}&pageSize={$pageSize}";
+$productsApiUrl = $api . "/api/products?pageIndex={$pageIndex}&pageSize={$pageSize}";
 
 // Determine which brands API to use based on whether a category is selected
 if ($categoryCode) {
-    $brandsApiUrl = "http://tamcutephomaique.ddns.net:5001/api/brands/by-category/{$categoryCode}";
+    $brandsApiUrl = $api . "/api/brands/by-category/{$categoryCode}";
 } else {
-    $brandsApiUrl = "http://tamcutephomaique.ddns.net:5001/api/brands/get_select";
+    $brandsApiUrl = $api . "/api/brands/get_select";
 }
 
 // Add filters to API URL if provided
@@ -607,7 +608,7 @@ function calculateDiscount($original, $current)
             btn.disabled = true;
 
             // Build API URL with the same filters as current page
-            let apiUrl = `http://tamcutephomaique.ddns.net:5001/api/products?pageIndex=${currentPage}&pageSize=12`;
+            let apiUrl = `${<?= json_encode($api) ?>}/api/products?pageIndex=${currentPage}&pageSize=12`;
             if (btn.dataset.category) apiUrl += `&categoryCode=${encodeURIComponent(btn.dataset.category)}`;
             if (btn.dataset.brand) apiUrl += `&brandCode=${encodeURIComponent(btn.dataset.brand)}`;
             if (btn.dataset.search) apiUrl += `&productName=${encodeURIComponent(btn.dataset.search)}`;

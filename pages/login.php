@@ -21,6 +21,8 @@ function sanitize($data): string
 // Get redirect target from query or POST
 $redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? '../index.php?page=home';
 
+$api = getenv('API_URL');
+
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $username = sanitize($_POST['username'] ?? '');
@@ -45,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // If valid, call the authentication API
   if ($isValid) {
-    $apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/auth/login';
+    $apiUrl = $api . '/api/auth/login';
     $postData = json_encode(['username' => $username, 'password' => $password]);
 
     $ch = curl_init($apiUrl);

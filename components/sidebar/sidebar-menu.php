@@ -1,7 +1,10 @@
 <?php
+$api = getenv('API_URL');
+
 // Fetch categories using PHP cURL
 function fetchCategories() {
-    $apiUrl = "http://tamcutephomaique.ddns.net:5001/api/categories/get?pageSize=1000"; // Fetch all categories
+    global $api;
+    $apiUrl = $api . "/api/categories/get?pageSize=1000"; // Fetch all categories
 
     $categories = [];
     $errorMsg = '';

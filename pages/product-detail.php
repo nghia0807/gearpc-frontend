@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/session_init.php';
+$api = getenv('API_URL');
 
 
 // Check if product ID is provided
@@ -10,7 +11,7 @@ if (!$productId) {
 }
 
 // Fetch product details from API
-$apiUrl = "http://tamcutephomaique.ddns.net:5001/api/products/{$productId}";
+$apiUrl = $api . "/api/products/{$productId}";
 $product = null;
 $errorMsg = '';
 
@@ -37,7 +38,7 @@ try {
 $relatedProducts = [];
 if ($product && !empty($product['productInfo']['code'])) {
     $productCode = $product['productInfo']['code'];
-    $relatedApiUrl = "http://tamcutephomaique.ddns.net:5001/api/products/related?productCode={$productCode}&count=5";
+    $relatedApiUrl = $api . "/api/products/related?productCode={$productCode}&count=5";
     try {
         $ch = curl_init($relatedApiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -57,7 +58,7 @@ if ($product && !empty($product['productInfo']['code'])) {
 // Fetch variant combinations for this product (if any)
 $variantCombinations = [];
 if (!empty($product['productInfo']['code'])) {
-    $variantApiUrl = "http://tamcutephomaique.ddns.net:5001/api/products/{$product['productInfo']['code']}/variants";
+    $variantApiUrl = $api . "/api/products/{$product['productInfo']['code']}/variants";
     try {
         $ch = curl_init($variantApiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1098,7 +1099,7 @@ function getProductImages($product): array
                         document.body.appendChild(loadingOverlay);
                         const currentUrl = new URL(window.location.href);
                         currentUrl.searchParams.set('id', optionId);
-                        fetch(`http://tamcutephomaique.ddns.net:5001/api/products/${optionId}`)
+                        fetch(`<?= $api ?>/api/products/${optionId}`)
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success && data.data) {

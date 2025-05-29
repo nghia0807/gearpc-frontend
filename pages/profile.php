@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/session_init.php';
+$api = getenv('API_URL');
 
 // Check login
 if (!isset($_SESSION['token'])) {
@@ -29,7 +30,8 @@ if (isset($_SESSION['profile_error'])) {
 // Call API to get user information
 function getUserProfile($token)
 {
-    $ch = curl_init("http://tamcutephomaique.ddns.net:5001/api/auth/me");
+    global $api;
+    $ch = curl_init($api . "/api/auth/me");
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -63,7 +65,8 @@ function getUserProfile($token)
 // Function to get user's order count
 function getUserOrderCount($token)
 {
-    $apiUrl = "http://tamcutephomaique.ddns.net:5001/api/orders/user?pageIndex=0&pageSize=1";
+    global $api;
+    $apiUrl = $api . "/api/orders/user?pageIndex=0&pageSize=1";
     $ch = curl_init($apiUrl);
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -135,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
 
             // Send API request
-            $ch = curl_init("http://tamcutephomaique.ddns.net:5001/api/auth/me/update");
+            $ch = curl_init($api . "/api/auth/me/update");
 
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");

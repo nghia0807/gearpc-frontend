@@ -8,6 +8,8 @@ session_set_cookie_params([
 ]);
 session_start();
 
+$api = getenv('API_URL');
+
 $error = '';
 
 // --- Handle logout ---
@@ -34,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter both username and password.';
     } else {
         // Call backend API for authentication
-        $ch = curl_init('http://tamcutephomaique.ddns.net:5001/api/auth/login');
+        $ch = curl_init($api . '/api/auth/login');
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,

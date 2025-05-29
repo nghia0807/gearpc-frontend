@@ -8,6 +8,7 @@
  */
 
 // Ajax endpoint to get cart count
+$api = getenv('API_URL');
 if (isset($_GET['action']) && $_GET['action'] === 'getCartCount') {
     session_name('user_session');
     session_start();
@@ -25,7 +26,7 @@ function getCartItemCount($token): array
         return ['success' => false, 'count' => 0];
     }
     
-    $apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/get';
+    $apiUrl = $api.'/api/carts/get';
     $ch = curl_init($apiUrl);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,

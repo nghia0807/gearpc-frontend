@@ -2,6 +2,8 @@
 session_name('user_session');
 session_start();
 
+$api = getenv('API_URL');
+
 // Determine if it's an AJAX request
 $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
@@ -79,7 +81,7 @@ if ($isAjax && isset($postData['components'])) {
 $_SESSION['last_add_time'] = time();
 $token = $_SESSION['token'];
 
-$apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/add';
+$apiUrl = $api . '/api/carts/add';
 
 // Process single product or multiple components
 if ($isComponentBuild) {

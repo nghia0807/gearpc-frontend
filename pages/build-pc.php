@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/session_init.php';
+$api = getenv('API_URL');
 ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -586,7 +587,7 @@ require_once __DIR__ . '/../includes/session_init.php';
             try {
                 // Fetch components if not cached
                 if (!allComponents[category]) {
-                    const response = await fetch(`http://tamcutephomaique.ddns.net:5001/api/products?categoryCode=${encodeURIComponent(categoryConfig[category].code)}&pageIndex=0&pageSize=100`);
+                    const response = await fetch(`${API_URL}/api/products?categoryCode=${encodeURIComponent(categoryConfig[category].code)}&pageIndex=0&pageSize=100`);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const result = await response.json();
                     allComponents[category] = result.data?.data || [];
@@ -1032,4 +1033,6 @@ require_once __DIR__ . '/../includes/session_init.php';
             });
         });
     });
+
+    const API_URL = <?= json_encode($api) ?>;
 </script>

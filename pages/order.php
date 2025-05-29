@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/session_init.php';
+$api = getenv('API_URL');
 
 // Get token from session
 $token = $_SESSION['token'] ?? null;
@@ -26,8 +27,8 @@ $selectedItems = [];
  * @return array|null The product details if found, null otherwise
  */
 function handleBuyNow($itemId, $quantity, $token) {
-    // Call API to get product details directly
-    $apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/products/' . $itemId;
+    global $api;
+    $apiUrl = $api . '/api/products/' . $itemId;
     $ch = curl_init($apiUrl);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -124,14 +125,8 @@ if (isset($_GET['buyNow']) && $_GET['buyNow'] === 'true' && isset($_GET['itemId'
      */
     function handleCartCheckout($itemIds, $requestedQuantity, $token): array
     {
-        $result = [
-            'success' => false,
-            'items' => [],
-            'error' => ''
-        ];
-        
-        // Call API to get cart to retrieve selected items details
-        $apiUrl = 'http://tamcutephomaique.ddns.net:5001/api/carts/get';
+        global $api;
+        $apiUrl = $api . '/api/carts/get';
         $ch = curl_init($apiUrl);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
@@ -247,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         // Submit order to API
-        $orderApiUrl = 'http://tamcutephomaique.ddns.net:5001/api/orders/create';
+        $orderApiUrl = $api . '/api/orders/create';
         $ch = curl_init($orderApiUrl);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/session_init.php';
+$api = getenv('API_URL');
 
 // Check login
 if (!isset($_SESSION['token'])) {
@@ -35,7 +36,8 @@ if (isset($_SESSION['orders_error'])) {
 // Call API to get user's orders
 function getUserOrders($token, $pageIndex, $pageSize)
 {
-    $apiUrl = "http://tamcutephomaique.ddns.net:5001/api/orders/user?pageIndex={$pageIndex}&pageSize={$pageSize}";
+    global $api;
+    $apiUrl = $api . "/api/orders/user?pageIndex={$pageIndex}&pageSize={$pageSize}";
     $ch = curl_init($apiUrl);
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

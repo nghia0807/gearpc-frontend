@@ -1,3 +1,7 @@
+<?php
+$api = getenv('API_URL');
+?>
+
 <style>
 /* Sidebar styles */
 #adminSidebar {
@@ -165,6 +169,9 @@ body {
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    const API_URL = <?= json_encode($api) ?>;
+</script>
+<script>
 <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'Admin'): ?>
 $(function() {
     $('#createManagerForm').on('submit', function(e) {
@@ -197,7 +204,7 @@ $(function() {
         };
         // API call
         $.ajax({
-            url: 'http://tamcutephomaique.ddns.net:5001/api/admin/create-manager',
+            url: API_URL + '/api/admin/create-manager',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),

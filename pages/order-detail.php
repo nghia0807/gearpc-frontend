@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../includes/session_init.php';
 
+$api = getenv('API_URL');
+
 // Check login
 if (!isset($_SESSION['token'])) {
     // Redirect to login page if not logged in
@@ -27,7 +29,7 @@ $errorMessage = "";
 // Call API to get the order details
 function getOrderDetail($token, $orderId)
 {
-    $apiUrl = "http://tamcutephomaique.ddns.net:5001/api/orders/{$orderId}";
+    $apiUrl = $api . "/api/orders/{$orderId}";
     $ch = curl_init($apiUrl);
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
