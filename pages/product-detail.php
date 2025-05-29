@@ -764,7 +764,7 @@ function getProductImages($product): array
                 <div class="error-icon"><i class="bi bi-exclamation-circle"></i></div>
                 <h3>Unable to load product information</h3>
                 <p class="mb-4"><?= htmlspecialchars($errorMsg) ?></p>
-                <a href="/index.php?page=products" class="btn btn-add-cart">
+                <a href="index.php?page=products" class="btn btn-add-cart">
                     <i class="bi bi-arrow-left"></i> Back to product list
                 </a>
             </div>
@@ -963,7 +963,7 @@ function getProductImages($product): array
                         <div class="related-products" id="relatedProductsSlider">
                             <?php foreach ($relatedProducts as $relatedProduct): ?>
                                 <div class="related-product-card">
-                                    <a href="/index.php?page=product-detail&id=<?= htmlspecialchars($relatedProduct['id']) ?>"
+                                    <a href="index.php?page=product-detail&id=<?= htmlspecialchars($relatedProduct['id']) ?>"
                                         class="text-decoration-none">
                                         <div class="related-product-image">
                                             <img src="<?= htmlspecialchars($relatedProduct['imageUrl']) ?>"

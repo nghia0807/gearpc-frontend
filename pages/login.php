@@ -108,10 +108,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <title>Login</title>  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
   <style>
     body {
       background-color: #121212;
@@ -170,10 +169,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </style>
 </head>
 
-<body>
-  <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
-    <a href="/index.php" class="mb-4">
-      <img src="/assets/img/logo.png" alt="Logo" />
+<body>  <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
+    <a href="index.php" class="mb-4">
+      <img src="../assets/img/logo.png" alt="Logo" />
     </a>
     <h5 class="mb-4 fw-bold">Sign In</h5>
     <!-- Alert for API or validation messages -->

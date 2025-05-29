@@ -443,13 +443,12 @@ function formatOrderDate($dateString): string
                     <h5 class="mb-0 text-white">
                         <i class="bi bi-person-lines-fill me-2"></i>Account
                     </h5>
-                </div>
-                <div class="list-group list-group-flush profile-nav">
-                    <a href="/index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
+                </div>                <div class="list-group list-group-flush profile-nav">
+                    <a href="index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
                         <i class="bi bi-person-circle me-2"></i> Personal Information
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
                     </a>
-                    <a href="/index.php?page=my-orders"
+                    <a href="index.php?page=my-orders"
                         class="list-group-item list-group-item-action side-nav-item active">
                         <i class="bi bi-box-seam me-2"></i> My Orders
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
@@ -498,11 +497,10 @@ function formatOrderDate($dateString): string
                     </div>
                     <div class="card-body">
                         <?php if (empty($orders)): ?>
-                            <div class="text-center py-5">
-                                <i class="bi bi-bag-x" style="font-size: 3rem; color: #ccc;"></i>
+                            <div class="text-center py-5">                                <i class="bi bi-bag-x" style="font-size: 3rem; color: #ccc;"></i>
                                 <h5 class="mt-3">No Orders Found</h5>
                                 <p class="text-muted">You haven't placed any orders yet.</p>
-                                <a href="/index.php?page=products" class="btn btn-primary mt-2">
+                                <a href="index.php?page=products" class="btn btn-primary mt-2">
                                     <i class="bi bi-cart-plus me-2"></i>Start Shopping
                                 </a>
                             </div>
@@ -601,13 +599,12 @@ function formatOrderDate($dateString): string
 
                                                     <!-- Order summary -->
                                                     <div
-                                                        class="col-md-4 d-flex flex-column justify-content-between align-items-end">
-                                                        <div class="order-total mb-3 text-end">
+                                                        class="col-md-4 d-flex flex-column justify-content-between align-items-end">                                                        <div class="order-total mb-3 text-end">
                                                             <span class="fw-bold">Total:</span>
                                                             <h5 class="mb-0 text-success">
                                                                 $<?= number_format((float) $totalAmount, 2) ?></h5>
                                                         </div>
-                                                        <a href="/index.php?page=order-detail&id=<?= $orderId ?>"
+                                                        <a href="index.php?page=order-detail&id=<?= $orderId ?>"
                                                             class="btn btn-outline-dark">
                                                             <i class="bi bi-eye me-1"></i>View Details
                                                         </a>

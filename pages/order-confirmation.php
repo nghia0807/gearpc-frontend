@@ -86,10 +86,9 @@ $items = $order['items'];
                     </div>
                     <div class="text-center mt-4">
                         <p class="mb-4 text-muted">We'll send an email confirmation with details and tracking info.
-                        </p>
-                        <div class="d-grid gap-2 d-md-block">
-                            <a href="/index.php" class="btn btn-outline-success me-md-2">Continue Shopping</a>
-                            <a href="/index.php?page=my-orders" class="btn btn-success">My Orders</a>
+                        </p>                        <div class="d-grid gap-2 d-md-block">
+                            <a href="index.php" class="btn btn-outline-success me-md-2">Continue Shopping</a>
+                            <a href="index.php?page=my-orders" class="btn btn-success">My Orders</a>
                         </div>
                     </div>
                 </div>

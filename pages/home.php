@@ -338,31 +338,30 @@ $rss = simplexml_load_file($rss_url);
     <!-- Main content -->
     <main>
         <!-- Banner Grid -->
-        <div class="banner-grid">
-            <!-- Main Banner -->
+        <div class="banner-grid">            <!-- Main Banner -->
             <div class="banner-item main">
-                <img src="/assets/img/banners/gpu-nvidia.jpg">
+                <img src="../assets/img/banners/gpu-nvidia.jpg">
                 <div class="banner-content">
                     <h3>GeForce RTX 5060 Out Now</h3>
-                    <a href="/index.php?page=products&brand=nvidia&category=gpu" class="btn btn-light">Shop Now</a>
+                    <a href="index.php?page=products&brand=nvidia&category=gpu" class="btn btn-light">Shop Now</a>
                 </div>
             </div>
 
             <!-- Sub Banners -->
-            <a href="/index.php?page=products&brand=intel&category=cpu" class="banner-item sub">
-                <img src="/assets/img/banners/cpu-intel.jpg">
+            <a href="index.php?page=products&brand=intel&category=cpu" class="banner-item sub">
+                <img src="../assets/img/banners/cpu-intel.jpg">
             </a>
 
-            <a href="/index.php?page=products&category=laptop" class="banner-item sub">
-                <img src="/assets/img/banners/laptop.jpg">
+            <a href="index.php?page=products&category=laptop" class="banner-item sub">
+                <img src="../assets/img/banners/laptop.jpg">
             </a>
 
-            <a href="/index.php?page=products&category=keyboard" class="banner-item sub">
-                <img src="/assets/img/banners/keyboard.jpg">
+            <a href="index.php?page=products&category=keyboard" class="banner-item sub">
+                <img src="../assets/img/banners/keyboard.jpg">
             </a>
 
-            <a href="/index.php?page=products&brand=razer&category=mouse" class="banner-item sub">
-                <img src="/assets/img/banners/mouse-razer.jpg">
+            <a href="index.php?page=products&brand=razer&category=mouse" class="banner-item sub">
+                <img src="../assets/img/banners/mouse-razer.jpg">
             </a>
         </div>
 

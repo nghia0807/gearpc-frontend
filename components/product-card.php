@@ -149,7 +149,7 @@ if (empty($product)) {
 </style>
 <div class="col">
     <div class="product-card">
-        <a href="/index.php?page=product-detail&id=<?= htmlspecialchars($product['id']) ?>" class="text-decoration-none">
+        <a href="index.php?page=product-detail&id=<?= htmlspecialchars($product['id']) ?>" class="text-decoration-none">
             <div class="product-img-container">
                 <img src="<?= htmlspecialchars($product['imageUrl'] ?? '') ?>"
                     alt="<?= htmlspecialchars($product['name']) ?>" class="product-img"

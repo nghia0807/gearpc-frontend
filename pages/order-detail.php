@@ -341,8 +341,7 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
 <div class="profile-banner bg-dark text-white py-4 mb-5">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-md-12 d-flex align-items-center">
-                <a href="/index.php?page=my-orders" class="text-white me-3">
+            <div class="col-md-12 d-flex align-items-center">                <a href="index.php?page=my-orders" class="text-white me-3">
                     <i class="bi bi-arrow-left-circle-fill fs-4"></i>
                 </a>
                 <div>
@@ -365,13 +364,12 @@ if ($orderResponse['success'] && isset($orderResponse['data'])) {
                     <h5 class="mb-0 text-white">
                         <i class="bi bi-person-lines-fill me-2"></i>Account
                     </h5>
-                </div>
-                <div class="list-group list-group-flush profile-nav">
-                    <a href="/index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
+                </div>                <div class="list-group list-group-flush profile-nav">
+                    <a href="index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
                         <i class="bi bi-person-circle me-2"></i> Personal Information
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
                     </a>
-                    <a href="/index.php?page=my-orders"
+                    <a href="index.php?page=my-orders"
                         class="list-group-item list-group-item-action side-nav-item active">
                         <i class="bi bi-box-seam me-2"></i> My Orders
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
