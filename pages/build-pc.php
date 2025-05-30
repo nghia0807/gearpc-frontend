@@ -904,7 +904,7 @@ require_once __DIR__ . '/../includes/session_init.php';
                 if (!validComponentsData) return;
 
                 // First, add components to cart
-                const response = await fetch('/gearpc-frontend/actions/add-to-cart.php', {
+                const response = await fetch('/actions/add-to-cart.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
