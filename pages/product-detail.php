@@ -1025,7 +1025,7 @@ function getProductImages($product): array
                     <p>Please login to use this fearture.</p>
                 </div>
                 <div class="modal-footer border-top border-secondary">
-                    <a href="./login.php" class="btn"
+                    <a href="/pages/login.php" class="btn"
                         style="background-color: #ffa33a; color: #000000; font-weight: 600;">Login</a>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
