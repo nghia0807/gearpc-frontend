@@ -130,8 +130,12 @@ function formatOrderDate($dateString): string
         if (empty($dateString)) {
             return 'N/A';
         }
+
         $date = new DateTime($dateString);
-        return $date->format('d/m/Y H:i:s'); // Thêm hiển thị giây (:s)
+        if ($date->format('H:i:s') == '00:00:00') {
+            return $date->format('d/m/Y');
+        }
+        return $date->format('d/m/Y H:i:s');
     } catch (Exception $e) {
         return !empty($dateString) ? $dateString : 'N/A';
     }
@@ -170,6 +174,23 @@ function formatOrderDate($dateString): string
         padding: 20px;
         width: 100%;
         box-sizing: border-box;
+    }
+
+    /* New container layout without Bootstrap columns */
+    .profile-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .profile-sidebar-container {
+        flex: 0 0 250px;
+    }
+
+    .profile-content-container {
+        flex: 1;
+        min-width: 0;
+        /* Prevents content from overflowing */
     }
 
     /* Sidebar navigation styling - match with profile.php */
@@ -345,10 +366,19 @@ function formatOrderDate($dateString): string
 
     /* Media queries for responsive design */
     @media (max-width: 991px) {
-        .profile-sidebar {
-            min-width: 100% !important;
-            width: 100% !important;
+        .profile-container {
+            flex-direction: column;
+        }
+
+        .profile-sidebar-container {
+            flex: 0 0 100%;
+            width: 100%;
             margin-bottom: 20px;
+        }
+
+        .profile-content-container {
+            flex: 0 0 100%;
+            width: 100%;
         }
 
         .side-nav-item {
@@ -435,8 +465,8 @@ function formatOrderDate($dateString): string
 </div>
 
 <div class="container-fluid profile-content mb-5">
-    <div class="row w-100">
-        <div class="col-lg-3 mb-4">
+    <div class="profile-container">
+        <div class="profile-sidebar-container">
             <!-- Sidebar menu with hover and active effects -->
             <div class="card profile-sidebar">
                 <div class="card-header bg-dark profile-sidebar-header">
@@ -445,11 +475,11 @@ function formatOrderDate($dateString): string
                     </h5>
                 </div>
                 <div class="list-group list-group-flush profile-nav">
-                    <a href="/index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
+                    <a href="index.php?page=profile" class="list-group-item list-group-item-action side-nav-item">
                         <i class="bi bi-person-circle me-2"></i> Personal Information
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
                     </a>
-                    <a href="/index.php?page=my-orders"
+                    <a href="index.php?page=my-orders"
                         class="list-group-item list-group-item-action side-nav-item active">
                         <i class="bi bi-box-seam me-2"></i> My Orders
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
@@ -462,7 +492,7 @@ function formatOrderDate($dateString): string
                 </div>
             </div>
         </div>
-        <div class="col-lg-9">
+        <div class="profile-content-container">
             <!-- Show alerts if available -->
             <?php if ($errorMessage): ?>
                 <div class="alert alert-danger alert-dismissible fade show alert-custom" role="alert">
@@ -498,11 +528,10 @@ function formatOrderDate($dateString): string
                     </div>
                     <div class="card-body">
                         <?php if (empty($orders)): ?>
-                            <div class="text-center py-5">
-                                <i class="bi bi-bag-x" style="font-size: 3rem; color: #ccc;"></i>
+                            <div class="text-center py-5"> <i class="bi bi-bag-x" style="font-size: 3rem; color: #ccc;"></i>
                                 <h5 class="mt-3">No Orders Found</h5>
                                 <p class="text-muted">You haven't placed any orders yet.</p>
-                                <a href="/index.php?page=products" class="btn btn-primary mt-2">
+                                <a href="index.php?page=products" class="btn btn-primary mt-2">
                                     <i class="bi bi-cart-plus me-2"></i>Start Shopping
                                 </a>
                             </div>
@@ -511,7 +540,7 @@ function formatOrderDate($dateString): string
                                 <?php foreach ($orders as $order): ?>
                                     <?php                                    // Get order properties with fallback values
                                             $orderId = $order['id'] ?? $order['orderId'] ?? 'N/A';
-                                            $orderDate = $order['createdDate'] ?? $order['createdAt'] ?? $order['orderDate'] ?? date('Y-m-d H:i:s');
+                                            $orderDate = $order['createdDate'] ?? 'N/A';
                                             $orderStatus = $order['status'] ?? 'pending';
                                             $paymentStatus = $order['paymentStatus'] ?? 'pending';
 
@@ -607,7 +636,7 @@ function formatOrderDate($dateString): string
                                                             <h5 class="mb-0 text-success">
                                                                 $<?= number_format((float) $totalAmount, 2) ?></h5>
                                                         </div>
-                                                        <a href="/index.php?page=order-detail&id=<?= $orderId ?>"
+                                                        <a href="index.php?page=order-detail&id=<?= $orderId ?>"
                                                             class="btn btn-outline-dark">
                                                             <i class="bi bi-eye me-1"></i>View Details
                                                         </a>
@@ -682,45 +711,45 @@ function formatOrderDate($dateString): string
 </div>
 
 <!-- Order Detail Modals -->
-<?php foreach ($orders as $order): ?>    <?php    // Get the order ID using fallback logic
-        $orderId = $order['id'] ?? 'no-id';
-        // Get the order date using fallback logic with multiple options
-        $orderDate = $order['createdDate'];
-        // Get the order status using fallback logic
-        $orderStatus = $order['status'] ?? 'pending';
-        // Get the payment status using fallback logic
-        $paymentStatus = $order['paymentStatus'] ?? 'pending';
+<?php foreach ($orders as $order): ?>     <?php    // Get the order ID using fallback logic
+              $orderId = $order['id'] ?? 'no-id';
+              // Get the order date using fallback logic with multiple options
+              $orderDate = $order['createdDate'];
+              // Get the order status using fallback logic
+              $orderStatus = $order['status'] ?? 'pending';
+              // Get the payment status using fallback logic
+              $paymentStatus = $order['paymentStatus'] ?? 'pending';
 
-        // Get the total amount using improved fallback logic
-        if (isset($order['totalAmount']) && is_numeric($order['totalAmount'])) {
-            $totalAmount = $order['totalAmount'];
-        } elseif (isset($order['total']) && is_numeric($order['total'])) {
-            $totalAmount = $order['total'];
-        } elseif (isset($order['amount']) && is_numeric($order['amount'])) {
-            $totalAmount = $order['amount'];
-        } else {
-            // Calculate from items if no valid total found
-            $totalAmount = 0;
-            $itemsList = $order['orderItems'] ?? $order['items'] ?? [];
-            foreach ($itemsList as $item) {
-                $itemPrice = $item['price'] ?? 0;
-                $itemQuantity = $item['quantity'] ?? 1;
-                $totalAmount += ($itemPrice * $itemQuantity);
-            }
-            // Add shipping fee if available
-            $totalAmount += isset($order['shippingFee']) && is_numeric($order['shippingFee']) ? $order['shippingFee'] : 0;
-        }
+              // Get the total amount using improved fallback logic
+              if (isset($order['totalAmount']) && is_numeric($order['totalAmount'])) {
+                  $totalAmount = $order['totalAmount'];
+              } elseif (isset($order['total']) && is_numeric($order['total'])) {
+                  $totalAmount = $order['total'];
+              } elseif (isset($order['amount']) && is_numeric($order['amount'])) {
+                  $totalAmount = $order['amount'];
+              } else {
+                  // Calculate from items if no valid total found
+                  $totalAmount = 0;
+                  $itemsList = $order['orderItems'] ?? $order['items'] ?? [];
+                  foreach ($itemsList as $item) {
+                      $itemPrice = $item['price'] ?? 0;
+                      $itemQuantity = $item['quantity'] ?? 1;
+                      $totalAmount += ($itemPrice * $itemQuantity);
+                  }
+                  // Add shipping fee if available
+                  $totalAmount += isset($order['shippingFee']) && is_numeric($order['shippingFee']) ? $order['shippingFee'] : 0;
+              }
 
-        // Get the order items using fallback logic
-        $orderItems = $order['orderItems'] ?? $order['items'] ?? [];
-        // Get customer information
-        $customerName = $order['customer']['fullName'] ?? $order['customerName'] ?? 'N/A';
-        $customerPhone = $order['customer']['phone'] ?? $order['customerPhone'] ?? 'N/A';
-        $shippingAddress = $order['deliveryAddress'] ?? $order['shippingAddress'] ?? 'N/A';
-        $paymentMethod = $order['paymentMethod'] ?? 'N/A';
-        $notes = $order['note'] ?? $order['notes'] ?? '';
-        $shippingFee = $order['shippingFee'] ?? 0;
-        ?>
+              // Get the order items using fallback logic
+              $orderItems = $order['orderItems'] ?? $order['items'] ?? [];
+              // Get customer information
+              $customerName = $order['customer']['fullName'] ?? $order['customerName'] ?? 'N/A';
+              $customerPhone = $order['customer']['phone'] ?? $order['customerPhone'] ?? 'N/A';
+              $shippingAddress = $order['deliveryAddress'] ?? $order['shippingAddress'] ?? 'N/A';
+              $paymentMethod = $order['paymentMethod'] ?? 'N/A';
+              $notes = $order['note'] ?? $order['notes'] ?? '';
+              $shippingFee = $order['shippingFee'] ?? 0;
+              ?>
     <div class="modal fade" id="orderDetailModal<?= $orderId ?>" tabindex="-1"
         aria-labelledby="orderDetailModalLabel<?= $orderId ?>" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">

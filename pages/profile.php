@@ -210,6 +210,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         margin: 0 auto;
         padding: 20px;
     }
+    
+    /* New container layout without Bootstrap columns */
+    .profile-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .profile-sidebar-container {
+        flex: 0 0 250px;
+    }
+    
+    .profile-content-container {
+        flex: 1;
+        min-width: 0; /* Prevents content from overflowing */
+    }
 
     .user-role {
         font-weight: 600;
@@ -430,12 +446,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             opacity: 1;
             transform: translateX(0);
         }
-    }    /* Responsive adjustments */
-    @media (max-width: 991px) {
-        .profile-sidebar {
-            min-width: 100% !important;
-            width: 100% !important;
+    }    /* Responsive adjustments */    @media (max-width: 991px) {
+        .profile-container {
+            flex-direction: column;
+        }
+        
+        .profile-sidebar-container {
+            flex: 0 0 100%;
+            width: 100%;
             margin-bottom: 20px;
+        }
+        
+        .profile-content-container {
+            flex: 0 0 100%;
+            width: 100%;
         }
         
         .side-nav-item {
@@ -535,8 +559,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <div class="container-fluid profile-content">
-    <div class="row">
-        <div class="col-lg-3 mb-4">
+    <div class="profile-container">
+        <div class="profile-sidebar-container">
             <!-- Sidebar menu with hover and active effects -->
             <div class="card profile-sidebar">
                 <div class="card-header bg-dark profile-sidebar-header">
@@ -544,12 +568,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <i class="bi bi-person-lines-fill me-2"></i>Account
                     </h5>
                 </div>
-                <div class="list-group list-group-flush profile-nav">
-                    <a href="#profile" class="list-group-item list-group-item-action side-nav-item active"
+                <div class="list-group list-group-flush profile-nav">                    <a href="#profile" class="list-group-item list-group-item-action side-nav-item active"
                         data-bs-toggle="list">
                         <i class="bi bi-person-circle me-2"></i> Personal Information
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
-                    </a> <a href="/index.php?page=my-orders"
+                    </a>
+                    <a href="index.php?page=my-orders"
                         class="list-group-item list-group-item-action side-nav-item">
                         <i class="bi bi-box-seam me-2"></i> My Orders
                         <i class="bi bi-chevron-right float-end side-nav-arrow"></i>
@@ -568,12 +592,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h5 class="card-title mb-0">
                         <i class="bi bi-graph-up me-2"></i>Total Oders: 
                         <?php echo $orderCount; ?>
-                    </h5>                    
-                </div>
+                    </h5>                      </div>
             </div>
         </div>
 
-        <div class="col-lg-9">
+        <div class="profile-content-container">
             <!-- Show alerts if available -->
             <?php if ($errorMessage): ?>
                 <div class="alert alert-danger alert-dismissible fade show alert-custom" role="alert">
