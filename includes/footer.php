@@ -83,9 +83,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Loading Spinner & Page Transition Scripts -->
-    <script src="/gearpc-frontend/assets/js/loading-spinner.js"></script>
-    <script src="/gearpc-frontend/assets/js/page-loader.js"></script>
-    <script src="/gearpc-frontend/assets/js/page-transitions.js"></script>
+    <script src="/assets/js/loading-spinner.js"></script>
+    <script src="/assets/js/page-loader.js"></script>
+    <script src="/assets/js/page-transitions.js"></script>
 </body>
 
 </html>

@@ -553,7 +553,7 @@ require_once __DIR__ . '/../includes/session_init.php';
         };
 
         // Set up buttons to open modal
-        document.querySelectorAll('.select-component-btn').forEach(async (btn) => {
+        document.querySelectorAll('.select-component-btn').forEach((btn) => {
             btn.addEventListener('click', () => {
                 const category = btn.dataset.category;
                 showComponentModal(category);
@@ -587,7 +587,7 @@ require_once __DIR__ . '/../includes/session_init.php';
             try {
                 // Fetch components if not cached
                 if (!allComponents[category]) {
-                    const response = await fetch(`https://tamcutephomaique.ddns.net:5001/api/products?categoryCode=${encodeURIComponent(categoryConfig[category].code)}&pageIndex=0&pageSize=100`);
+                    const response = await fetch(`http://tamcutephomaique.ddns.net:5001/api/products?categoryCode=${encodeURIComponent(categoryConfig[category].code)}&pageIndex=0&pageSize=100`);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const result = await response.json();
                     allComponents[category] = result.data?.data || [];
@@ -850,7 +850,7 @@ require_once __DIR__ . '/../includes/session_init.php';
 
                 console.log('Adding build to cart:', validComponentsData.components);
 
-                const response = await fetch('/gearpc-frontend/actions/add-to-cart.php', {
+                const response = await fetch('/actions/add-to-cart.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -904,7 +904,7 @@ require_once __DIR__ . '/../includes/session_init.php';
                 if (!validComponentsData) return;
 
                 // First, add components to cart
-                const response = await fetch('/gearpc-frontend/actions/add-to-cart.php', {
+                const response = await fetch('/actions/add-to-cart.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
