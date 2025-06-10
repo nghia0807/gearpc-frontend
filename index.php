@@ -8,14 +8,14 @@
 
 
 // Redirect HTTPS to HTTP
-//if (
-//    isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
-//    $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'
-//) {
-//    $httpUrl = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-//    header("Location: $httpUrl", true, 301);
-//    exit;
-//}
+if (
+    isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'
+) {
+    $httpUrl = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    header("Location: $httpUrl", true, 301);
+    exit;
+}
 
 
 // List of allowed pages for security
